@@ -180,6 +180,11 @@ void led_init() {
 }
 
 void led_update_pattern_idx(uint8_t pattern_idx) {
+    if (pattern_idx >= count_of(pattern_table)) 
+    {
+        puts("Index out of range, skipping...");
+        return;
+    }
     led_state.pattern_idx = pattern_idx;
     printf("Updated pattern to: %s\n", pattern_table[led_state.pattern_idx].name);
     // puts(dir == 1 ? "(forward)" : "(backward)");
@@ -192,7 +197,7 @@ void led_set_random_pattern() {
 }
 
 void led_update() {
-    printf("Updating LED\n");
+    // printf("Updating LED\n");
 
     led_state.cycle_idx++;
     pattern_table[led_state.pattern_idx].pat(NUM_PIXELS, led_state.cycle_idx);

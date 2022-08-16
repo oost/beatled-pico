@@ -13,11 +13,12 @@ int command_hello()
 
 int command_random() 
 {
+  led_set_random_pattern();
   return 0;
 }
 int command_program(char * command, uint16_t message_length)
 {
-  led_set_random_pattern();
+  led_update_pattern_idx(command[1]);
   return 0;
 }
 

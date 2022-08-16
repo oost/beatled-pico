@@ -8,25 +8,26 @@
 void dgram_recv(void *arg, struct udp_pcb *pcb, struct pbuf *p, const ip_addr_t *addr, u16_t port)
 {
     printf("Received UDP datagram on port %d\n", port);
+    envelope_t envelope;
 
     BSP_T *state = (BSP_T *)arg;
     uint8_t instruction = pbuf_get_at(p, 0);
-    char* msg = malloc((COMMAND_MAX_LEN) * sizeof(char));
-    u16_t msglen = pbuf_copy_partial(p, msg, COMMAND_MAX_LEN, 0);
-    if (msglen) {
-        if (msglen == COMMAND_MAX_LEN) {
+  
+    envelope.message_length = pbuf_copy_partial(p, &envelope.message, COMMAND_MAX_LEN, 0);
+    if (envelope.message_length) {
+        if (envelope.message_length == COMMAND_MAX_LEN) {
           puts("Received more than 128 bytes. Discarding the extra bytes...");
         } else {
-          printf("Received: %d bytes\n", msglen);
+          printf("Received: %d bytes\n", envelope.message_length);
         }
-        fwrite(msg, 1, msglen, stdout);
+        fwrite(envelope.message, 1, envelope.message_length, stdout);
         // msg[l] = '\0';
         // printf("Received: %s\n", msg);
-        command_queue_add_message(msg, msglen, port);
+        envelope.time_received = get_absolute_time();
+        command_queue_add_message(&envelope);
     } else { 
         puts("Error with msg");
     }
-
     pbuf_free(p);
 }
 

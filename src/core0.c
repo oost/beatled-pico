@@ -70,20 +70,17 @@ void core0_loop()
 
     bsp_init();
 
-    char* message;
-    uint16_t message_length;
+    envelope_t envelope;
     while(1) {
-        sleep_ms(100);
+        sleep_ms(20);
         while (1) {
-            if (!command_queue_pop_message(message, &message_length)) {
-                puts("No more messages to read");
+            if (command_queue_pop_message(&envelope)) {
                 break;
             };
             puts("Got a message, going to parse it...");
-            if (!parse_command(message, message_length)) {
+            if (parse_command(envelope.message, envelope.message_length)) {
                 puts("Error parsing command :-(");
             }
-            free(message);
         }
         led_update();
 
