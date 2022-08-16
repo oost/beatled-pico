@@ -13,6 +13,11 @@ add_executable(pico_w_beatled
         core0.c
         core1.c
         ws2812/ws2812.c
+        clock/clock.c
+        blink/blink.c
+        udp_server/udp_server.c
+        command_queue/queue.c
+        command/command.c
 )
 
 # generate the header file into the source tree as it is included in the RP2040 datasheet
@@ -24,8 +29,8 @@ pico_add_extra_outputs(pico_w_beatled)
 pico_set_program_name(pico_w_beatled "pico_w_beatled")
 pico_set_program_version(pico_w_beatled "0.1")
 
-pico_enable_stdio_uart(pico_w_beatled 0)
-pico_enable_stdio_usb(pico_w_beatled 1)
+pico_enable_stdio_uart(pico_w_beatled 1)
+pico_enable_stdio_usb(pico_w_beatled 0)
 
 target_compile_definitions(pico_w_beatled PRIVATE
         WIFI_SSID=\"${WIFI_SSID}\"
@@ -46,7 +51,9 @@ target_link_libraries(pico_w_beatled
         hardware_clocks
         pico_multicore
         pico_stdlib
+        pico_util
         pico_cyw43_arch_lwip_threadsafe_background
+        pico_lwip_sntp
         hardware_pio
         )
 

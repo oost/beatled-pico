@@ -8,13 +8,11 @@
 #include "constants.h"
 #include "pico/cyw43_arch.h"
 #include "ws2812/ws2812.h"
-
-#define BSP_PORT 8765
-
-typedef struct BSP_T_ {
-    struct udp_pcb *bsp_pcb;
-} BSP_T;
-
+#include "clock/clock.h"
+#include "blink/blink.h"
+#include "udp_server/udp_server.h"
+#include "command_queue/queue.h"
+#include "command/command.h"
 
 void core0_init()
 {
@@ -25,117 +23,70 @@ void core0_init()
     led_init();
 }
 
-void blink_once(int speed)
-{
-    cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, 1);
-    sleep_ms(speed);
-    cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, 0);
-    sleep_ms(speed);
+
+
+int connect_to_wifi() {
+    if (cyw43_arch_wifi_connect_blocking(WIFI_SSID, WIFI_PASSWORD, CYW43_AUTH_WPA2_AES_PSK)) {
+        blink(ERROR_BLINK_SPEED, ERROR_WIFI);
+        printf("Failed to connect to WIFI\n");
+        return 1;
+    }
+    printf("Connected to %s\n", WIFI_SSID);
+    blink(MESSAGE_BLINK_SPEED, MESSAGE_CONNECTED);
+    return 0;
 }
 
-void blink(int speed, int count)
-{
-    if (count > 0)
-    {
-        for (int i = 0; i < count; i++)
-        {
-            blink_once(speed);
+void check_wifi() {
+    if (cyw43_wifi_link_status(&cyw43_state, CYW43_ITF_STA) != CYW43_LINK_JOIN) {
+        while (1) {
+            if (!connect_to_wifi()) {
+                return;
+            }
         }
     }
 }
 
-// NTP data received
-static void dgram_recv(void *arg, struct udp_pcb *pcb, struct pbuf *p, const ip_addr_t *addr, u16_t port)
-{
-    printf("Received UDP datagram\n");
 
-    BSP_T *state = (BSP_T *)arg;
-    uint8_t instruction = pbuf_get_at(p, 0);
-    char msg[1024];
-    u16_t l = pbuf_copy_partial(p, msg, 1024, 0);
-    led_set_random_pattern();
-    if (l) {
-        printf("Received: %d bytes\n", l);
-        msg[23] = '\0';
-        printf("Received: %s\n", msg);
-    } else { 
-        puts("Error with msg");
-    }
-
-    // // Check the result
-    // if (port == BSP_PORT)
-    // {
-    //     blink(250, 6);
-    // }
-    // else
-    // {
-    //     blink(1000, 3);
-    // }
-    pbuf_free(p);
-}
-
-// Perform initialisation
-static BSP_T *bsp_init(void)
-{
-    BSP_T *state = calloc(1, sizeof(BSP_T));
-    if (!state)
-    {
-        printf("failed to allocate state\n");
-        return NULL;
-    }
-    state->bsp_pcb = udp_new_ip_type(IPADDR_TYPE_ANY);
-    if (!state->bsp_pcb)
-    {
-        printf("failed to create pcb\n");
-        free(state);
-        return NULL;
-    }
-
-    if (udp_bind(state->bsp_pcb, IP_ANY_TYPE, BSP_PORT))
-    {
-        printf("failed to bind pcb\n");
-        free(state);
-        return NULL;
-    }
-    printf("Setting up UDP callback on %s\n", ipaddr_ntoa(&state->bsp_pcb->local_ip));
-
-
-
-    udp_recv(state->bsp_pcb, dgram_recv, state);
-    return state;
-}
-
-int connect_to_wifi()
+void start_wifi()
 {
     cyw43_arch_enable_sta_mode();
-
-    if (cyw43_arch_wifi_connect_timeout_ms(WIFI_SSID, WIFI_PASSWORD, CYW43_AUTH_WPA2_AES_PSK, 10000))
-    {
-        blink(1000, 10);
-
-        printf("failed to connect\n");
-        return 1;
-    }
-    printf("Connected to %s\n", WIFI_SSID);
-    blink(250, 4);
-
-    return 0;
 }
 
 void core0_loop()
 {
     sleep_ms(2000);
     printf("Starting core 0 loop\n");
-    blink(100, 3);
+    blink(MESSAGE_BLINK_SPEED, MESSAGE_WELCOME);
     sleep_ms(1000);
-    if (connect_to_wifi()) {
-        return;
-    }
+
+    start_wifi(); 
+    check_wifi();
+    
+    command_queue_init();
+
+    sntp_sync_init();
+    send_hello();
+    print_all_ip_addresses();
+
     bsp_init();
+
+    char* message;
+    uint16_t message_length;
     while(1) {
+        sleep_ms(100);
+        while (1) {
+            if (!command_queue_pop_message(message, &message_length)) {
+                puts("No more messages to read");
+                break;
+            };
+            puts("Got a message, going to parse it...");
+            if (!parse_command(message, message_length)) {
+                puts("Error parsing command :-(");
+            }
+            free(message);
+        }
         led_update();
-        sleep_ms(250);
+
     }
     cyw43_arch_deinit();
-
 }
