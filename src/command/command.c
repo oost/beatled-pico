@@ -7,6 +7,7 @@
 
 int command_hello() 
 {
+  puts("Hello!");
   blink(MESSAGE_BLINK_SPEED, MESSAGE_HELLO);
   return 0;
 }
@@ -19,6 +20,13 @@ int command_random()
 int command_program(char * command, uint16_t message_length)
 {
   led_update_pattern_idx(command[1]);
+  return 0;
+}
+
+int command_beat()
+{
+  puts("Beat!");
+  led_beat();
   return 0;
 }
 
@@ -36,6 +44,8 @@ int parse_command(char * command, uint16_t message_length)
     return command_random();  
   case COMMAND_PROGRAM:
     return command_program(command, message_length);
+  case COMMAND_BEAT:
+    return command_beat();
   default:
     puts("Unknown command...");
     blink(ERROR_BLINK_SPEED, ERROR_COMMAND);

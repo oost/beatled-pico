@@ -7,7 +7,7 @@
 // NTP data received
 void dgram_recv(void *arg, struct udp_pcb *pcb, struct pbuf *p, const ip_addr_t *addr, u16_t port)
 {
-    printf("Received UDP datagram on port %d\n", port);
+    // printf("Received UDP datagram from port %d\n", port);
     envelope_t envelope;
 
     BSP_T *state = (BSP_T *)arg;
@@ -20,7 +20,8 @@ void dgram_recv(void *arg, struct udp_pcb *pcb, struct pbuf *p, const ip_addr_t 
         } else {
           printf("Received: %d bytes\n", envelope.message_length);
         }
-        fwrite(envelope.message, 1, envelope.message_length, stdout);
+        printf("The string is: %.*s\n", envelope.message_length, envelope.message);
+        // fwrite(envelope.message, 1, envelope.message_length, stdout);
         // msg[l] = '\0';
         // printf("Received: %s\n", msg);
         envelope.time_received = get_absolute_time();
@@ -87,14 +88,16 @@ BSP_T *bsp_init(void)
         return NULL;
     }
 
-    // Bind to endpoint  
+    // Bind to endpoint  IP_ADDR_BROADCAST IP_ANY_TYPE
     if (udp_bind(state->bsp_pcb, IP_ANY_TYPE, BSP_PORT))
     {
         printf("Failed to bind pcb\n");
         free(state);
         return NULL;
     }
-
+    ip_set_option(state->bsp_pcb, SOF_BROADCAST);
+    ip_set_option(state->bsp_pcb, IP_SOF_BROADCAST_RECV);
+    
     // Add callback
     udp_recv(state->bsp_pcb, dgram_recv, state);
     printf("Set up UDP callback on %s:%d\n", ipaddr_ntoa(&state->bsp_pcb->local_ip), BSP_PORT);

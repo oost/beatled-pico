@@ -196,6 +196,10 @@ void led_set_random_pattern() {
 
 }
 
+void led_beat() {
+   led_state.cycle_idx = 0; 
+}
+
 void led_update() {
     // printf("Updating LED\n");
 
