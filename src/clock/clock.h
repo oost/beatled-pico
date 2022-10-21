@@ -7,12 +7,14 @@ extern "C" {
 #endif
 
 
-#define SNTP_SET_SYSTEM_TIME	sntp_set_system_time
-#define SNTP_HOST_NAME "raspberrypiz.local"
+#include <stdint.h>
+#include <pico/time.h>
 
 void sntp_sync_init(void);
 
-void sntp_set_system_time(u32_t sec);
+absolute_time_t get_absolute_time_from_server_time(uint64_t server_time);
+
+void sntp_set_system_time(uint32_t sec, uint32_t nsec);
 
 
 

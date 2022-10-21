@@ -77,7 +77,9 @@ void core0_loop()
             if (command_queue_pop_message(&envelope)) {
                 break;
             };
+
             puts("Got a message, going to parse it...");
+            
             if (parse_command(envelope.message, envelope.message_length)) {
                 puts("Error parsing command :-(");
             }

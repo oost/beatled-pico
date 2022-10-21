@@ -23,9 +23,18 @@ int command_program(char * command, uint16_t message_length)
   return 0;
 }
 
-int command_beat()
+int command_beat(char * command, uint16_t message_length)
 {
   puts("Beat!");
+  uint64_t beat_time = 0;
+  int i;
+  uint64_t paquet = 0;
+  for( i = 7; i >= 0; --i )
+  {
+      paquet <<= 8;
+      paquet |= (uint64_t)command[1+i];
+  }
+
   led_beat();
   return 0;
 }
@@ -45,7 +54,7 @@ int parse_command(char * command, uint16_t message_length)
   case COMMAND_PROGRAM:
     return command_program(command, message_length);
   case COMMAND_BEAT:
-    return command_beat();
+    return command_beat(command, message_length);
   default:
     puts("Unknown command...");
     blink(ERROR_BLINK_SPEED, ERROR_COMMAND);

@@ -21,7 +21,8 @@
 		},
 		"files.associations": {
 			"dma.h": "c",
-			"constants.h": "c"
+			"constants.h": "c",
+			"sntp.h": "c"
 		}
 	}
 }

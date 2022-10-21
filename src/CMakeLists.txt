@@ -53,6 +53,7 @@ target_link_libraries(pico_w_beatled
         pico_stdlib
         pico_util
         pico_cyw43_arch_lwip_threadsafe_background
+        # pico_cyw43_arch_lwip_poll
         pico_lwip_sntp
         hardware_pio
         )
