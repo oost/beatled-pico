@@ -35,6 +35,8 @@
 
 static uint32_t colors[2][NUM_PIXELS];
 
+absolute_time_t time_ref;
+float bpm = 200.0f;
 
 const uint8_t gamma8[] = {
     0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
@@ -62,9 +64,11 @@ static inline uint32_t rgb_u32(uint8_t r, uint8_t g, uint8_t b) {
             (uint32_t) (b) << 8 ;
 }
 
-void pattern_snakes(uint32_t *stream, uint len, uint t) {
+void pattern_snakes(uint32_t *stream, uint len, uint32_t t) {
+    uint32_t pos = t >> 26;
+
     for (uint i = 0; i < len; ++i) {
-        uint x = (i + (t >> 1)) % 64;
+        uint x = (i + (pos >> 1)) % 64;
         uint32_t value;
         if (x < 10)
             value = (rgb_u32(0xff, 0, 0));
@@ -78,32 +82,31 @@ void pattern_snakes(uint32_t *stream, uint len, uint t) {
     }
 }
 
-void pattern_random(uint32_t *stream, uint len, uint t) {
-    if (t % 8)
+void pattern_random(uint32_t *stream, uint len, uint32_t t) {
+    if ((t >> 29) == 0)
         return;
     for (int i = 0; i < len; ++i)
         stream[i]= (rand());
 }
 
-void pattern_sparkle(uint32_t *stream, uint len, uint t) {
-    if (t % 8)
+void pattern_sparkle(uint32_t *stream, uint len, uint32_t t) {
+    if ((t >> 29) == 0)
         return;
     for (int i = 0; i < len; ++i)
         stream[i] = (rand() % 16 ? 0 : 0xffffffff);
 }
 
-void pattern_greys(uint32_t *stream, uint len, uint t) {
+void pattern_greys(uint32_t *stream, uint len, uint32_t t) {
     int max = 100; // let's not draw too much current!
-    t %= max;
+    uint8_t brightness = t >> 26;
     for (int i = 0; i < len; ++i) {
-        stream[i] = (t * 0x10101);
-        if (++t >= max) t = 0;
+        stream[i] = (brightness * 0x10101);
     }
 }
 
-void pattern_drops(uint32_t *stream, uint len, uint t) {
+void pattern_drops(uint32_t *stream, uint len, uint32_t t) {
     int value;
-    int max = 50;
+    int max = (UINT32_MAX / 256);
     int pos = t % NUM_PIXELS;
     int step = max / NUM_PIXELS * 3;
     for( int i = 0; i < len; ++i) {
@@ -120,16 +123,16 @@ void pattern_drops(uint32_t *stream, uint len, uint t) {
 }
 
 
-void pattern_solid(uint32_t *stream, uint len, uint t) {
-    t = t % 200;
+void pattern_solid(uint32_t *stream, uint len, uint32_t t) {
+    uint8_t pos = t >> 24; 
     for (int i = 0; i < len; ++i) {
-        stream[i] = (t * 0x10101);
+        stream[i] = (pos * 0x10101);
     }
 }
 
 int level = 8;
 
-void pattern_fade(uint32_t *stream, uint len, uint t) {
+void pattern_fade(uint32_t *stream, uint len, uint32_t t) {
     uint shift = 4;
 
     uint max = 16; // let's not draw too much current!
@@ -150,7 +153,7 @@ void pattern_fade(uint32_t *stream, uint len, uint t) {
     }
 }
 
-typedef void (*pattern)(uint32_t *stream, uint len, uint t);
+typedef void (*pattern)(uint32_t *stream, uint len, uint32_t t);
 const struct {
     pattern pat;
     const char *name;
@@ -229,6 +232,8 @@ void output_strings_dma(uint32_t *stream) {
 
 
 int main() {
+    time_ref = get_absolute_time();	
+
     //set_sys_clock_48();
     stdio_init_all();
     printf("WS2812 Smoke Test with DMA, using pin %d...\n", WS2812_PIN);
@@ -247,11 +252,13 @@ int main() {
     // gpio_set_dir(LED_PIN, GPIO_OUT);
 
     // int led_on = true;
-
+    uint32_t beat_frac, prev_beat_frac;
+    uint32_t beat_us = 60 * 1000000/ bpm;
     int t = 0;
     while (1) {
         // gpio_put(LED_PIN, led_on);
         // led_on = led_on > 0 ?  0 : 1;
+
 
         int pat = rand() % count_of(pattern_table);
         int dir = (rand() >> 30) & 1 ? 1 : -1;
@@ -261,13 +268,21 @@ int main() {
         uint current_stream = 0;
 
         for (int i = 0; i < 1000; ++i) {
-            pattern_table[pat].pat(colors[current_stream], NUM_PIXELS, t);
+            absolute_time_t current_time = get_absolute_time();	
+            int64_t duration_from_time_ref =	absolute_time_diff_us(time_ref, current_time);
+            beat_frac = (duration_from_time_ref % beat_us) * UINT32_MAX / beat_us;
+            if (beat_frac < prev_beat_frac) {
+              puts("Beat ... ");
+            }
+            // printf("Frac %f\n", beat_frac / (1.f * UINT32_MAX));
+            pattern_table[pat].pat(colors[current_stream], NUM_PIXELS, beat_frac);
 
             sem_acquire_blocking(&reset_delay_complete_sem);
             output_strings_dma(colors[current_stream]);
             sleep_ms(20);
             current_stream ^= 1;
             t += dir;
+            prev_beat_frac = beat_frac;
         }
     }
 }

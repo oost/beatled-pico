@@ -8,17 +8,19 @@ endif()
 set(WIFI_SSID "$ENV{WIFI_SSID}" CACHE INTERNAL "WiFi SSID for examples")
 set(WIFI_PASSWORD "$ENV{WIFI_PASSWORD}" CACHE INTERNAL "WiFi password for examples")
 
+add_subdirectory(ws2812)
+
 add_executable(pico_w_beatled 
         main.c
         core0.c
         core1.c
-        ws2812/ws2812.c
         clock/clock.c
         blink/blink.c
         udp_server/udp_server.c
         command_queue/queue.c
         command/command.c
 )
+
 
 # generate the header file into the source tree as it is included in the RP2040 datasheet
 pico_generate_pio_header(pico_w_beatled ${CMAKE_CURRENT_LIST_DIR}/ws2812/ws2812.pio OUTPUT_DIR ${CMAKE_CURRENT_LIST_DIR}/generated)
@@ -56,6 +58,7 @@ target_link_libraries(pico_w_beatled
         # pico_cyw43_arch_lwip_poll
         pico_lwip_sntp
         hardware_pio
+        ws2812
         )
 
 pico_add_extra_outputs(pico_w_beatled)
