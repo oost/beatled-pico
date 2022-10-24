@@ -16,7 +16,7 @@ uint32_t dma_channel_mask = 0;
 // posted when it is safe to output a new set of values
 static struct semaphore reset_delay_complete_sem;
 // alarm handle for handling delay
-alarm_id_t reset_delay_alarm_id;
+volatile alarm_id_t reset_delay_alarm_id;
 
 int64_t reset_delay_complete(alarm_id_t id, void *user_data) {
     reset_delay_alarm_id = 0;

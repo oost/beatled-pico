@@ -1,8 +1,10 @@
-#ifndef COMMAND_COMMAND_H
-#define COMMAND_COMMAND_H
+#ifndef COMMAND__COMMAND_H
+#define COMMAND__COMMAND_H
 
-#include "pico/stdlib.h"
+#include <pico/stdlib.h>
 
-int parse_command(char * command, uint16_t message_length);
+#include "command_queue/queue.h"
 
-#endif // COMMAND_COMMAND_H
+int parse_command(command_envelope_t *envelope);
+
+#endif // COMMAND__COMMAND_H

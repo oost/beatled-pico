@@ -22,7 +22,8 @@
 		"files.associations": {
 			"dma.h": "c",
 			"constants.h": "c",
-			"sntp.h": "c"
+			"sntp.h": "c",
+			"cyw43_arch.h": "c"
 		}
 	}
 }

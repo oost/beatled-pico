@@ -1,43 +1,44 @@
-#include <stdlib.h>
+#include <pico/stdlib.h>
+#include <pico/util/queue.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
-#include "pico/stdlib.h"
+
 #include "command_queue/queue.h"
-#include "pico/util/queue.h"
 
 #define MAX_QUEUE_COUNT 20
-queue_t command_queue;
 
-void command_queue_init()
-{
-  queue_init(&command_queue, sizeof(envelope_t), MAX_QUEUE_COUNT);
+static queue_t command_queue;
+
+void command_queue_init() {
+  queue_init(&command_queue, sizeof(command_envelope_t), MAX_QUEUE_COUNT);
 }
 
-int command_queue_add_message(envelope_t *envelope) 
-{
-  // Not sure if this is necessary with queue_try_add...
-  if (queue_is_full(&command_queue)) {
-    puts("Queued is FULL!!!");
-    return 1;
-  }
+bool command_envelope_message_alloc(command_envelope_t *envelope,
+                                    size_t message_length) {
+  envelope->message = (char *)malloc(message_length);
+  envelope->message_length = message_length;
+  return envelope->message != NULL;
+}
 
+void command_envelope_message_free(command_envelope_t *envelope) {
+  free(envelope->message);
+}
+
+bool command_queue_add_message(command_envelope_t *envelope) {
   if (!queue_try_add(&command_queue, envelope)) {
-    puts("Couldn't add... :-(");
-    return 1;
+    puts("Queued is FULL!!!");
+    return false;
   }
   puts("Queued message");
+  return true;
 }
 
-int command_queue_pop_message(envelope_t *envelope) 
-{
-  // Not sure if this is necessary with queue_try_removes...
-  if (queue_is_empty(&command_queue)) {
-    return 1;
-  }
+bool command_queue_pop_message(command_envelope_t *envelope) {
   if (!queue_try_remove(&command_queue, envelope)) {
-    return 1;
+    return false;
   }
 
   puts("Popped a message from queue");
-  return 0;
+  return true;
 }

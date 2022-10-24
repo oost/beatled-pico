@@ -1,63 +1,95 @@
+#include <pico/stdlib.h>
+#include <stdio.h>
+
+#include "blink/blink.h"
+#include "clock/clock.h"
 #include "command/command.h"
 #include "command/constants.h"
-#include "blink/blink.h"
-#include <stdio.h>
-#include "pico/stdlib.h"
+#include "state_manager/state_manager.h"
+#include "utils/network.h"
 #include "ws2812/ws2812.h"
 
-int command_hello() 
-{
+int command_hello() {
   puts("Hello!");
   blink(MESSAGE_BLINK_SPEED, MESSAGE_HELLO);
   return 0;
 }
 
-int command_random() 
-{
+int command_random() {
   led_set_random_pattern();
   return 0;
 }
-int command_program(char * command, uint16_t message_length)
-{
-  led_update_pattern_idx(command[1]);
+int command_program(command_envelope_t *envelope) {
+  led_update_pattern_idx(envelope->message[1]);
   return 0;
 }
 
-int command_beat(char * command, uint16_t message_length)
-{
+int command_beat(command_envelope_t *envelope) {
   puts("Beat!");
   uint64_t beat_time = 0;
   int i;
   uint64_t paquet = 0;
-  for( i = 7; i >= 0; --i )
-  {
-      paquet <<= 8;
-      paquet |= (uint64_t)command[1+i];
+  for (i = 7; i >= 0; --i) {
+    paquet <<= 8;
+    paquet |= (uint64_t)envelope->message[1 + i];
   }
 
   led_beat();
   return 0;
 }
 
-int parse_command(char * command, uint16_t message_length)
-{
+int command_tempo(command_envelope_t *envelope) {
+  puts("Tempo!");
+
+  if (envelope->message_length != 13) {
+    return -1;
+  }
+
+  tempo_msg_t *tempo_msg = (tempo_msg_t *)envelope->message;
+
+  // command[1] to command[8] is beat_time_ref in us. Big endian
+  uint64_t beat_time_ref = ntohll(tempo_msg->beat_time_ref);
+
+  // command[9] to command [12] is tempo in us. Big endian
+  uint32_t tempo_period_us = ntohl(tempo_msg->tempo_period_us);
+
+  absolute_time_t beat_absolute_time_ref =
+      server_time_to_local_time(beat_time_ref);
+  printf("Updated beat ref to %llu (%llx)\n", beat_time_ref, beat_time_ref);
+  printf("Updated tempo to %lu (%lx)\n", tempo_period_us, tempo_period_us);
+
+  state_manager_set_tempo(beat_absolute_time_ref, tempo_period_us);
+  // led_beat();
+  return 0;
+}
+
+int parse_command(command_envelope_t *envelope) {
   puts("Parsing command");
   // fwrite(command, 1, message_length, stdout);
+  int return_value = 0;
 
-
-  switch (command[0])
-  {
+  switch (envelope->message[0]) {
   case COMMAND_HELLO:
-    return command_hello();
+    return_value = command_hello();
+    break;
   case COMMAND_RANDOM:
-    return command_random();  
+    return_value = command_random();
+    break;
   case COMMAND_PROGRAM:
-    return command_program(command, message_length);
+    return_value = command_program(envelope);
+    break;
   case COMMAND_BEAT:
-    return command_beat(command, message_length);
+    return_value = command_beat(envelope);
+    break;
+  case COMMAND_TEMPO:
+    return_value = command_tempo(envelope);
+    break;
   default:
     puts("Unknown command...");
     blink(ERROR_BLINK_SPEED, ERROR_COMMAND);
-    return 1;
+    return_value = 1;
   }
+  command_envelope_message_free(envelope);
+
+  return return_value;
 }

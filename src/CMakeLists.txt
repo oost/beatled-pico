@@ -7,6 +7,7 @@ endif()
 
 set(WIFI_SSID "$ENV{WIFI_SSID}" CACHE INTERNAL "WiFi SSID for examples")
 set(WIFI_PASSWORD "$ENV{WIFI_PASSWORD}" CACHE INTERNAL "WiFi password for examples")
+set(SNTP_SERVER_ADDRESS "raspberrypi1.local")
 
 add_subdirectory(ws2812)
 
@@ -19,11 +20,15 @@ add_executable(pico_w_beatled
         udp_server/udp_server.c
         command_queue/queue.c
         command/command.c
+        state_manager/state_manager.c
+        wifi/wifi.c
+        utils/data_queue.c
+        autotest/autotest.c 
 )
 
 
 # generate the header file into the source tree as it is included in the RP2040 datasheet
-pico_generate_pio_header(pico_w_beatled ${CMAKE_CURRENT_LIST_DIR}/ws2812/ws2812.pio OUTPUT_DIR ${CMAKE_CURRENT_LIST_DIR}/generated)
+# pico_generate_pio_header(pico_w_beatled ${CMAKE_CURRENT_LIST_DIR}/ws2812/ws2812.pio OUTPUT_DIR ${CMAKE_CURRENT_LIST_DIR}/generated)
 
 pico_add_extra_outputs(pico_w_beatled)
 
@@ -37,6 +42,7 @@ pico_enable_stdio_usb(pico_w_beatled 0)
 target_compile_definitions(pico_w_beatled PRIVATE
         WIFI_SSID=\"${WIFI_SSID}\"
         WIFI_PASSWORD=\"${WIFI_PASSWORD}\"
+        SNTP_SERVER_ADDRESS="${SNTP_SERVER_ADDRESS}"
         )
 
 target_include_directories(pico_w_beatled PRIVATE

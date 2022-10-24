@@ -1,39 +1,73 @@
+#include <pico/cyw43_arch.h>
+#include <pico/multicore.h>
+#include <pico/stdlib.h>
+#include <pico/util/queue.h>
 #include <stdio.h>
-#include "pico/stdlib.h"
-#include "pico/util/queue.h"
-#include "pico/multicore.h"
 
+#include "blink/blink.h"
+#include "clock/clock.h"
+#include "command_queue/queue.h"
 #include "core0.h"
 #include "core1.h"
-#include "data_queue.h"
-#include "pico/stdlib.h"
-#include "pico/cyw43_arch.h"
+#include "state_manager/state_manager.h"
+#include "udp_server/udp_server.h"
+#include "wifi/wifi.h"
+#include "ws2812/ws2812.h"
 
 void core1_entry() {
-    core1_init();
-    core1_loop();
+  core1_init();
+  core1_loop();
 }
 
+void init() {
+  puts("- Starting STDIO");
+  stdio_init_all();
 
-int main( void )
-{
+  puts("- Starting State Manager");
+  state_manager_init();
 
-    stdio_init_all();
-    printf("Hello, multicore_runner using queues!\n");
+  puts("- Starting Wifi");
+  wifi_init();
+  wifi_check();
 
-    if (cyw43_arch_init()) {
-        printf("WiFi init failed");
-        return -1;
-    }
-    
-    cyw43_arch_enable_sta_mode();
+  puts("- Starting WS2812 Manager");
+  led_init();
 
+  puts("- Starting Command queue");
+  command_queue_init();
 
-    core0_init();
+  puts("- Sending Hello message via UDP");
+  udp_send_hello();
+  udp_print_all_ip_addresses();
 
-    multicore_launch_core1(core1_entry);
+  puts("- Starting SNTP poll");
+  sntp_sync_init();
 
-    core0_loop();
+  puts("- Starting Beat Server");
+  bsp_init();
+}
 
-    return 0;
+void deinit() {
+  puts("Deinit... Not sure how we got here");
+  wifi_deinit();
+}
+
+int main(void) {
+  printf("Starting on pico board %s\n", state_manager_get_unique_board_id());
+
+  // Starting initialization sequence
+  init();
+
+  // Launch core 1
+  multicore_launch_core1(core1_entry);
+
+  // Do core 0 specific initialization
+  core0_init();
+
+  // Start infinite loop on core 0
+  core0_loop();
+
+  // Shouldn't ever get here but who knows...
+  deinit();
+  return 0;
 }
