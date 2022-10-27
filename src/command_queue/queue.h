@@ -3,8 +3,6 @@
 
 #include <pico/stdlib.h>
 
-#include "command/constants.h"
-
 typedef struct command_envelope {
   absolute_time_t time_received;
   char *message;

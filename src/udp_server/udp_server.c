@@ -1,7 +1,15 @@
-#include "udp_server/udp_server.h"
-#include "command/constants.h"
+#include <lwip/dns.h>
+#include <pico/unique_id.h>
+
+#include "beatled/protocol.h"
 #include "command_queue/queue.h"
+#include "udp_server/udp_server.h"
+#include "utils/network.h"
 #include "ws2812/ws2812.h"
+
+static bool server_address_resolved = false;
+static ip_addr_t server_address;
+static struct udp_pcb *server_udp_pcb;
 
 // NTP data received
 void dgram_recv(void *arg, struct udp_pcb *pcb, struct pbuf *p,
@@ -10,15 +18,15 @@ void dgram_recv(void *arg, struct udp_pcb *pcb, struct pbuf *p,
   command_envelope_t envelope;
   command_envelope_message_alloc(&envelope, p->tot_len);
 
-  BSP_T *state = (BSP_T *)arg;
-  uint8_t instruction = pbuf_get_at(p, 0);
-
   uint16_t message_length =
-      pbuf_copy_partial(p, &envelope.message, COMMAND_MAX_LEN, 0);
+      pbuf_copy_partial(p, envelope.message, p->tot_len, 0);
+
   if (message_length != 0 || envelope.message_length != message_length) {
     printf("Received: %d bytes\n", envelope.message_length);
     printf("The string is: %.*s\n", envelope.message_length, envelope.message);
+
     envelope.time_received = get_absolute_time();
+
     if (!command_queue_add_message(&envelope)) {
       puts("Error adding message to queue");
     }
@@ -26,72 +34,111 @@ void dgram_recv(void *arg, struct udp_pcb *pcb, struct pbuf *p,
     puts(" **** Error with msg...");
   }
   pbuf_free(p);
+  puts("Done");
 }
 
-int udp_send_hello() {
-  const char *ip_addr_string = "192.168.86.24";
-  ip_addr_t *addr = malloc(sizeof(ip_addr_t));
-  u16_t port = 8765;
+static void server_dns_found(const char *hostname, const ip_addr_t *ipaddr,
+                             void *arg) {
 
-  if (!ip4addr_aton(ip_addr_string, addr)) {
-    printf("failed to create ip addr\n");
-    return 0;
+  if (ipaddr != NULL) {
+    printf("Host server found %s: %s\n", hostname, ipaddr_ntoa(ipaddr));
+    server_address_resolved = true;
+    ip_addr_copy(server_address, *ipaddr);
+  } else {
+    printf("Host server not found %s...\n", hostname);
   }
+}
 
-  struct udp_pcb *upcb = udp_new_ip_type(IPADDR_TYPE_ANY);
-  if (!upcb) {
-    printf("failed to create pcb\n");
-    return 0;
+void resolve_server_address() {
+  err_t err;
+
+  err = dns_gethostbyname(SERVER_NAME, &server_address, server_dns_found, NULL);
+  if (err == ERR_INPROGRESS) {
+    return;
+  } else if (err == ERR_OK) {
+    server_address_resolved = true;
   }
-  const char *msg = "Hello World!!!";
+}
 
-  struct pbuf *hello_pbuf = pbuf_alloc(PBUF_TRANSPORT, sizeof(msg), PBUF_RAM);
-  if (!hello_pbuf) {
+void resolve_server_address_blocking() {
+  resolve_server_address();
+  while (!server_address_resolved) {
+    sleep_ms(20);
+  }
+  puts("Server address resolved.");
+}
+
+int send_udp_request(void *msg, size_t msg_length) {
+
+  struct pbuf *msg_pbuf = pbuf_alloc(PBUF_TRANSPORT, msg_length, PBUF_RAM);
+
+  if (!msg_pbuf) {
     printf("failed to create pbuf\n");
-    return 0;
-  }
-  if (pbuf_take(hello_pbuf, msg, sizeof(msg)) != ERR_OK) {
-    printf("failed to copy into pbuf\n");
-    return 0;
+    return 1;
   }
 
-  udp_sendto(upcb, hello_pbuf, addr, port);
-  pbuf_free(hello_pbuf);
-  free(addr);
-  udp_remove(upcb);
-  printf("Sent hello world message\n");
+  if (pbuf_take(msg_pbuf, msg, sizeof(msg)) != ERR_OK) {
+    printf("failed to copy into pbuf\n");
+    pbuf_free(msg_pbuf);
+    return 1;
+  }
+
+  if (udp_sendto(server_udp_pcb, msg_pbuf, &server_address, UDP_SERVER_PORT) !=
+      ERR_OK) {
+    pbuf_free(msg_pbuf);
+    printf("Error sending message to %s:%u ...\n", ipaddr_ntoa(&server_address),
+           UDP_SERVER_PORT);
+    return 1;
+  }
+
+  pbuf_free(msg_pbuf);
+  printf("Sent message to %s:%u ... Command %c\n", ipaddr_ntoa(&server_address),
+         UDP_SERVER_PORT, (char *)msg);
+  return 0;
+}
+
+int send_hello_msg() {
+
+  hello_msg_t msg;
+  msg.command = COMMAND_HELLO;
+  pico_get_unique_board_id_string(msg.board_id, count_of(msg.board_id));
+
+  return send_udp_request((void *)&msg, sizeof(msg));
+}
+
+int send_time_sync_request() {
+  time_req_msg_t msg;
+  msg.command = COMMAND_TIME;
+  msg.orig_time = htonll(time_us_64());
+
+  return send_udp_request((void *)&msg, sizeof(msg));
 }
 
 // Perform initialisation
-BSP_T *bsp_init(void) {
-  BSP_T *state = calloc(1, sizeof(BSP_T));
-  if (!state) {
-    printf("Failed to allocate state\n");
-    return NULL;
-  }
+int init_server_udp_pcb() {
 
-  state->bsp_pcb = udp_new_ip_type(IPADDR_TYPE_ANY);
-  if (!state->bsp_pcb) {
+  server_udp_pcb = udp_new_ip_type(IPADDR_TYPE_ANY);
+  if (!server_udp_pcb) {
     printf("Failed to create bsp pcb\n");
-    free(state);
-    return NULL;
+    return 1;
   }
 
   // Bind to endpoint  IP_ADDR_BROADCAST IP_ANY_TYPE
-  if (udp_bind(state->bsp_pcb, IP_ANY_TYPE, BSP_PORT)) {
+  if (udp_bind(server_udp_pcb, IP_ANY_TYPE, UDP_PORT)) {
     printf("Failed to bind pcb\n");
-    free(state);
-    return NULL;
+    udp_remove(server_udp_pcb);
+    return 1;
   }
-  ip_set_option(state->bsp_pcb, SOF_BROADCAST);
-  ip_set_option(state->bsp_pcb, IP_SOF_BROADCAST_RECV);
+
+  ip_set_option(server_udp_pcb, SOF_BROADCAST);
+  ip_set_option(server_udp_pcb, IP_SOF_BROADCAST_RECV);
 
   // Add callback
-  udp_recv(state->bsp_pcb, dgram_recv, state);
+  udp_recv(server_udp_pcb, dgram_recv, NULL);
   printf("Set up UDP callback on %s:%d\n",
-         ipaddr_ntoa(&state->bsp_pcb->local_ip), BSP_PORT);
+         ipaddr_ntoa(&server_udp_pcb->local_ip), UDP_PORT);
 
-  return state;
+  return 0;
 }
 
 const ip4_addr_t *get_ip_address() {

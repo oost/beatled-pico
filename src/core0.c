@@ -2,11 +2,12 @@
 #include <pico/stdlib.h>
 #include <stdio.h>
 
+#include "beatled/protocol.h"
 #include "blink/blink.h"
 #include "clock/clock.h"
 #include "command/command.h"
 #include "command_queue/queue.h"
-#include "constants.h"
+#include "udp_server/udp_server.h"
 #include "ws2812/ws2812.h"
 
 #include "autotest/autotest.h"
@@ -14,9 +15,9 @@
 void core0_init() {
   puts("Initializing core 0");
 
-  while (!clock_is_synced()) {
-    sleep_ms(20);
-  }
+  // while (!clock_is_synced()) {
+  //   sleep_ms(20);
+  // }
   puts("Clock is synced via SNTP");
 
   init_test();

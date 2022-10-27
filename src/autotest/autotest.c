@@ -2,7 +2,7 @@
 #include <string.h>
 
 #include "autotest.h"
-#include "command/constants.h"
+#include "beatled/protocol.h"
 #include "command_queue/queue.h"
 #include "utils/network.h"
 
@@ -24,8 +24,8 @@ void test_tempo() {
 
   uint32_t tempo_period_us = 60 * 1000000UL / tempo;
   tempo_msg.tempo_period_us = htonl(tempo_period_us);
-  printf("TTempo period: %lu (%lx)\n", tempo_period_us, tempo_period_us);
-  printf("TTempo period big endian: %lu (%lx)\n", tempo_msg.tempo_period_us,
+  printf("Tempo period: %lu (%lx)\n", tempo_period_us, tempo_period_us);
+  printf("Tempo period big endian: %lu (%lx)\n", tempo_msg.tempo_period_us,
          tempo_msg.tempo_period_us);
 
   command_envelope_t envelope;

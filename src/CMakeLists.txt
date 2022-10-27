@@ -8,6 +8,7 @@ endif()
 set(WIFI_SSID "$ENV{WIFI_SSID}" CACHE INTERNAL "WiFi SSID for examples")
 set(WIFI_PASSWORD "$ENV{WIFI_PASSWORD}" CACHE INTERNAL "WiFi password for examples")
 set(SNTP_SERVER_ADDRESS "raspberrypi1.local")
+set(SERVER_NAME "Oscars-MacBook-Pro.local")
 
 add_subdirectory(ws2812)
 
@@ -43,6 +44,7 @@ target_compile_definitions(pico_w_beatled PRIVATE
         WIFI_SSID=\"${WIFI_SSID}\"
         WIFI_PASSWORD=\"${WIFI_PASSWORD}\"
         SNTP_SERVER_ADDRESS="${SNTP_SERVER_ADDRESS}"
+        SERVER_NAME="${SERVER_NAME}"
         )
 
 target_include_directories(pico_w_beatled PRIVATE
@@ -65,6 +67,7 @@ target_link_libraries(pico_w_beatled
         pico_lwip_sntp
         hardware_pio
         ws2812
+        beatled_protocol
         )
 
 pico_add_extra_outputs(pico_w_beatled)

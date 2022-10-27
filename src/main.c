@@ -37,14 +37,17 @@ void init() {
   command_queue_init();
 
   puts("- Sending Hello message via UDP");
-  udp_send_hello();
   udp_print_all_ip_addresses();
 
-  puts("- Starting SNTP poll");
-  sntp_sync_init();
+  resolve_server_address_blocking();
+
+  // puts("- Starting SNTP poll");
+  // sntp_sync_init();
 
   puts("- Starting Beat Server");
-  bsp_init();
+  init_server_udp_pcb();
+  send_hello_msg();
+  send_time_sync_request();
 }
 
 void deinit() {

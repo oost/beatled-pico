@@ -1,10 +1,10 @@
 #include <pico/stdlib.h>
 #include <stdio.h>
 
+#include "beatled/protocol.h"
 #include "blink/blink.h"
 #include "clock/clock.h"
 #include "command/command.h"
-#include "command/constants.h"
 #include "state_manager/state_manager.h"
 #include "utils/network.h"
 #include "ws2812/ws2812.h"
@@ -41,16 +41,13 @@ int command_beat(command_envelope_t *envelope) {
 int command_tempo(command_envelope_t *envelope) {
   puts("Tempo!");
 
-  if (envelope->message_length != 13) {
+  if (envelope->message_length != sizeof(tempo_msg_t)) {
     return -1;
   }
 
   tempo_msg_t *tempo_msg = (tempo_msg_t *)envelope->message;
 
-  // command[1] to command[8] is beat_time_ref in us. Big endian
   uint64_t beat_time_ref = ntohll(tempo_msg->beat_time_ref);
-
-  // command[9] to command [12] is tempo in us. Big endian
   uint32_t tempo_period_us = ntohl(tempo_msg->tempo_period_us);
 
   absolute_time_t beat_absolute_time_ref =
@@ -59,13 +56,25 @@ int command_tempo(command_envelope_t *envelope) {
   printf("Updated tempo to %lu (%lx)\n", tempo_period_us, tempo_period_us);
 
   state_manager_set_tempo(beat_absolute_time_ref, tempo_period_us);
-  // led_beat();
+  return 0;
+}
+
+int command_error(command_envelope_t *envelope) {
+  puts("Error");
+
+  if (envelope->message_length != sizeof(error_msg_t)) {
+    return -1;
+  }
+
+  error_msg_t *error_msg = (error_msg_t *)envelope->message;
+
+  printf("Communication error %u\n", error_msg->error_code);
   return 0;
 }
 
 int parse_command(command_envelope_t *envelope) {
   puts("Parsing command");
-  // fwrite(command, 1, message_length, stdout);
+
   int return_value = 0;
 
   switch (envelope->message[0]) {
@@ -83,6 +92,9 @@ int parse_command(command_envelope_t *envelope) {
     break;
   case COMMAND_TEMPO:
     return_value = command_tempo(envelope);
+    break;
+  case COMMAND_ERROR:
+    return_value = command_error(envelope);
     break;
   default:
     puts("Unknown command...");
