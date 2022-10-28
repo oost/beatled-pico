@@ -11,54 +11,57 @@
 extern "C" {
 #endif
 
-// Code for header body
-#define COMMAND_HELLO 'a'
-#define COMMAND_RANDOM 'b'
-#define COMMAND_PROGRAM 'c'
-#define COMMAND_BEAT 'd'
-#define COMMAND_TEMPO 't'
-#define COMMAND_TIME 'T'
-#define COMMAND_ERROR 'E'
+typedef enum {
+  eBeatledError = 0,
+  eBeatledHello,
+  eBeatledTempo,
+  eBeatledTime,
+  eBeatledProgram
+} beatled_message_type_t;
 
-// Tempo message. Command = 'E'
 typedef struct {
-  uint8_t command;
+  beatled_message_type_t type;
+} __attribute__((packed)) beatled_message_t;
+
+// Tempo message. eCommandType = eBeatledError
+typedef struct {
+  beatled_message_t base;
   uint8_t error_code;
-} __attribute__((packed)) error_msg_t;
+} __attribute__((packed)) beatled_error_msg_t;
 
-// Tempo message. Command = 't'
+// Tempo message. eCommandType = eBeatledTempo
 typedef struct {
-  uint8_t command;
+  beatled_message_t base;
   uint64_t beat_time_ref;
   uint32_t tempo_period_us;
-} __attribute__((packed)) tempo_msg_t;
+} __attribute__((packed)) beatled_tempo_msg_t;
 
-// Hello. Command = 'h'
+// Hello. eCommandType = eBeatledHello
 typedef struct {
-  uint8_t command;
+  beatled_message_t base;
   char board_id[2 * PICO_UNIQUE_BOARD_ID_SIZE_BYTES + 1];
-} __attribute__((packed)) hello_msg_t;
+} __attribute__((packed)) beatled_hello_msg_t;
 
-// Command = 'T'
+// eCommandType = eBeatledTime
 typedef struct {
-  uint8_t command;
+  beatled_message_t base;
   uint64_t orig_time;
-} __attribute__((packed)) time_req_msg_t;
+} __attribute__((packed)) beatled_time_req_msg_t;
 
-// Command = 'T'
+// eCommandType = eBeatledTime
 typedef struct {
-  uint8_t command;
+  beatled_message_t base;
   uint64_t orig_time;
   uint64_t rec_time;
   uint64_t xmit_time;
-} __attribute__((packed)) time_resp_msg_t;
+} __attribute__((packed)) beatled_time_resp_msg_t;
 
-// Command = 'P'
+// eCommandType = eBeatledProgram
 typedef struct {
-  uint8_t command;
+  beatled_message_t base;
   uint64_t orig_time;
   uint32_t program_id;
-} __attribute__((packed)) program_msg_t;
+} __attribute__((packed)) beatled_program_msg_t;
 
 #ifdef __cplusplus
 } /*extern "C" */

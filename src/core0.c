@@ -6,7 +6,9 @@
 #include "blink/blink.h"
 #include "clock/clock.h"
 #include "command/command.h"
-#include "command_queue/queue.h"
+#include "constants.h"
+#include "event_queue/queue.h"
+#include "intercore_queue.h"
 #include "udp_server/udp_server.h"
 #include "ws2812/ws2812.h"
 
@@ -16,7 +18,8 @@ void core0_init() {
   puts("Initializing core 0");
 
   // while (!clock_is_synced()) {
-  //   sleep_ms(20);
+
+  //   sleep_ms(1000);
   // }
   puts("Clock is synced via SNTP");
 
@@ -29,23 +32,23 @@ void core0_loop() {
   blink(MESSAGE_BLINK_SPEED, MESSAGE_WELCOME);
   sleep_ms(1000);
 
-  command_envelope_t envelope;
+  event_t event;
 
   test_tempo();
 
   while (1) {
-    sleep_ms(20);
     while (1) {
-      if (!command_queue_pop_message(&envelope)) {
+      if (!event_queue_pop_message(&event)) {
         break;
       };
 
       puts("Got a message, going to parse it...");
 
-      if (parse_command(&envelope)) {
+      if (handle_event(&event)) {
         puts("Error parsing command :-(");
       }
     }
-    led_update();
+
+    sleep_ms(CONTROL_CORE_SLEEP_MS);
   }
 }

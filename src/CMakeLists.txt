@@ -19,7 +19,7 @@ add_executable(pico_w_beatled
         clock/clock.c
         blink/blink.c
         udp_server/udp_server.c
-        command_queue/queue.c
+        event_queue/queue.c
         command/command.c
         state_manager/state_manager.c
         wifi/wifi.c

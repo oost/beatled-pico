@@ -3,8 +3,8 @@
 
 #include <pico/stdlib.h>
 
-#include "command_queue/queue.h"
+#include "event_queue/queue.h"
 
-int parse_command(command_envelope_t *envelope);
+int handle_event(event_t *event);
 
 #endif // COMMAND__COMMAND_H

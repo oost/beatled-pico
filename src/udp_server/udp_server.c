@@ -2,7 +2,7 @@
 #include <pico/unique_id.h>
 
 #include "beatled/protocol.h"
-#include "command_queue/queue.h"
+#include "event_queue/queue.h"
 #include "udp_server/udp_server.h"
 #include "utils/network.h"
 #include "ws2812/ws2812.h"
@@ -15,19 +15,16 @@ static struct udp_pcb *server_udp_pcb;
 void dgram_recv(void *arg, struct udp_pcb *pcb, struct pbuf *p,
                 const ip_addr_t *addr, u16_t port) {
   // printf("Received UDP datagram from port %d\n", port);
-  command_envelope_t envelope;
-  command_envelope_message_alloc(&envelope, p->tot_len);
+  size_t data_length = p->tot_len;
+  void *server_msg = (void *)malloc(data_length);
+  uint16_t copied_length = pbuf_copy_partial(p, server_msg, data_length, 0);
 
-  uint16_t message_length =
-      pbuf_copy_partial(p, envelope.message, p->tot_len, 0);
+  if (copied_length > 0 && copied_length == data_length) {
+    printf("Received: %d bytes\n", copied_length);
+    printf("The string is: %.*s\n", copied_length, server_msg);
 
-  if (message_length != 0 || envelope.message_length != message_length) {
-    printf("Received: %d bytes\n", envelope.message_length);
-    printf("The string is: %.*s\n", envelope.message_length, envelope.message);
-
-    envelope.time_received = get_absolute_time();
-
-    if (!command_queue_add_message(&envelope)) {
+    if (!event_queue_add_message(event_server_message, server_msg,
+                                 data_length)) {
       puts("Error adding message to queue");
     }
   } else {
@@ -68,9 +65,9 @@ void resolve_server_address_blocking() {
   puts("Server address resolved.");
 }
 
-int send_udp_request(void *msg, size_t msg_length) {
+int send_udp_request(beatled_message_t *msg, size_t msg_length) {
 
-  struct pbuf *msg_pbuf = pbuf_alloc(PBUF_TRANSPORT, msg_length, PBUF_RAM);
+  struct pbuf *msg_pbuf = pbuf_alloc(PBUF_TRANSPORT, msg_length + 1, PBUF_RAM);
 
   if (!msg_pbuf) {
     printf("failed to create pbuf\n");
@@ -99,19 +96,19 @@ int send_udp_request(void *msg, size_t msg_length) {
 
 int send_hello_msg() {
 
-  hello_msg_t msg;
-  msg.command = COMMAND_HELLO;
+  beatled_hello_msg_t msg;
+  msg.base.type = eBeatledHello;
   pico_get_unique_board_id_string(msg.board_id, count_of(msg.board_id));
 
-  return send_udp_request((void *)&msg, sizeof(msg));
+  return send_udp_request((beatled_message_t *)&msg, sizeof(msg));
 }
 
 int send_time_sync_request() {
-  time_req_msg_t msg;
-  msg.command = COMMAND_TIME;
+  beatled_time_req_msg_t msg;
+  msg.base.type = eBeatledTime;
   msg.orig_time = htonll(time_us_64());
 
-  return send_udp_request((void *)&msg, sizeof(msg));
+  return send_udp_request((beatled_message_t *)&msg, sizeof(msg));
 }
 
 // Perform initialisation

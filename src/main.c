@@ -6,13 +6,19 @@
 
 #include "blink/blink.h"
 #include "clock/clock.h"
-#include "command_queue/queue.h"
 #include "core0.h"
 #include "core1.h"
+#include "event_queue/queue.h"
+#include "intercore_queue.h"
+#include "state_manager/state.h"
 #include "state_manager/state_manager.h"
 #include "udp_server/udp_server.h"
 #include "wifi/wifi.h"
 #include "ws2812/ws2812.h"
+
+#define MAX_INTERCORE_QUEUE_COUNT 20
+
+queue_t intercore_command_queue;
 
 void core1_entry() {
   core1_init();
@@ -20,6 +26,10 @@ void core1_entry() {
 }
 
 void init() {
+
+  queue_init(&intercore_command_queue, sizeof(state_update_t),
+             MAX_INTERCORE_QUEUE_COUNT);
+
   puts("- Starting STDIO");
   stdio_init_all();
 
@@ -33,8 +43,8 @@ void init() {
   puts("- Starting WS2812 Manager");
   led_init();
 
-  puts("- Starting Command queue");
-  command_queue_init();
+  puts("- Starting Event queue");
+  event_queue_init();
 
   puts("- Sending Hello message via UDP");
   udp_print_all_ip_addresses();
@@ -53,6 +63,7 @@ void init() {
 void deinit() {
   puts("Deinit... Not sure how we got here");
   wifi_deinit();
+  queue_free(&intercore_command_queue);
 }
 
 int main(void) {
