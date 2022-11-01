@@ -1,16 +1,20 @@
 # Add executable. Default name is the project name, version 0.1
 
+option(PICO_AUTOTEST "Run with auto tests"   OFF)
+
+IF(PICO_AUTOTEST)
+    ADD_DEFINITIONS(-DPICO_AUTOTEST)
+ENDIF(PICO_AUTOTEST)
+
 if (NOT PICO_CYW43_SUPPORTED AND NOT TARGET pico_cyw43_arch)
         message(FATAL_ERROR "Skipping Pico W examples as support is not available ${PICO_CYW43_SUPPORTED}")
 endif()
 
 
-set(WIFI_SSID "$ENV{WIFI_SSID}" CACHE INTERNAL "WiFi SSID for examples")
-set(WIFI_PASSWORD "$ENV{WIFI_PASSWORD}" CACHE INTERNAL "WiFi password for examples")
-set(SNTP_SERVER_ADDRESS "raspberrypi1.local")
-set(SERVER_NAME "Oscars-MacBook-Pro.local")
 
 add_subdirectory(ws2812)
+add_subdirectory(state_manager)
+add_subdirectory(command)
 
 add_executable(pico_w_beatled 
         main.c
@@ -20,12 +24,9 @@ add_executable(pico_w_beatled
         blink/blink.c
         udp_server/udp_server.c
         event_queue/queue.c
-        command/command.c
-        state_manager/state_manager.c
         wifi/wifi.c
-        utils/data_queue.c
         autotest/autotest.c 
-)
+) 
 
 
 # generate the header file into the source tree as it is included in the RP2040 datasheet
@@ -67,6 +68,8 @@ target_link_libraries(pico_w_beatled
         pico_lwip_sntp
         hardware_pio
         ws2812
+        state_manager
+        commands
         beatled_protocol
         )
 

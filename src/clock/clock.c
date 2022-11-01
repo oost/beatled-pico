@@ -14,6 +14,14 @@
 static absolute_time_t sntp_request_local_time_ref;
 static uint64_t sntp_server_time_ref_us = 0;
 
+static int64_t server_time_offset = 0;
+
+void set_server_time_offset(int64_t new_server_time_offset) {
+  server_time_offset = new_server_time_offset;
+}
+
+int64_t get_server_time_offset() { return server_time_offset; }
+
 void sntp_set_system_time(uint32_t sec, uint32_t usec) {
   puts("Got SNTP response");
 
@@ -37,13 +45,14 @@ void sntp_set_system_time(uint32_t sec, uint32_t usec) {
   LWIP_PLATFORM_DIAG(("SNTP time: %s\n", buf));
 }
 
-bool clock_is_synced() { return sntp_server_time_ref_us; }
+bool clock_is_synced() { return server_time_offset != 0; }
 
 uint64_t get_sntp_server_time_ref_us() { return sntp_server_time_ref_us; }
 
-absolute_time_t server_time_to_local_time(uint64_t server_time) {
-  return delayed_by_us(sntp_request_local_time_ref,
-                       server_time - sntp_server_time_ref_us);
+uint64_t server_time_to_local_time(uint64_t server_time) {
+  return server_time - server_time_offset;
+  // return delayed_by_us(sntp_request_local_time_ref,
+  //                      server_time - sntp_server_time_ref_us);
 }
 
 // void sntp_dns_found(const char *name, const ip_addr_t *ipaddr,

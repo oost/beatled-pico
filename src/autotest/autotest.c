@@ -31,7 +31,7 @@ void test_tempo() {
          tempo_msg->tempo_period_us);
 
   size_t data_length = sizeof(beatled_tempo_msg_t);
-  //   beatled_message_t *test_msg = (beatled_message_t *)tempo_msg;
+
   if (!event_queue_add_message(event_server_message, (void *)tempo_msg,
                                data_length)) {
     puts("Couldn't add message");

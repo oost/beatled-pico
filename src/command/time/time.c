@@ -1,0 +1,61 @@
+#include "time.h"
+#include "beatled/protocol.h"
+#include "command/utils.h"
+#include "state_manager/state_manager.h"
+#include "state_manager/states/states.h"
+#include "udp_server/udp_server.h"
+#include "utils/network.h"
+
+int prepare_time_request(struct pbuf *buffer, size_t buf_len) {
+  if (buf_len != sizeof(beatled_time_req_msg_t)) {
+    printf("Error sizes don't match %d, %d", buf_len,
+           sizeof(beatled_time_req_msg_t));
+    return 1;
+  }
+
+  beatled_time_req_msg_t *msg = buffer->payload;
+  msg->base.type = eBeatledTime;
+  uint64_t orig_time = time_us_64();
+  printf("Sending time request. \n - orig_time: %llu / %llx\n", orig_time,
+         orig_time);
+
+  msg->orig_time = htonll(orig_time);
+
+  printf("Sending time request. \n - orig_time: %llu / %llx\n", msg->orig_time,
+         msg->orig_time);
+
+  return 0;
+}
+
+int send_time_request() {
+  return send_udp_request(sizeof(beatled_time_req_msg_t),
+                          &prepare_time_request);
+}
+
+int process_time_msg(beatled_message_t *server_msg, size_t data_length,
+                     uint64_t dest_time) {
+  puts("Time!");
+  if (!check_size(data_length, sizeof(beatled_time_resp_msg_t))) {
+    return 1;
+  }
+  beatled_time_resp_msg_t *time_resp_msg =
+      (beatled_time_resp_msg_t *)server_msg;
+
+  uint64_t orig_time = ntohll(time_resp_msg->orig_time);
+  uint64_t recv_time = ntohll(time_resp_msg->recv_time);
+  uint64_t xmit_time = ntohll(time_resp_msg->xmit_time);
+
+  uint64_t delay = (dest_time - orig_time) - (xmit_time - recv_time);
+  int64_t clock_offset =
+      ((recv_time - orig_time) - (xmit_time - dest_time)) / 2;
+  printf(
+      "Got times\n - orig: %llu\n - recv: %llu\n - xmit: %llu\n - dest: %llu\n",
+      orig_time, recv_time, xmit_time, dest_time);
+  printf("Delay %llu\n offset: %lld\n", delay, clock_offset);
+
+  set_server_time_offset(clock_offset);
+
+  state_manager_set_state(STATE_TIME_SYNCED);
+
+  return 0;
+}

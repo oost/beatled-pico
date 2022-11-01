@@ -78,6 +78,9 @@ void led_update_time_ref(uint64_t new_time_ref) {
 }
 
 void led_update() {
+  if (time_ref == 0) {
+    return;
+  }
 
   static uint32_t colors[2][NUM_PIXELS];
   static uint current_stream = 0;

@@ -1,64 +1,23 @@
-#include <pico/cyw43_arch.h>
-#include <pico/multicore.h>
 #include <pico/stdlib.h>
 #include <pico/util/queue.h>
 #include <stdio.h>
 
-#include "blink/blink.h"
-#include "clock/clock.h"
-#include "core0.h"
-#include "core1.h"
-#include "event_queue/queue.h"
+// #include "blink/blink.h"
+// #include "clock/clock.h"
+
+// #include "event_queue/queue.h"
 #include "intercore_queue.h"
-#include "state_manager/state.h"
-#include "state_manager/state_manager.h"
-#include "udp_server/udp_server.h"
+// #include "state_manager/state.h"
+// #include "state_manager/state_manager.h"
+// #include "udp_server/udp_server.h"
 #include "wifi/wifi.h"
-#include "ws2812/ws2812.h"
+// #include "ws2812/ws2812.h"
 
-#define MAX_INTERCORE_QUEUE_COUNT 20
+// #include "command/hello/hello.h"
+// #include "command/tempo/tempo.h"
+// #include "command/time/time.h"
 
-queue_t intercore_command_queue;
-
-void core1_entry() {
-  core1_init();
-  core1_loop();
-}
-
-void init() {
-
-  queue_init(&intercore_command_queue, sizeof(state_update_t),
-             MAX_INTERCORE_QUEUE_COUNT);
-
-  puts("- Starting STDIO");
-  stdio_init_all();
-
-  puts("- Starting State Manager");
-  state_manager_init();
-
-  puts("- Starting Wifi");
-  wifi_init();
-  wifi_check();
-
-  puts("- Starting WS2812 Manager");
-  led_init();
-
-  puts("- Starting Event queue");
-  event_queue_init();
-
-  puts("- Sending Hello message via UDP");
-  udp_print_all_ip_addresses();
-
-  resolve_server_address_blocking();
-
-  // puts("- Starting SNTP poll");
-  // sntp_sync_init();
-
-  puts("- Starting Beat Server");
-  init_server_udp_pcb();
-  send_hello_msg();
-  send_time_sync_request();
-}
+void init() {}
 
 void deinit() {
   puts("Deinit... Not sure how we got here");
@@ -67,19 +26,6 @@ void deinit() {
 }
 
 int main(void) {
-  printf("Starting on pico board %s\n", state_manager_get_unique_board_id());
-
-  // Starting initialization sequence
-  init();
-
-  // Launch core 1
-  multicore_launch_core1(core1_entry);
-
-  // Do core 0 specific initialization
-  core0_init();
-
-  // Start infinite loop on core 0
-  core0_loop();
 
   // Shouldn't ever get here but who knows...
   deinit();

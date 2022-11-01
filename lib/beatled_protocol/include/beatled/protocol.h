@@ -19,8 +19,14 @@ typedef enum {
   eBeatledProgram
 } beatled_message_type_t;
 
+typedef enum {
+  unknownError = 0,
+  unknownMessageType,
+  noData
+} beatled_error_codes;
+
 typedef struct {
-  beatled_message_type_t type;
+  uint8_t type; // beatled_message_type_t
 } __attribute__((packed)) beatled_message_t;
 
 // Tempo message. eCommandType = eBeatledError
@@ -42,6 +48,11 @@ typedef struct {
   char board_id[2 * PICO_UNIQUE_BOARD_ID_SIZE_BYTES + 1];
 } __attribute__((packed)) beatled_hello_msg_t;
 
+typedef struct {
+  beatled_message_t base;
+  uint16_t pico_id;
+} __attribute__((packed)) beatled_hello_response_t;
+
 // eCommandType = eBeatledTime
 typedef struct {
   beatled_message_t base;
@@ -52,7 +63,7 @@ typedef struct {
 typedef struct {
   beatled_message_t base;
   uint64_t orig_time;
-  uint64_t rec_time;
+  uint64_t recv_time;
   uint64_t xmit_time;
 } __attribute__((packed)) beatled_time_resp_msg_t;
 

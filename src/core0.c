@@ -1,29 +1,20 @@
-#include "core0.h"
 #include <pico/stdlib.h>
 #include <stdio.h>
 
-#include "beatled/protocol.h"
+#include "autotest/autotest.h"
 #include "blink/blink.h"
-#include "clock/clock.h"
 #include "command/command.h"
 #include "constants.h"
-#include "event_queue/queue.h"
-#include "intercore_queue.h"
-#include "udp_server/udp_server.h"
-#include "ws2812/ws2812.h"
-
-#include "autotest/autotest.h"
+#include "core0.h"
+#include "state_manager/state_manager.h"
 
 void core0_init() {
   puts("Initializing core 0");
 
-  // while (!clock_is_synced()) {
-
-  //   sleep_ms(1000);
-  // }
-  puts("Clock is synced via SNTP");
-
+#ifdef PICO_AUTOTEST
+  puts("**** Running with autotest *********");
   init_test();
+#endif // PICO_AUTOTEST
 }
 
 void core0_loop() {
@@ -32,9 +23,13 @@ void core0_loop() {
   blink(MESSAGE_BLINK_SPEED, MESSAGE_WELCOME);
   sleep_ms(1000);
 
+  state_manager_set_state(STATE_STARTED);
+
   event_t event;
 
+#ifdef PICO_AUTOTEST
   test_tempo();
+#endif // PICO_AUTOTEST
 
   while (1) {
     while (1) {

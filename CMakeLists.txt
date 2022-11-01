@@ -1,9 +1,16 @@
 # Generated Cmake Pico project file
 
 cmake_minimum_required(VERSION 3.13)
+project(pico_w_beatled C CXX ASM)
 
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
+
+
+set(WIFI_SSID "$ENV{WIFI_SSID}" CACHE INTERNAL "WiFi SSID for examples")
+set(WIFI_PASSWORD "$ENV{WIFI_PASSWORD}" CACHE INTERNAL "WiFi password for examples")
+set(SNTP_SERVER_ADDRESS "raspberrypi1.local")
+set(SERVER_NAME "Oscars-MacBook-Pro.local")
 
 # Initialise pico_sdk from installed location
 # (note this can come from environment, CMake cache etc)
@@ -21,7 +28,6 @@ include(beatled_protocol_import.cmake)
 # add_subdirectory(lib/beatled_protocol)
 
 
-project(pico_w_beatled C CXX ASM)
 
 # Initialise the Raspberry Pi Pico SDK
 pico_sdk_init()
