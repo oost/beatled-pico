@@ -1,19 +1,19 @@
 #include "time.h"
 #include "beatled/protocol.h"
 #include "command/utils.h"
+#include "hal/udp/udp.h"
 #include "state_manager/state_manager.h"
 #include "state_manager/states/states.h"
-#include "udp_server/udp_server.h"
 #include "utils/network.h"
 
-int prepare_time_request(struct pbuf *buffer, size_t buf_len) {
+int prepare_time_request(void *buffer_payload, size_t buf_len) {
   if (buf_len != sizeof(beatled_time_req_msg_t)) {
     printf("Error sizes don't match %d, %d", buf_len,
            sizeof(beatled_time_req_msg_t));
     return 1;
   }
 
-  beatled_time_req_msg_t *msg = buffer->payload;
+  beatled_time_req_msg_t *msg = buffer_payload;
   msg->base.type = eBeatledTime;
   uint64_t orig_time = time_us_64();
   printf("Sending time request. \n - orig_time: %llu / %llx\n", orig_time,

@@ -8,3 +8,9 @@ target_sources(
         states/registered/registered.c
         states/time_synced/time_synced.c
 )
+
+target_link_libraries(state_manager INTERFACE
+        hardware_timer
+        hardware_clocks
+        pico_multicore
+        )

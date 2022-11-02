@@ -1,20 +1,20 @@
 #include "tempo.h"
 #include "beatled/protocol.h"
 #include "command/utils.h"
+#include "hal/udp/udp.h"
 #include "intercore_queue.h"
 #include "state_manager/state.h"
 #include "state_manager/state_manager.h"
-#include "udp_server/udp_server.h"
 #include "utils/network.h"
 
-int prepare_tempo_request(struct pbuf *buffer, size_t buf_len) {
+int prepare_tempo_request(void *buffer_payload, size_t buf_len) {
   if (buf_len != sizeof(beatled_tempo_msg_t)) {
     printf("Error sizes don't match %d, %d", buf_len,
            sizeof(beatled_tempo_msg_t));
     return 1;
   }
 
-  beatled_tempo_msg_t *msg = buffer->payload;
+  beatled_tempo_msg_t *msg = buffer_payload;
   msg->base.type = eBeatledTempo;
   return 0;
 }

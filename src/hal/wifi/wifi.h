@@ -4,7 +4,6 @@
 void wifi_init();
 void wifi_deinit();
 
-void wifi_check();
-
+void wifi_check(const char *wifi_ssid, const char *wifi_password);
 
 #endif // WIFI__WIFI_H

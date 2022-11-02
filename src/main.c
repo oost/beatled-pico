@@ -10,7 +10,7 @@
 // #include "state_manager/state.h"
 // #include "state_manager/state_manager.h"
 // #include "udp_server/udp_server.h"
-#include "wifi/wifi.h"
+// #include "wifi/wifi.h"
 // #include "ws2812/ws2812.h"
 
 // #include "command/hello/hello.h"
@@ -21,7 +21,7 @@ void init() {}
 
 void deinit() {
   puts("Deinit... Not sure how we got here");
-  wifi_deinit();
+  // wifi_deinit();
   queue_free(&intercore_command_queue);
 }
 

@@ -2,15 +2,19 @@
 #include <lwip/pbuf.h>
 #include <pico/unique_id.h>
 
-#include "beatled/protocol.h"
-#include "event_queue/queue.h"
-#include "udp_server/udp_server.h"
-#include "utils/network.h"
+// #include "beatled/protocol.h"
+// #include "event_queue/queue.h"
+#include "../utils/network.h"
+#include "udp.h"
 #include "ws2812/ws2812.h"
 
 static bool server_address_resolved = false;
 static ip_addr_t server_address;
 static struct udp_pcb *server_udp_pcb;
+
+static uint16_t udp_port_;
+static uint16_t udp_server_port_;
+static process_response_fn process_response_;
 
 void dgram_recv(void *arg, struct udp_pcb *pcb, struct pbuf *p,
                 const ip_addr_t *addr, u16_t port) {
@@ -23,10 +27,13 @@ void dgram_recv(void *arg, struct udp_pcb *pcb, struct pbuf *p,
     printf("Received: %d bytes\n", copied_length);
     printf("The string is: %.*s\n", copied_length, server_msg);
 
-    if (!event_queue_add_message(event_server_message, server_msg,
-                                 data_length)) {
-      puts("Error adding message to queue");
+    if (!process_response_(server_msg, data_length)) {
+      puts("Error processing message to queue");
     }
+    // if (!event_queue_add_message(event_server_message, server_msg,
+    //                              data_length)) {
+    //   puts("Error adding message to queue");
+    // }
   } else {
     puts(" **** Error with msg...");
   }
@@ -46,11 +53,11 @@ static void server_dns_found(const char *hostname, const ip_addr_t *ipaddr,
   }
 }
 
-void resolve_server_address() {
+void resolve_server_address(const char *server_name) {
   err_t err;
   cyw43_arch_lwip_begin();
 
-  err = dns_gethostbyname(SERVER_NAME, &server_address, server_dns_found, NULL);
+  err = dns_gethostbyname(server_name, &server_address, server_dns_found, NULL);
   cyw43_arch_lwip_end();
 
   if (err == ERR_INPROGRESS) {
@@ -60,8 +67,8 @@ void resolve_server_address() {
   }
 }
 
-void resolve_server_address_blocking() {
-  resolve_server_address();
+void resolve_server_address_blocking(const char *server_name) {
+  resolve_server_address(server_name);
   while (!server_address_resolved) {
     sleep_ms(20);
   }
@@ -102,20 +109,20 @@ int send_udp_request(size_t msg_length, prepare_payload_fn prepare_payload) {
     uint8_t *req = (uint8_t *)buffer->payload;
     memset(req, 0, msg_length);
 
-    if (prepare_payload(buffer, msg_length) != 0) {
+    if (prepare_payload(buffer->payload, msg_length) != 0) {
       printf("Error preparing payload");
       err = 1;
     }
 
-    if (udp_sendto(server_udp_pcb, buffer, &server_address, UDP_SERVER_PORT) !=
+    if (udp_sendto(server_udp_pcb, buffer, &server_address, udp_server_port_) !=
         ERR_OK) {
       printf("Error sending message to %s:%u ...\n",
-             ipaddr_ntoa(&server_address), UDP_SERVER_PORT);
+             ipaddr_ntoa(&server_address), udp_server_port_);
       err = 1;
     }
 
     printf("Sent message to %s:%u ... Command %x .. len %u\n",
-           ipaddr_ntoa(&server_address), UDP_SERVER_PORT, req[0], msg_length);
+           ipaddr_ntoa(&server_address), udp_server_port_, req[0], msg_length);
     printf("The string is ");
     print_buffer_as_hex(req, msg_length);
     printf("\n");
@@ -127,7 +134,12 @@ int send_udp_request(size_t msg_length, prepare_payload_fn prepare_payload) {
 }
 
 // Perform initialisation
-int init_server_udp_pcb() {
+int init_server_udp_pcb(uint16_t udp_port, uint16_t udp_server_port,
+                        process_response_fn process_response) {
+  udp_port_ = udp_port;
+  udp_server_port_ = udp_server_port;
+  process_response_ = process_response;
+
   cyw43_arch_lwip_begin();
 
   server_udp_pcb = udp_new_ip_type(IPADDR_TYPE_ANY);
@@ -139,7 +151,7 @@ int init_server_udp_pcb() {
   }
 
   // Bind to endpoint  IP_ADDR_BROADCAST IP_ANY_TYPE
-  if (udp_bind(server_udp_pcb, IP_ANY_TYPE, UDP_PORT)) {
+  if (udp_bind(server_udp_pcb, IP_ANY_TYPE, udp_port_)) {
     printf("Failed to bind pcb\n");
     udp_remove(server_udp_pcb);
     cyw43_arch_lwip_end();
@@ -153,7 +165,7 @@ int init_server_udp_pcb() {
   // Add callback
   udp_recv(server_udp_pcb, dgram_recv, NULL);
   printf("Set up UDP callback on %s:%d\n",
-         ipaddr_ntoa(&server_udp_pcb->local_ip), UDP_PORT);
+         ipaddr_ntoa(&server_udp_pcb->local_ip), udp_port_);
   cyw43_arch_lwip_end();
 
   return 0;

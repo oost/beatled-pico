@@ -3,6 +3,7 @@
 
 #include "autotest.h"
 #include "beatled/protocol.h"
+#include "clock/clock.h"
 #include "event_queue/queue.h"
 #include "utils/network.h"
 

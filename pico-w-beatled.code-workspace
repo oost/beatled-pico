@@ -23,7 +23,9 @@
 			"dma.h": "c",
 			"constants.h": "c",
 			"sntp.h": "c",
-			"cyw43_arch.h": "c"
+			"cyw43_arch.h": "c",
+			"core1.h": "c",
+			"multicore.h": "c"
 		}
 	}
 }

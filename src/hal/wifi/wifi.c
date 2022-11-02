@@ -1,24 +1,25 @@
-#include "wifi.h"
-#include "blink/blink.h"
-#include "constants.h"
+// #include "constants.h"
+// #include "hal/blink/blink.h"
 #include <pico/cyw43_arch.h>
 
-int wifi_connect() {
-  if (cyw43_arch_wifi_connect_blocking(WIFI_SSID, WIFI_PASSWORD,
+#include "wifi.h"
+
+int wifi_connect(const char *wifi_ssid, const char *wifi_password) {
+  if (cyw43_arch_wifi_connect_blocking(wifi_ssid, wifi_password,
                                        CYW43_AUTH_WPA2_AES_PSK)) {
-    blink(ERROR_BLINK_SPEED, ERROR_WIFI);
+    // blink(ERROR_BLINK_SPEED, ERROR_WIFI);
     printf("Failed to connect to WIFI\n");
     return 1;
   }
-  printf("Connected to %s\n", WIFI_SSID);
-  blink(MESSAGE_BLINK_SPEED, MESSAGE_CONNECTED);
+  printf("Connected to %s\n", wifi_ssid);
+  // blink(MESSAGE_BLINK_SPEED, MESSAGE_CONNECTED);
   return 0;
 }
 
-void wifi_check() {
+void wifi_check(const char *wifi_ssid, const char *wifi_password) {
   if (cyw43_wifi_link_status(&cyw43_state, CYW43_ITF_STA) != CYW43_LINK_JOIN) {
     while (1) {
-      if (!wifi_connect()) {
+      if (!wifi_connect(wifi_ssid, wifi_password)) {
         return;
       }
     }

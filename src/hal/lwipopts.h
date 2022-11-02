@@ -1,7 +1,7 @@
 #ifndef _LWIPOPTS_EXAMPLE_COMMONH_H
 #define _LWIPOPTS_EXAMPLE_COMMONH_H
 
-#include "clock/clock.h"
+// #include "clock/clock.h"
 
 // #define NDEBUG                     1
 // #define LWIP_DEBUG                  1
@@ -13,7 +13,7 @@
 #define LWIP_DEBUG 1
 #define SNTP_SERVER_DNS 1
 // #define SNTP_SERVER_ADDRESS "raspberrypi1.local"
-#define SNTP_SET_SYSTEM_TIME_US sntp_set_system_time
+// #define SNTP_SET_SYSTEM_TIME_US sntp_set_system_time
 #define SNTP_DEBUG LWIP_DBG_ON
 #define SNTP_UPDATE_DELAY 120000
 #define MEMP_NUM_SYS_TIMEOUT (LWIP_NUM_SYS_TIMEOUT_INTERNAL + 1)

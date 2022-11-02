@@ -1,8 +1,8 @@
-#include <lwip/apps/sntp.h>
-#include <lwip/dns.h>
-#include <lwip/netif.h>
-#include <lwip/opt.h>
-#include <pico/time.h>
+// #include <lwip/apps/sntp.h>
+// #include <lwip/dns.h>
+// #include <lwip/netif.h>
+// #include <lwip/opt.h>
+// #include <pico/time.h>
 #include <time.h>
 
 #include "../blink/blink.h"

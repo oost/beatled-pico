@@ -1,7 +1,7 @@
 #ifndef COMMAND__COMMAND_H
 #define COMMAND__COMMAND_H
 
-#include <pico/stdlib.h>
+#include <stdlib.h>
 
 #include "command/hello/hello.h"
 #include "command/tempo/tempo.h"

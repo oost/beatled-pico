@@ -1,5 +1,5 @@
-#ifndef UTILS__NETWORK_H
-#define UTILS__NETWORK_H
+#ifndef HAL__UTILS__NETWORK_H
+#define HAL__UTILS__NETWORK_H
 
 #include <lwip/def.h>
 
@@ -14,4 +14,4 @@
 #define htonll(x) pico_htonll(x)
 #define ntohll(x) pico_ntohll(x)
 
-#endif // UTILS__NETWORK_H
+#endif // HAL__UTILS__NETWORK_H

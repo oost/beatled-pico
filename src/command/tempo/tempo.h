@@ -1,7 +1,7 @@
 #ifndef COMMAND__TEMPO__TEMPO_H
 #define COMMAND__TEMPO__TEMPO_H
 
-#include <pico/stdlib.h>
+#include <stdlib.h>
 
 #include "beatled/protocol.h"
 

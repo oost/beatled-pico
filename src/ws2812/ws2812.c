@@ -4,26 +4,15 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include <hardware/clocks.h>
-#include <hardware/dma.h>
-#include <hardware/irq.h>
-#include <hardware/pio.h>
-#include <pico/sem.h>
-#include <pico/stdlib.h>
-#include <pico/time.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "hal/ws2812/ws2812.h"
 #include "state_manager/state_manager.h"
 #include "ws2812_config.h"
-#include "ws2812_dma.h"
 #include "ws2812_patterns.h"
 
-#include "ws2812.pio.h"
-
-static PIO pio;
-static uint offset;
-static uint sm;
 static uint32_t cycle_idx = 0;
 static uint8_t pattern_idx = 0;
 
@@ -34,21 +23,12 @@ pattern *pattern_table;
 uint pattern_count;
 
 void led_init() {
+  ws2812_init(NUM_PIXELS, WS2812_PIN, 800000, IS_RGBW);
   // todo get free sm
-  pio = pio0;
-  offset = pio_add_program(pio, &ws2812_program);
 
   get_all_patterns_table(pattern_table, &pattern_count);
 
-  // Find a free state machine on our chosen PIO (erroring if there are
-  // none). Configure it to run our program, and start it, using the
-  // helper function we included in our .pio file.
-  sm = pio_claim_unused_sm(pio, true);
-
-  ws2812_program_init(pio, sm, offset, WS2812_PIN, 800000, IS_RGBW);
-  dma_init(pio, sm);
-
-  printf("Initialized LED driver\n");
+  printf("Initialized LED manager\n");
 }
 
 void led_update_pattern_idx(uint8_t pattern_idx) {

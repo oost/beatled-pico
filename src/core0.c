@@ -2,10 +2,10 @@
 #include <stdio.h>
 
 #include "autotest/autotest.h"
-#include "blink/blink.h"
 #include "command/command.h"
 #include "constants.h"
 #include "core0.h"
+#include "hal/blink/blink.h"
 #include "state_manager/state_manager.h"
 
 void core0_init() {

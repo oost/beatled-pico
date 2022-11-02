@@ -1,19 +1,22 @@
 #ifndef WS2812_PATTERNS_H
 #define WS2812_PATTERNS_H
 
-#include "pico/stdlib.h"
+#include <stddef.h>
+#include <stdint.h>
 
-typedef void (*pattern_fn)(uint32_t *stream, uint len, uint32_t beat_pos);
+typedef void (*pattern_fn)(uint32_t *stream, size_t len, uint32_t beat_pos);
 
 typedef struct {
-    pattern_fn pat;
-    const char *name;
+  pattern_fn pat;
+  const char *name;
 } pattern;
 
-void get_all_patterns_table(const pattern* pattern_table, uint* pattern_count);
+void get_all_patterns_table(const pattern *pattern_table,
+                            size_t *pattern_count);
 
-uint num_patterns();
+size_t num_patterns();
 
-void run_pattern(int pattern_idx, uint32_t *stream, uint len, uint32_t beat_pos);
+void run_pattern(int pattern_idx, uint32_t *stream, size_t len,
+                 uint32_t beat_pos);
 
 #endif // WS2812_PATTERNS_H

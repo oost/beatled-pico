@@ -1,7 +1,8 @@
 #ifndef MANAGER_H
 #define MANAGER_H
 
-#include <pico/stdlib.h>
+#include <stdbool.h>
+#include <stdlib.h>
 
 typedef enum { event_error = 0, event_server_message } event_type_t;
 

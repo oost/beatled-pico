@@ -1,11 +1,11 @@
-#include <pico/stdlib.h>
 #include <stdio.h>
 #include <stdlib.h>
 
 #include "beatled/protocol.h"
-#include "blink/blink.h"
 #include "command/command.h"
 #include "command/utils.h"
+#include "constants.h"
+#include "hal/blink/blink.h"
 #include "tempo/tempo.h"
 #include "time/time.h"
 

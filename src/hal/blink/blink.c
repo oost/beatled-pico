@@ -1,6 +1,8 @@
 #include <pico/cyw43_arch.h>
 #include <pico/stdlib.h>
 
+#include "blink.h"
+
 void blink_once(int speed) {
   cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, 1);
   sleep_ms(speed);

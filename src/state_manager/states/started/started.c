@@ -1,20 +1,19 @@
-#include <pico/multicore.h>
-#include <pico/stdlib.h>
 #include <pico/util/queue.h>
 #include <stdio.h>
+#include <stdlib.h>
 
-#include "blink/blink.h"
 #include "clock/clock.h"
 #include "constants.h"
 #include "core0.h"
 #include "core1.h"
 #include "event_queue/queue.h"
+#include "hal/blink/blink.h"
+#include "hal/udp/udp.h"
+#include "hal/wifi/wifi.h"
 #include "intercore_queue.h"
 #include "started.h"
 #include "state_manager/state.h"
 #include "state_manager/state_manager.h"
-#include "udp_server/udp_server.h"
-#include "wifi/wifi.h"
 #include "ws2812/ws2812.h"
 
 #include "command/hello/hello.h"
@@ -37,7 +36,7 @@ int enter_started_state() {
 
   puts("- Starting Wifi");
   wifi_init();
-  wifi_check();
+  wifi_check(WIFI_SSID, WIFI_PASSWORD);
 
   puts("- Starting WS2812 Manager");
   led_init();
@@ -48,14 +47,14 @@ int enter_started_state() {
   puts("- Sending Hello message via UDP");
   udp_print_all_ip_addresses();
 
-  resolve_server_address_blocking();
+  resolve_server_address_blocking(SERVER_NAME);
   sleep_ms(500);
 
   // puts("- Starting SNTP poll");
   // sntp_sync_init();
 
   puts("- Starting Beat Server");
-  init_server_udp_pcb();
+  init_server_udp_pcb(UDP_PORT, UDP_SERVER_PORT);
 
   state_manager_set_state(STATE_INITIALIZED);
   return 0;

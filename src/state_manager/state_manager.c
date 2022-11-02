@@ -1,4 +1,4 @@
-#include <pico/sync.h>
+// #include <pico/sync.h>
 #include <pico/unique_id.h>
 #include <stdio.h>
 

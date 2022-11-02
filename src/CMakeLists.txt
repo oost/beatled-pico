@@ -12,19 +12,18 @@ endif()
 
 
 
+add_subdirectory(hal)
 add_subdirectory(ws2812)
 add_subdirectory(state_manager)
 add_subdirectory(command)
+add_subdirectory(clock)
+add_subdirectory(event_queue)
 
 add_executable(pico_w_beatled 
         main.c
         core0.c
         core1.c
-        clock/clock.c
-        blink/blink.c
-        udp_server/udp_server.c
         event_queue/queue.c
-        wifi/wifi.c
         autotest/autotest.c 
 ) 
 
@@ -54,23 +53,18 @@ target_include_directories(pico_w_beatled PRIVATE
 
 # Add any user requested libraries
 target_link_libraries(pico_w_beatled
-        hardware_dma
-        hardware_adc
-        hardware_pio
-        # hardware_interp
-        hardware_timer
-        hardware_clocks
-        pico_multicore
         pico_stdlib
-        pico_util
-        pico_cyw43_arch_lwip_threadsafe_background
-        # pico_cyw43_arch_lwip_poll
-        pico_lwip_sntp
-        hardware_pio
+        # pico_lwip_sntp
+
         ws2812
         state_manager
         commands
         beatled_protocol
+        clock
+        beatled_hal_blink
+        beatled_hal_clock
+        beatled_hal_wifi
+        beatled_hal_udp
         )
 
 pico_add_extra_outputs(pico_w_beatled)

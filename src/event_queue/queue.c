@@ -1,4 +1,3 @@
-#include <pico/stdlib.h>
 #include <pico/util/queue.h>
 #include <stdio.h>
 #include <stdlib.h>
