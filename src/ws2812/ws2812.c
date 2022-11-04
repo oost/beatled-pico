@@ -8,7 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "hal/ws2812/ws2812.h"
+#include "hal/ws2812.h"
 #include "state_manager/state_manager.h"
 #include "ws2812_config.h"
 #include "ws2812_patterns.h"

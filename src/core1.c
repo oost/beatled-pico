@@ -1,5 +1,5 @@
-#include <pico/stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "constants.h"
 #include "core1.h"

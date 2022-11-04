@@ -1,10 +1,10 @@
-#include <pico/unique_id.h>
+#include "hal/unique_id.h"
 
 #include "beatled/protocol.h"
 #include "command/utils.h"
 #include "constants.h"
 #include "hal/blink/blink.h"
-#include "hal/udp/udp.h"
+#include "hal/udp.h"
 #include "hello.h"
 #include "state_manager/state_manager.h"
 

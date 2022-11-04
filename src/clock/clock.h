@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-#include <pico/time.h>
+#include <stdbool.h>
 #include <stdint.h>
 
 void sntp_sync_init(void);

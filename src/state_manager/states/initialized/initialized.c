@@ -1,4 +1,4 @@
-#include <pico/multicore.h>
+#include "hal/multiprocessing.h"
 #include <stdio.h>
 
 #include "command/command.h"

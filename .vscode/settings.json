@@ -1,5 +1,6 @@
 {
   "cmake.configureOnOpen": false,
+  "cmake.useCMakePresets": "always",
   "cmake.statusbar.advanced": {
     "debug": {
       "visibility": "hidden"
@@ -20,10 +21,6 @@
   },
   "cmake.buildBeforeRun": true,
   "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
-  "files.associations": {
-    "dma.h": "c",
-    "constants.h": "c"
-  },
   // "cmake.configureSettings": {
   //   "CMAKE_TOOLCHAIN_FILE": "/Users/oscarostlund/Programmation/projects/vcpkg/scripts/buildsystems/vcpkg.cmake"
   // }

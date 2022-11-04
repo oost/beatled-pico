@@ -25,7 +25,11 @@
 			"sntp.h": "c",
 			"cyw43_arch.h": "c",
 			"core1.h": "c",
-			"multicore.h": "c"
+			"multicore.h": "c",
+			"queue.h": "c",
+			"stdlib.h": "c",
+			"pico.h": "c",
+			"stdio.h": "c"
 		}
 	}
 }

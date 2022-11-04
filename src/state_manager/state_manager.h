@@ -1,8 +1,8 @@
 #ifndef STATE_MANAGER__STATE_MANAGER_H
 #define STATE_MANAGER__STATE_MANAGER_H
 
-#include <pico/time.h>
-#include <pico/unique_id.h>
+#include "hal/time.h"
+#include "hal/unique_id.h"
 
 typedef enum {
   STATE_UNKNOWN = 0,

@@ -1,5 +1,5 @@
-#include <pico/stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "autotest/autotest.h"
 #include "command/command.h"

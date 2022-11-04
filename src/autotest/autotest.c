@@ -33,8 +33,8 @@ void test_tempo() {
 
   size_t data_length = sizeof(beatled_tempo_msg_t);
 
-  if (!event_queue_add_message(event_server_message, (void *)tempo_msg,
-                               data_length)) {
+  if (event_queue_add_message(event_server_message, (void *)tempo_msg,
+                              data_length)) {
     puts("Couldn't add message");
   }
 }

@@ -1,8 +1,9 @@
-add_library(beatled_hal_queue
-    queue.c
+set(CURRENT_LIBRARY_NAME beatled_hal_queue)
+
+add_library(${CURRENT_LIBRARY_NAME})
+
+target_include_directories(${CURRENT_LIBRARY_NAME}
+  PUBLIC ${CMAKE_CURRENT_LIST_DIR}/include
 )
 
-target_link_libraries(beatled_hal_queue
-  pico_stdlib
-  pico_util
-)
+add_subdirectory(ports/${PORT})

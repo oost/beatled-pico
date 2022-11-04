@@ -1,4 +1,4 @@
-#include <pico/util/queue.h>
+#include "hal/queue.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -54,7 +54,7 @@ int enter_started_state() {
   // sntp_sync_init();
 
   puts("- Starting Beat Server");
-  init_server_udp_pcb(UDP_PORT, UDP_SERVER_PORT);
+  init_server_udp_pcb(UDP_PORT, UDP_SERVER_PORT, &add_payload_to_event_queue);
 
   state_manager_set_state(STATE_INITIALIZED);
   return 0;

@@ -2,13 +2,12 @@
 
 option(PICO_AUTOTEST "Run with auto tests"   OFF)
 
+
 IF(PICO_AUTOTEST)
     ADD_DEFINITIONS(-DPICO_AUTOTEST)
 ENDIF(PICO_AUTOTEST)
 
-if (NOT PICO_CYW43_SUPPORTED AND NOT TARGET pico_cyw43_arch)
-        message(FATAL_ERROR "Skipping Pico W examples as support is not available ${PICO_CYW43_SUPPORTED}")
-endif()
+
 
 
 
@@ -28,17 +27,8 @@ add_executable(pico_w_beatled
 ) 
 
 
-# generate the header file into the source tree as it is included in the RP2040 datasheet
-# pico_generate_pio_header(pico_w_beatled ${CMAKE_CURRENT_LIST_DIR}/ws2812/ws2812.pio OUTPUT_DIR ${CMAKE_CURRENT_LIST_DIR}/generated)
-
-pico_add_extra_outputs(pico_w_beatled)
 
 
-pico_set_program_name(pico_w_beatled "pico_w_beatled")
-pico_set_program_version(pico_w_beatled "0.1")
-
-pico_enable_stdio_uart(pico_w_beatled 1)
-pico_enable_stdio_usb(pico_w_beatled 0)
 
 target_compile_definitions(pico_w_beatled PRIVATE
         WIFI_SSID=\"${WIFI_SSID}\"
@@ -61,13 +51,25 @@ target_link_libraries(pico_w_beatled
         commands
         beatled_protocol
         clock
-        beatled_hal_blink
-        beatled_hal_clock
-        beatled_hal_wifi
-        beatled_hal_udp
-        )
+        beatled_hal
+)
 
-pico_add_extra_outputs(pico_w_beatled)
+if (PICO_PORT)
+  if (NOT PICO_CYW43_SUPPORTED AND NOT TARGET pico_cyw43_arch)
+          message(FATAL_ERROR "Skipping Pico W examples as support is not available ${PICO_CYW43_SUPPORTED}")
+  endif()
+  # generate the header file into the source tree as it is included in the RP2040 datasheet
+  # pico_generate_pio_header(pico_w_beatled ${CMAKE_CURRENT_LIST_DIR}/ws2812/ws2812.pio OUTPUT_DIR ${CMAKE_CURRENT_LIST_DIR}/generated)
+
+  pico_add_extra_outputs(pico_w_beatled)
+
+
+  pico_set_program_name(pico_w_beatled "pico_w_beatled")
+  pico_set_program_version(pico_w_beatled "0.1")
+
+  pico_enable_stdio_uart(pico_w_beatled 1)
+  pico_enable_stdio_usb(pico_w_beatled 0)
+endif()
 
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
     COMMAND arm-none-eabi-size --format=berkeley "pico_w_beatled.elf")
