@@ -5,8 +5,14 @@
 #include "command/command.h"
 #include "constants.h"
 #include "core0.h"
-#include "hal/blink/blink.h"
+#include "hal/blink.h"
+#include "hal/process.h"
 #include "state_manager/state_manager.h"
+
+void core0_entry() {
+  core0_init();
+  core0_loop();
+}
 
 void core0_init() {
   puts("Initializing core 0");

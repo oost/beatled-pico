@@ -3,6 +3,7 @@
 
 #include "constants.h"
 #include "core1.h"
+#include "hal/process.h"
 #include "intercore_queue.h"
 #include "state_manager/state.h"
 #include "ws2812/ws2812.h"
@@ -26,7 +27,7 @@ void core1_loop() {
   printf("Starting core 1 loop\n");
 
   while (1) {
-    if (queue_try_remove(&intercore_command_queue, &new_state)) {
+    if (hal_queue_pop_message(intercore_command_queue, &new_state)) {
       puts("Updating state in core 1");
       update_state(&new_state);
     }

@@ -8,7 +8,7 @@ void init() {}
 void deinit() {
   puts("Deinit... Not sure how we got here");
   // wifi_deinit();
-  queue_free(&intercore_command_queue);
+  hal_queue_free(intercore_command_queue);
 }
 
 int main(void) {

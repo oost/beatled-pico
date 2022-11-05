@@ -1,15 +1,16 @@
 #include "tempo.h"
 #include "beatled/protocol.h"
+#include "clock/clock.h"
 #include "command/utils.h"
-#include "hal/udp/udp.h"
+#include "hal/network.h"
+#include "hal/udp.h"
 #include "intercore_queue.h"
 #include "state_manager/state.h"
 #include "state_manager/state_manager.h"
-#include "utils/network.h"
 
 int prepare_tempo_request(void *buffer_payload, size_t buf_len) {
   if (buf_len != sizeof(beatled_tempo_msg_t)) {
-    printf("Error sizes don't match %d, %d", buf_len,
+    printf("Error sizes don't match %zu, %zu", buf_len,
            sizeof(beatled_tempo_msg_t));
     return 1;
   }
@@ -42,7 +43,7 @@ int process_tempo_msg(beatled_message_t *server_msg, size_t data_length) {
 
   state_manager_set_state(STATE_TIME_SYNCED);
 
-  if (!queue_try_add(&intercore_command_queue, &state_update)) {
+  if (!hal_queue_add_message(intercore_command_queue, &state_update)) {
     puts("Intercore queue is FULL!!!");
     return 1;
   }

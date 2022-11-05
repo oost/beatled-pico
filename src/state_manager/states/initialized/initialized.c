@@ -1,15 +1,15 @@
-#include "hal/multiprocessing.h"
 #include <stdio.h>
 
 #include "command/command.h"
 #include "core0.h"
 #include "core1.h"
+#include "hal/process.h"
 #include "initialized.h"
 
-bool timer_callback(repeating_timer_t *rt) {
+// bool timer_callback(repeating_timer_t *rt) {
 
-  return true; // keep repeating
-}
+//   return true; // keep repeating
+// }
 
 void core1_entry() {
   core1_init();
@@ -18,24 +18,23 @@ void core1_entry() {
 
 int enter_initialized_state() {
   // Launch core 1
-  multicore_launch_core1(core1_entry);
-
-  // Do core 0 specific initialization
-  core0_init();
+  start_core1(&core1_entry);
+  // multicore_launch_core1(core1_entry);
 
   // Start infinite loop on core 0
-  core0_loop();
+  start_core0(&core0_entry);
+  // core0_loop();
   send_hello_request();
 
-  repeating_timer_t timer;
+  // repeating_timer_t timer;
 
-  // negative timeout means exact delay (rather than delay between callbacks)
-  if (!add_repeating_timer_us(-1000000, timer_callback, NULL, &timer)) {
-    printf("Failed to add timer\n");
-    return 1;
-  }
+  // // negative timeout means exact delay (rather than delay between callbacks)
+  // if (!add_repeating_timer_us(-1000000, timer_callback, NULL, &timer)) {
+  //   printf("Failed to add timer\n");
+  //   return 1;
+  // }
 
-  cancel_repeating_timer(&timer);
+  // cancel_repeating_timer(&timer);
 
   return 0;
 }

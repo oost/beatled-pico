@@ -20,7 +20,7 @@ static uint64_t time_ref = 0;
 static uint32_t tempo_period_us = 120 * 1000000 / 60;
 
 pattern *pattern_table;
-uint pattern_count;
+size_t pattern_count;
 
 void led_init() {
   ws2812_init(NUM_PIXELS, WS2812_PIN, 800000, IS_RGBW);
@@ -32,7 +32,7 @@ void led_init() {
 }
 
 void led_update_pattern_idx(uint8_t pattern_idx) {
-  if (pattern_idx >= count_of(pattern_table)) {
+  if (pattern_idx >= pattern_count) {
     puts("Index out of range, skipping...");
     return;
   }
@@ -49,7 +49,7 @@ void led_beat() { cycle_idx = 0; }
 
 void led_update_tempo(uint32_t new_tempo_period_us) {
   tempo_period_us = new_tempo_period_us;
-  printf("Updated state tempo: %lu", tempo_period_us);
+  printf("Updated state tempo: %u", tempo_period_us);
 }
 
 void led_update_time_ref(uint64_t new_time_ref) {
@@ -63,7 +63,7 @@ void led_update() {
   }
 
   static uint32_t colors[2][NUM_PIXELS];
-  static uint current_stream = 0;
+  static unsigned int current_stream = 0;
   static uint32_t prev_beat_frac = 0;
 
   static uint32_t beat_frac;

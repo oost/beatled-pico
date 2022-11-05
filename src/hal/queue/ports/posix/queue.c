@@ -1,67 +1,23 @@
-#include <pthread.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include <stdbool.h>
 
+#include "circular_buffer.h"
 #include "hal/queue.h"
 
-// From https://github.com/majek/dump/blob/master/msqueue/queue_lock_mutex.c
-
-// See also https://gist.github.com/lpereira/d74da26c87f73e722db4
-
-#define QUEUE_POISON1 ((void *)0xCAFEBAB5)
-
-struct queue_root {
-  struct queue_head *head;
-  pthread_mutex_t head_lock;
-
-  struct queue_head *tail;
-  pthread_mutex_t tail_lock;
-
-  struct queue_head divider;
-};
-
-struct queue_root *ALLOC_QUEUE_ROOT() {
-  struct queue_root *root = malloc(sizeof(struct queue_root));
-  pthread_mutex_init(&root->head_lock, NULL);
-  pthread_mutex_init(&root->tail_lock, NULL);
-
-  root->divider.next = NULL;
-  root->head = &root->divider;
-  root->tail = &root->divider;
-  return root;
+hal_queue_handle_t hal_queue_init(size_t msg_size, int queue_size) {
+  return circular_buf_init(msg_size, queue_size);
 }
 
-void INIT_QUEUE_HEAD(struct queue_head *head) { head->next = QUEUE_POISON1; }
+void hal_queue_free(hal_queue_handle_t queue) { circular_buf_free(queue); }
 
-void queue_put(struct queue_head *new, struct queue_root *root) {
-  new->next = NULL;
-
-  pthread_mutex_lock(&root->tail_lock);
-  root->tail->next = new;
-  root->tail = new;
-  pthread_mutex_unlock(&root->tail_lock);
+bool hal_queue_add_message(hal_queue_handle_t queue, void *data) {
+  return false;
 }
-
-struct queue_head *queue_get(struct queue_root *root) {
-  struct queue_head *head, *next;
-
-  while (1) {
-    pthread_mutex_lock(&root->head_lock);
-    head = root->head;
-    next = head->next;
-    if (next == NULL) {
-      pthread_mutex_unlock(&root->head_lock);
-      return NULL;
-    }
-    root->head = next;
-    pthread_mutex_unlock(&root->head_lock);
-
-    if (head == &root->divider) {
-      queue_put(head, root);
-      continue;
-    }
-
-    head->next = QUEUE_POISON1;
-    return head;
-  }
+bool hal_queue_add_message_blocking(hal_queue_handle_t queue, void *data) {
+  return false;
+}
+bool hal_queue_pop_message(hal_queue_handle_t queue, void *data) {
+  return false;
+}
+bool hal_queue_pop_message_blocking(hal_queue_handle_t queue, void *data) {
+  return false;
 }

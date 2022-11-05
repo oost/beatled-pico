@@ -1,7 +1,7 @@
-add_library(state_manager INTERFACE)
+add_library(beatled_state_manager INTERFACE)
 
 target_sources(
-    state_manager INTERFACE 
+    beatled_state_manager INTERFACE 
         state_manager.c
         states/started/started.c
         states/initialized/initialized.c
@@ -9,8 +9,9 @@ target_sources(
         states/time_synced/time_synced.c
 )
 
-target_link_libraries(state_manager INTERFACE
-        hardware_timer
-        hardware_clocks
-        pico_multicore
+target_link_libraries(beatled_state_manager INTERFACE
+        # hardware_timer
+        # hardware_clocks
+        # pico_multicore
+        beatled_hal_wifi
         )

@@ -5,6 +5,8 @@ cmake_minimum_required(VERSION 3.13)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
 
+include (cmake/hal_module.cmake)
+
 
 set(WIFI_SSID "$ENV{WIFI_SSID}" CACHE INTERNAL "WiFi SSID for examples")
 set(WIFI_PASSWORD "$ENV{WIFI_PASSWORD}" CACHE INTERNAL "WiFi password for examples")
@@ -14,11 +16,20 @@ set(SERVER_NAME "Oscars-MacBook-Pro.local")
 set(PORT "$ENV{PORT}" )
 
 
+list(APPEND CMAKE_CXX_SOURCE_FILE_EXTENSIONS c)
 
 if(PORT EQUAL "pico")
   set(PICO_PORT ON) 
+  add_compile_definitions(PICO_PORT)
+
 else()
   SET(POSIX_PORT ON)
+  add_compile_definitions(POSIX_PORT)
+  if(STDC_NO_THREADS)
+    message( FATAL_ERROR "Need thread support" )
+  else()
+    message("Threads are supported.")
+  endif()
 endif()
 
 message("Building ${PORT} port")

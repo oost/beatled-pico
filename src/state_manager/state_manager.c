@@ -5,8 +5,6 @@
 #include "state_manager.h"
 #include "state_manager/states/states.h"
 
-static pico_unique_board_id_t board_id;
-
 static state_manager_state_t current_state = 0;
 exit_state_fn exit_current_state;
 
@@ -14,10 +12,7 @@ uint16_t transition_matrix[] = {0, 0x01 << STATE_UNKNOWN, 0x01 << STATE_STARTED,
                                 0x01 << STATE_INITIALIZED,
                                 0x01 << STATE_TIME_SYNCED};
 
-void state_manager_init() {
-  pico_get_unique_board_id(&board_id);
-  state_manager_set_state(STATE_STARTED);
-}
+void state_manager_init() { state_manager_set_state(STATE_STARTED); }
 
 int transition_state(state_manager_state_t new_state) {
   state_manager_state_t old_state = current_state;
@@ -30,7 +25,7 @@ int transition_state(state_manager_state_t new_state) {
 
   int err = 0;
 
-  if (transition_matrix[current_state] & (0x01 << new_state) == 0) {
+  if (((transition_matrix[current_state] & (0x01 << new_state)) == 0)) {
     return 2;
   }
 
@@ -69,8 +64,4 @@ int transition_state(state_manager_state_t new_state) {
 
 int state_manager_set_state(state_manager_state_t state) {
   return transition_state(state);
-}
-
-const pico_unique_board_id_t *state_manager_get_unique_board_id() {
-  return &board_id;
 }

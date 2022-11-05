@@ -31,8 +31,8 @@ static inline uint32_t rgb_u32(uint8_t r, uint8_t g, uint8_t b) {
 void pattern_snakes(uint32_t *stream, size_t len, uint32_t t) {
   uint32_t pos = t >> 26;
 
-  for (uint i = 0; i < len; ++i) {
-    uint x = (i + (pos >> 1)) % 64;
+  for (unsigned int i = 0; i < len; ++i) {
+    unsigned int x = (i + (pos >> 1)) % 64;
     uint32_t value;
     if (x < 10)
       value = (rgb_u32(0xff, 0, 0));
@@ -98,12 +98,12 @@ void pattern_solid(uint32_t *stream, size_t len, uint32_t t) {
 int level = 8;
 
 void pattern_fade(uint32_t *stream, size_t len, uint32_t t) {
-  uint shift = 4;
+  unsigned int shift = 4;
 
-  uint max = 16; // let's not draw too much current!
+  unsigned int max = 16; // let's not draw too much current!
   max <<= shift;
 
-  uint slow_t = t / 32;
+  unsigned int slow_t = t / 32;
   slow_t = level;
   slow_t %= max;
 

@@ -5,42 +5,44 @@
 
 #include "circular_buffer.h"
 
+/// This implementation is threadsafe for a single producer and single consumer
+
 // The definition of our circular buffer structure is hidden from the user
-struct circular_buf_t {
-  uint8_t *buffer;
+struct hal_queue_t {
+  uint8_t *data;
+  unsigned int element_count; // of the buffer
+  size_t element_size;
   size_t head;
   size_t tail;
-  size_t max; // of the buffer
-  bool full;
 };
 
 #pragma mark - Private Functions -
 
-static inline size_t advance_headtail_value(size_t value, size_t max) {
-  return (value + 1) % max;
-}
-
-static void advance_head_pointer(cbuf_handle_t me) {
-  assert(me);
-
-  if (circular_buf_full(me)) {
-    me->tail = advance_headtail_value(me->tail, me->max);
+static inline unsigned int advance_headtail_value(unsigned int value,
+                                                  unsigned int element_count) {
+  if (++value > element_count) {
+    value = 0;
   }
 
-  me->head = advance_headtail_value(me->head, me->max);
-  me->full = (me->head == me->tail);
+  return value;
+}
+
+static inline void *element_ptr(hal_queue_handle_t q, unsigned int index) {
+  assert(index <= q->element_count);
+  return q->data + index * q->element_size;
 }
 
 #pragma mark - APIs -
 
-cbuf_handle_t circular_buf_init(uint8_t *buffer, size_t size) {
-  assert(buffer && size);
+hal_queue_handle_t circular_buf_init(unsigned int element_count,
+                                     size_t element_size) {
+  assert(element_size > 0);
 
-  cbuf_handle_t cbuf = malloc(sizeof(circular_buf_t));
+  hal_queue_handle_t cbuf = malloc(sizeof(hal_queue_t));
   assert(cbuf);
 
-  cbuf->buffer = buffer;
-  cbuf->max = size;
+  cbuf->data = calloc(element_count, element_size);
+  cbuf->element_count = element_count;
   circular_buf_reset(cbuf);
 
   assert(circular_buf_empty(cbuf));
@@ -48,96 +50,104 @@ cbuf_handle_t circular_buf_init(uint8_t *buffer, size_t size) {
   return cbuf;
 }
 
-void circular_buf_free(cbuf_handle_t me) {
+void circular_buf_free(hal_queue_handle_t me) {
   assert(me);
+  free(me->data);
   free(me);
 }
 
-void circular_buf_reset(cbuf_handle_t me) {
+void circular_buf_reset(hal_queue_handle_t me) {
   assert(me);
 
   me->head = 0;
   me->tail = 0;
-  me->full = false;
 }
 
-size_t circular_buf_size(cbuf_handle_t me) {
+unsigned int circular_buf_size(hal_queue_handle_t me) {
   assert(me);
 
-  size_t size = me->max;
+  // We account for the space we can't use for thread safety
+  unsigned int size = me->element_count;
 
   if (!circular_buf_full(me)) {
     if (me->head >= me->tail) {
       size = (me->head - me->tail);
     } else {
-      size = (me->max + me->head - me->tail);
+      // off by one?
+      size = (me->element_count + me->head - me->tail);
     }
   }
 
   return size;
 }
 
-size_t circular_buf_capacity(cbuf_handle_t me) {
+unsigned int circular_buf_capacity(hal_queue_handle_t me) {
   assert(me);
 
-  return me->max;
+  // We account for the space we can't use for thread safety
+  return me->element_count;
 }
 
-void circular_buf_put(cbuf_handle_t me, uint8_t data) {
-  assert(me && me->buffer);
+/// For thread safety, do not use put - use try_put.
+/// Because this version, which will overwrite the existing contents
+/// of the buffer, will involve modifying the tail pointer, which is also
+/// modified by get.
+void circular_buf_put(hal_queue_handle_t me, uint8_t data) {
+  assert(me && me->data);
 
-  me->buffer[me->head] = data;
+  me->data[me->head * me->element_size] = data;
+  if (circular_buf_full(me)) {
+    // THIS CONDITION IS NOT THREAD SAFE
+    me->tail = advance_headtail_value(me->tail, me->element_count);
+  }
 
-  advance_head_pointer(me);
+  me->head = advance_headtail_value(me->head, me->element_count);
 }
 
-int circular_buf_try_put(cbuf_handle_t me, uint8_t data) {
+int circular_buf_try_put(hal_queue_handle_t me, uint8_t data) {
+  assert(me && me->data);
+
   int r = -1;
 
-  assert(me && me->buffer);
-
   if (!circular_buf_full(me)) {
-    me->buffer[me->head] = data;
-    advance_head_pointer(me);
+    me->data[me->head * me->element_size] = data;
+    me->head = advance_headtail_value(me->head, me->element_count);
     r = 0;
   }
 
   return r;
 }
 
-int circular_buf_get(cbuf_handle_t me, uint8_t *data) {
-  assert(me && data && me->buffer);
+int circular_buf_get(hal_queue_handle_t me, uint8_t *data) {
+  assert(me && data && me->data);
 
   int r = -1;
 
   if (!circular_buf_empty(me)) {
-    *data = me->buffer[me->tail];
-    me->tail = advance_headtail_value(me->tail, me->max);
-    me->full = false;
+    *data = me->data[me->tail * me->element_size];
+    me->tail = advance_headtail_value(me->tail, me->element_count);
     r = 0;
   }
 
   return r;
 }
 
-bool circular_buf_empty(cbuf_handle_t me) {
+bool circular_buf_empty(hal_queue_handle_t me) {
   assert(me);
-
-  return (!circular_buf_full(me) && (me->head == me->tail));
+  return me->head == me->tail;
 }
 
-bool circular_buf_full(cbuf_handle_t me) {
-  assert(me);
-
-  return me->full;
+bool circular_buf_full(hal_queue_handle_t me) {
+  // We want to check, not advance, so we don't save the output here
+  return advance_headtail_value(me->head, me->element_count) == me->tail;
 }
 
-int circular_buf_peek(cbuf_handle_t me, uint8_t *data,
+int circular_buf_peek(hal_queue_handle_t me, uint8_t *data,
                       unsigned int look_ahead_counter) {
   int r = -1;
   size_t pos;
 
-  assert(me && data && me->buffer);
+  assert(me && data && me->data);
 
   // We can't look beyond the current buffer size
   if (circular_buf_empty(me) || look_ahead_counter > circular_buf_size(me)) {
@@ -146,8 +156,8 @@ int circular_buf_peek(cbuf_handle_t me, uint8_t *data,
 
   pos = me->tail;
   for (unsigned int i = 0; i < look_ahead_counter; i++) {
-    data[i] = me->buffer[pos];
-    pos = advance_headtail_value(pos, me->max);
+    data[i] = me->data[pos * me->element_size];
+    pos = advance_headtail_value(pos, me->element_count);
   }
 
   return 0;

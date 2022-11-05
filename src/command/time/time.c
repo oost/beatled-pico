@@ -1,14 +1,15 @@
 #include "time.h"
 #include "beatled/protocol.h"
+#include "clock/clock.h"
 #include "command/utils.h"
-#include "hal/udp/udp.h"
+#include "hal/network.h"
+#include "hal/udp.h"
 #include "state_manager/state_manager.h"
 #include "state_manager/states/states.h"
-#include "utils/network.h"
 
 int prepare_time_request(void *buffer_payload, size_t buf_len) {
   if (buf_len != sizeof(beatled_time_req_msg_t)) {
-    printf("Error sizes don't match %d, %d", buf_len,
+    printf("Error sizes don't match %zu, %zu", buf_len,
            sizeof(beatled_time_req_msg_t));
     return 1;
   }

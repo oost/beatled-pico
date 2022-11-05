@@ -5,7 +5,7 @@
 #include "command/command.h"
 #include "command/utils.h"
 #include "constants.h"
-#include "hal/blink/blink.h"
+#include "hal/blink.h"
 #include "tempo/tempo.h"
 #include "time/time.h"
 

@@ -3,21 +3,21 @@
 #include "beatled/protocol.h"
 #include "command/utils.h"
 #include "constants.h"
-#include "hal/blink/blink.h"
+#include "hal/blink.h"
 #include "hal/udp.h"
 #include "hello.h"
 #include "state_manager/state_manager.h"
 
 int prepare_hello_request(void *buffer_payload, size_t buf_len) {
   if (buf_len != sizeof(beatled_hello_msg_t)) {
-    printf("Error sizes don't match %d, %d", buf_len,
+    printf("Error sizes don't match %zu, %zu", buf_len,
            sizeof(beatled_hello_msg_t));
     return 1;
   }
 
   beatled_hello_msg_t *msg = (beatled_hello_msg_t *)buffer_payload;
   msg->base.type = eBeatledHello;
-  pico_get_unique_board_id_string(msg->board_id, count_of(msg->board_id));
+  // pico_get_unique_board_id_string(msg->board_id, count_of(msg->board_id));
   return 0;
 }
 

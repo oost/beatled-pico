@@ -43,15 +43,12 @@ target_include_directories(pico_w_beatled PRIVATE
 
 # Add any user requested libraries
 target_link_libraries(pico_w_beatled
-        pico_stdlib
-        # pico_lwip_sntp
-
-        ws2812
-        state_manager
-        commands
-        beatled_protocol
-        clock
-        beatled_hal
+    beatled_ws2812
+    beatled_state_manager
+    beatled_commands
+    beatled_protocol
+    beatled_clock
+    beatled_hal
 )
 
 if (PICO_PORT)
@@ -69,7 +66,9 @@ if (PICO_PORT)
 
   pico_enable_stdio_uart(pico_w_beatled 1)
   pico_enable_stdio_usb(pico_w_beatled 0)
+
+  add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+    COMMAND arm-none-eabi-size --format=berkeley "pico_w_beatled.elf")
+
 endif()
 
-add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-    COMMAND arm-none-eabi-size --format=berkeley "pico_w_beatled.elf")

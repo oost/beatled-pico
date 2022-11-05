@@ -7,9 +7,12 @@
 #include "core0.h"
 #include "core1.h"
 #include "event_queue/queue.h"
-#include "hal/blink/blink.h"
-#include "hal/udp/udp.h"
-#include "hal/wifi/wifi.h"
+#include "hal/blink.h"
+#include "hal/board.h"
+#include "hal/process.h"
+#include "hal/queue.h"
+#include "hal/udp.h"
+#include "hal/wifi.h"
 #include "intercore_queue.h"
 #include "started.h"
 #include "state_manager/state.h"
@@ -20,16 +23,18 @@
 #include "command/tempo/tempo.h"
 #include "command/time/time.h"
 
-queue_t intercore_command_queue;
+hal_queue_handle_t intercore_command_queue;
 
 int enter_started_state() {
-  printf("Starting on pico board %s\n", state_manager_get_unique_board_id());
+  // board_id_handle_t board_id_ptr = get_unique_board_id();
 
-  queue_init(&intercore_command_queue, sizeof(state_update_t),
-             MAX_INTERCORE_QUEUE_COUNT);
+  // printf("Starting on pico board %s\n", state_manager_get_unique_board_id());
+
+  intercore_command_queue =
+      hal_queue_init(sizeof(state_update_t), MAX_INTERCORE_QUEUE_COUNT);
 
   puts("- Starting STDIO");
-  stdio_init_all();
+  hal_stdio_init();
 
   puts("- Starting State Manager");
   state_manager_init();

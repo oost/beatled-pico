@@ -1,7 +1,7 @@
-add_library(commands INTERFACE)
+add_library(beatled_commands INTERFACE)
 
 target_sources(
-  commands INTERFACE 
+  beatled_commands INTERFACE 
     command.c
     hello/hello.c
     time/time.c

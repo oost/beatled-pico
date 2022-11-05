@@ -1,10 +1,9 @@
-add_library(beatled_hal_blink blink.c)
+set(CURRENT_LIBRARY_NAME beatled_hal_blink)
 
-target_link_libraries(beatled_hal_blink
-  pico_stdlib
-  ${PICO_WIFI_LIBRARY}
+add_library(${CURRENT_LIBRARY_NAME})
+
+target_include_directories(${CURRENT_LIBRARY_NAME}
+  PUBLIC ${CMAKE_CURRENT_LIST_DIR}/include
 )
 
-target_include_directories(beatled_hal_blink PRIVATE
-  ${CMAKE_CURRENT_LIST_DIR}/..
-)
+add_subdirectory(ports/${PORT})

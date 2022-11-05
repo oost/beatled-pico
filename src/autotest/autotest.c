@@ -1,11 +1,12 @@
 
+#include <stdio.h>
 #include <string.h>
 
 #include "autotest.h"
 #include "beatled/protocol.h"
 #include "clock/clock.h"
 #include "event_queue/queue.h"
-#include "utils/network.h"
+#include "hal/network.h"
 
 static uint64_t server_time_ref_us;
 
@@ -27,8 +28,8 @@ void test_tempo() {
 
   uint32_t tempo_period_us = 60 * 1000000UL / tempo;
   tempo_msg->tempo_period_us = htonl(tempo_period_us);
-  printf("Tempo period: %lu (%lx)\n", tempo_period_us, tempo_period_us);
-  printf("Tempo period big endian: %lu (%lx)\n", tempo_msg->tempo_period_us,
+  printf("Tempo period: %u (%x)\n", tempo_period_us, tempo_period_us);
+  printf("Tempo period big endian: %u (%x)\n", tempo_msg->tempo_period_us,
          tempo_msg->tempo_period_us);
 
   size_t data_length = sizeof(beatled_tempo_msg_t);
