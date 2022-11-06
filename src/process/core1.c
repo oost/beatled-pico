@@ -1,12 +1,18 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "constants.h"
+#include "../constants.h"
 #include "core1.h"
 #include "hal/process.h"
 #include "intercore_queue.h"
-#include "state_manager/state.h"
-#include "ws2812/ws2812.h"
+#include "state.h"
+#include "ws2812.h"
+
+void *core1_entry(void *data) {
+  core1_init();
+  core1_loop();
+  return NULL;
+}
 
 void core1_init() { printf("Initializing core 1\n"); }
 

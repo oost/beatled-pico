@@ -4,7 +4,7 @@
 #include "command/utils.h"
 #include "hal/network.h"
 #include "hal/udp.h"
-#include "intercore_queue.h"
+#include "process/intercore_queue.h"
 #include "state_manager/state.h"
 #include "state_manager/state_manager.h"
 

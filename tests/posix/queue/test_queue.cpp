@@ -22,12 +22,18 @@ TEST_CASE("Queues are created", "[queue]") {
     REQUIRE(hal_queue_size(queue_ptr) == 1);
   }
 
-  // SECTION("resizing bigger changes size and capacity") {
-  //   hal_queue_add_message(queue, &msg1);
-  //   REQUIRE(msg2.id == 2);
-  //   hal_queue_pop_message(queue, &msg2);
-  //   REQUIRE(msg2.id == 1);
-  // }
+  SECTION("Messages get copied in the queue") {
+    REQUIRE(hal_queue_add_message(queue_ptr, &msg1));
+    REQUIRE(msg2.id == 2);
+    REQUIRE(hal_queue_pop_message(queue_ptr, &msg2));
+    REQUIRE(msg2.id == 1);
+    REQUIRE(!hal_queue_pop_message(queue_ptr, &msg2));
+    REQUIRE(hal_queue_size(queue_ptr) == 0);
+    msg2.id = 2;
+    REQUIRE(!hal_queue_pop_message(queue_ptr, &msg2));
+    REQUIRE(hal_queue_size(queue_ptr) == 0);
+    REQUIRE(msg2.id == 2);
+  }
 
   hal_queue_free(queue_ptr);
 }

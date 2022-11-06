@@ -1,5 +1,5 @@
 #include "time_synced.h"
-#include "command/command.h"
+#include "command.h"
 
 int enter_time_synced_state() {
   send_tempo_request();

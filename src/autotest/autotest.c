@@ -4,9 +4,9 @@
 
 #include "autotest.h"
 #include "beatled/protocol.h"
-#include "clock/clock.h"
-#include "event_queue/queue.h"
+#include "clock.h"
 #include "hal/network.h"
+#include "queue.h"
 
 static uint64_t server_time_ref_us;
 

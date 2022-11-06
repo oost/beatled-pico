@@ -9,10 +9,13 @@ extern "C" {
 
 void sleep_ms(uint32_t duration);
 
-typedef void (*core_loop_fn)();
+typedef void *(*core_loop_fn)(void *data);
 
 void start_core0(core_loop_fn core_loop);
 void start_core1(core_loop_fn core_loop);
+void start_isr_thread(core_loop_fn isr_loop);
+
+void join_cores();
 
 #ifdef __cplusplus
 }

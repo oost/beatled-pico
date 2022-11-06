@@ -17,8 +17,8 @@ int add_payload_to_event_queue(void *buffer_payload, size_t size);
 
 void event_queue_init();
 
-int event_queue_add_message(event_type_t event_type, void *event_data,
-                            size_t data_length);
-int event_queue_pop_message(event_t *event);
+bool event_queue_add_message(event_type_t event_type, void *event_data,
+                             size_t data_length);
+bool event_queue_pop_message(event_t *event);
 
 #endif // MANAGER_H

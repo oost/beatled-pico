@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <time.h>
 
-#include "clock/clock.h"
+#include "clock.h"
 #include "hal/blink.h"
 #include "hal/time.h"
 

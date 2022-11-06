@@ -6,7 +6,6 @@ target_sources(
 )
 
 target_link_libraries(event_queue INTERFACE
-    pico_util
     beatled_hal_queue
 )
 
@@ -15,3 +14,5 @@ get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTO
 foreach(dir ${dirs})
   message(STATUS "dir='${dir}'")
 endforeach()
+
+target_include_directories(event_queue INTERFACE ${CMAKE_CURRENT_LIST_DIR})

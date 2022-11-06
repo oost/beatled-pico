@@ -1,17 +1,18 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "autotest/autotest.h"
-#include "command/command.h"
+#include "autotest.h"
+#include "command.h"
 #include "constants.h"
 #include "core0.h"
 #include "hal/blink.h"
 #include "hal/process.h"
 #include "state_manager/state_manager.h"
 
-void core0_entry() {
+void *core0_entry(void *data) {
   core0_init();
   core0_loop();
+  return NULL;
 }
 
 void core0_init() {
@@ -29,7 +30,7 @@ void core0_loop() {
   blink(MESSAGE_BLINK_SPEED, MESSAGE_WELCOME);
   sleep_ms(1000);
 
-  state_manager_set_state(STATE_STARTED);
+  send_hello_request();
 
   event_t event;
 

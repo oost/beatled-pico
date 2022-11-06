@@ -11,10 +11,7 @@
         "CMAKE_BUILD_TYPE": "Debug",
         "CMAKE_INSTALL_PREFIX": "${sourceDir}/out/install/${presetName}"
       },
-      "environment": {
-        "PICO_SDK_PATH": "../pico-sdk",
-        "PICO_BOARD": "pico_w"
-      }
+      "environment": {}
     },
     {
       "name": "ARM",
@@ -25,9 +22,13 @@
         "CMAKE_INSTALL_PREFIX": "${sourceDir}/out/install/${presetName}",
         "CMAKE_C_COMPILER": "/usr/local/bin/arm-none-eabi-gcc",
         "CMAKE_CXX_COMPILER": "/usr/local/bin/arm-none-eabi-g++",
-        "CMAKE_BUILD_TYPE": "Debug"
+        "CMAKE_BUILD_TYPE": "Debug",
+        "PORT": "pico"
       },
-      "environment": { "PORT": "pico" }
+      "environment": {
+        "PICO_SDK_PATH": "../pico-sdk",
+        "PICO_BOARD": "pico_w"
+      }
     },
     {
       "name": "Apple",
@@ -36,16 +37,36 @@
       "binaryDir": "${sourceDir}/out/build/${presetName}",
       "inherits": ["default"],
       "cacheVariables": {
-        "CMAKE_INSTALL_PREFIX": "${sourceDir}/out/install/${presetName}",
         "CMAKE_C_COMPILER": "/usr/bin/clang",
         "CMAKE_CXX_COMPILER": "/usr/bin/clang++",
         "CMAKE_BUILD_TYPE": "Debug",
         "CMAKE_TOOLCHAIN_FILE": {
           "value": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
           "type": "FILEPATH"
-        }
+        },
+        "PORT": "posix"
       },
-      "environment": { "PORT": "posix" }
+      "environment": {}
+    },
+    {
+      "name": "GCC_12",
+      "displayName": "GCC 12.2.0 x86_64-apple-darwin21",
+      "description": "Using compilers: C = /usr/local/bin/gcc-12, CXX = /usr/local/bin/g++-12",
+      "binaryDir": "${sourceDir}/out/build/${presetName}",
+      "inherits": ["default"],
+      "cacheVariables": {
+        "CMAKE_INSTALL_PREFIX": "${sourceDir}/out/install/${presetName}",
+        "CMAKE_C_COMPILER": "/usr/local/bin/gcc-12",
+        "CMAKE_CXX_COMPILER": "/usr/local/bin/g++-12",
+        "CMAKE_BUILD_TYPE": "Debug",
+        "VCPKG_TARGET_TRIPLET": "x64-osx",
+        "CMAKE_TOOLCHAIN_FILE": {
+          "value": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
+          "type": "FILEPATH"
+        },
+        "PORT": "posix"
+      },
+      "environment": {}
     }
   ],
   "buildPresets": [

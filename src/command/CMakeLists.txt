@@ -7,3 +7,5 @@ target_sources(
     time/time.c
     tempo/tempo.c
 )
+
+target_include_directories(beatled_commands INTERFACE ${CMAKE_CURRENT_LIST_DIR})

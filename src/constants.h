@@ -1,5 +1,5 @@
-#ifndef CONSTANTS_H
-#define CONSTANTS_H
+#ifndef BEATLED_CONSTANTS_H
+#define BEATLED_CONSTANTS_H
 
 #define SAMPLE_RATE 16000
 #define FFT_SIZE 1024
@@ -35,4 +35,4 @@
 #define UDP_SERVER_PORT 9090
 #define UDP_PORT 8765
 
-#endif // CONSTANTS_H
+#endif // BEATLED_CONSTANTS_H

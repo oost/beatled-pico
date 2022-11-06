@@ -5,4 +5,8 @@ target_sources(
         clock.c
 )
 
+target_link_libraries(beatled_autotest INTERFACE
+  beatled_hal_blink
+  beatled_hal_time
+)
 target_include_directories(beatled_clock INTERFACE ${CMAKE_CURRENT_LIST_DIR})

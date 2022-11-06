@@ -1,33 +1,19 @@
 # Add executable. Default name is the project name, version 0.1
 
-option(PICO_AUTOTEST "Run with auto tests"   OFF)
+message("Building beatled with ${CMAKE_BUILD_TYPE}")
 
-
-IF(PICO_AUTOTEST)
-    ADD_DEFINITIONS(-DPICO_AUTOTEST)
-ENDIF(PICO_AUTOTEST)
-
-
-
-
-
+add_subdirectory(autotest)
 add_subdirectory(hal)
 add_subdirectory(ws2812)
 add_subdirectory(state_manager)
 add_subdirectory(command)
 add_subdirectory(clock)
 add_subdirectory(event_queue)
+add_subdirectory(process)
 
 add_executable(pico_w_beatled 
         main.c
-        core0.c
-        core1.c
-        event_queue/queue.c
-        autotest/autotest.c 
 ) 
-
-
-
 
 
 target_compile_definitions(pico_w_beatled PRIVATE
@@ -49,6 +35,8 @@ target_link_libraries(pico_w_beatled
     beatled_protocol
     beatled_clock
     beatled_hal
+    beatled_process
+    beatled_autotest
 )
 
 if (PICO_PORT)

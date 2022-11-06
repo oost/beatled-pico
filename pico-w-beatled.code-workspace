@@ -32,7 +32,9 @@
 			"stdio.h": "c",
 			"state_manager.h": "c",
 			"stddef.h": "c",
-			"blink.h": "c"
+			"blink.h": "c",
+			"intercore_queue.h": "c",
+			"state.h": "c"
 		},
 		"editor.tokenColorCustomizations": {
 			"textMateRules": [

@@ -20,10 +20,6 @@ unsigned int hal_queue_capacity(hal_queue_handle_t queue) {
   return queue_get_capacity(queue);
 }
 
-// unsigned int hal_queue_capacity(hal_queue_handle_t queue) {
-//   return circular_buf_capacity(queue);
-// }
-
 bool hal_queue_add_message(hal_queue_handle_t queue, void *data) {
   return queue_try_add(queue, data);
 }

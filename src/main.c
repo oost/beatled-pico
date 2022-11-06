@@ -1,19 +1,24 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "intercore_queue.h"
-
-void init() {}
-
-void deinit() {
-  puts("Deinit... Not sure how we got here");
-  // wifi_deinit();
-  hal_queue_free(intercore_command_queue);
-}
+#include "constants.h"
+#include "hal/board.h"
+#include "hal/process.h"
+#include "process/core0.h"
+#include "process/core1.h"
+// #include "intercore_queue.h"
+#include "state_manager/state.h"
+#include "state_manager/state_manager.h"
 
 int main(void) {
+  puts("Starting beatled");
+  puts("- Starting State Manager");
+  state_manager_init();
 
-  // Shouldn't ever get here but who knows...
-  deinit();
+  if (state_manager_set_state(STATE_STARTED) != 0) {
+    return 1;
+  }
+  for (;;)
+    ;
   return 0;
 }

@@ -1,30 +1,29 @@
 #include <stdio.h>
 
 #include "command/command.h"
-#include "core0.h"
-#include "core1.h"
 #include "hal/process.h"
 #include "initialized.h"
+#include "process/core0.h"
+#include "process/core1.h"
 
 // bool timer_callback(repeating_timer_t *rt) {
 
 //   return true; // keep repeating
 // }
 
-void core1_entry() {
-  core1_init();
-  core1_loop();
-}
-
 int enter_initialized_state() {
   // Launch core 1
-  start_core1(&core1_entry);
-  // multicore_launch_core1(core1_entry);
 
-  // Start infinite loop on core 0
-  start_core0(&core0_entry);
+  start_core1(&core0_entry);
+  start_core0(&core1_entry);
+  // start_core0(&isr_entry);
+  join_cores();
+  // start_core1(&core1_entry);
+  // // multicore_launch_core1(core1_entry);
+
+  // // Start infinite loop on core 0
+  // start_core0(&core0_entry);
   // core0_loop();
-  send_hello_request();
 
   // repeating_timer_t timer;
 

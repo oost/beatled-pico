@@ -12,6 +12,9 @@ target_link_libraries(beatled_ws2812 INTERFACE
         beatled_hal_ws2812
 )
 
+target_include_directories(beatled_ws2812 INTERFACE ${CMAKE_CURRENT_LIST_DIR})
+
+
 # pico_add_extra_outputs(pio_ws2812)
 
 

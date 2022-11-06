@@ -2,10 +2,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "clock/clock.h"
+#include "clock.h"
 #include "constants.h"
-#include "core0.h"
-#include "core1.h"
 #include "event_queue/queue.h"
 #include "hal/blink.h"
 #include "hal/board.h"
@@ -13,11 +11,13 @@
 #include "hal/queue.h"
 #include "hal/udp.h"
 #include "hal/wifi.h"
-#include "intercore_queue.h"
+#include "process/core0.h"
+#include "process/core1.h"
+#include "process/intercore_queue.h"
 #include "started.h"
-#include "state_manager/state.h"
-#include "state_manager/state_manager.h"
-#include "ws2812/ws2812.h"
+#include "state.h"
+#include "state_manager.h"
+#include "ws2812.h"
 
 #include "command/hello/hello.h"
 #include "command/tempo/tempo.h"
@@ -30,14 +30,11 @@ int enter_started_state() {
 
   // printf("Starting on pico board %s\n", state_manager_get_unique_board_id());
 
-  intercore_command_queue =
-      hal_queue_init(sizeof(state_update_t), MAX_INTERCORE_QUEUE_COUNT);
-
   puts("- Starting STDIO");
   hal_stdio_init();
 
-  puts("- Starting State Manager");
-  state_manager_init();
+  intercore_command_queue =
+      hal_queue_init(sizeof(state_update_t), MAX_INTERCORE_QUEUE_COUNT);
 
   puts("- Starting Wifi");
   wifi_init();

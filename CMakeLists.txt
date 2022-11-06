@@ -13,23 +13,30 @@ set(WIFI_PASSWORD "$ENV{WIFI_PASSWORD}" CACHE INTERNAL "WiFi password for exampl
 set(SNTP_SERVER_ADDRESS "raspberrypi1.local")
 set(SERVER_NAME "Oscars-MacBook-Pro.local")
 
-set(PORT "$ENV{PORT}" )
+option(PORT "Port to build" OFF)
+message("Got port=${PORT}")
+option(PICO_AUTOTEST "Run with auto tests"   OFF)
 
 
 list(APPEND CMAKE_CXX_SOURCE_FILE_EXTENSIONS c)
 
-if(PORT EQUAL "pico")
+if(PORT STREQUAL "pico")
   set(PICO_PORT ON) 
   add_compile_definitions(PICO_PORT)
 
-else()
+elseif(PORT STREQUAL "posix")
+
   SET(POSIX_PORT ON)
   add_compile_definitions(POSIX_PORT)
+
   if(STDC_NO_THREADS)
     message( FATAL_ERROR "Need thread support" )
   else()
     message("Threads are supported.")
   endif()
+
+else()
+  message(FATAL_ERROR "Need to specify port. Got PORT='${PORT}'")
 endif()
 
 message("Building ${PORT} port")
@@ -45,6 +52,12 @@ if (PICO_PORT)
 endif()
 
 
+IF(PICO_AUTOTEST)
+    ADD_DEFINITIONS(-DPICO_AUTOTEST)
+ENDIF(PICO_AUTOTEST)
+
+project(pico_w_beatled C CXX ASM)
+
 
 set(BEATLED_PROTOCOL_PATH "${CMAKE_CURRENT_LIST_DIR}/lib/beatled_protocol")
 include(beatled_protocol_import.cmake)
@@ -57,7 +70,6 @@ beatled_protocol_init()
 
 # add_subdirectory(${CMSISDSP}/Source bin_dsp EXCLUDE_FROM_ALL)
 # add_subdirectory("lib/microphone-library-for-pico" EXCLUDE_FROM_ALL)
-project(pico_w_beatled C CXX ASM)
 
 add_subdirectory(src)
 add_subdirectory(tests)
