@@ -5,6 +5,23 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "(lldb) Launch",
+      "type": "cppdbg",
+      "request": "launch",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${workspaceRoot}",
+      "environment": [
+        {
+          "name": "config",
+          "value": "Debug"
+        }
+      ],
+      "externalConsole": false,
+      "MIMode": "lldb",
+      "program": "${command:cmake.launchTargetPath}",
+    },
+    {
       "name": "Cortex Debug",
       "cwd": "${workspaceRoot}",
       "executable": "${command:cmake.launchTargetPath}",

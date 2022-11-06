@@ -1,164 +1,160 @@
+/*
+ * Copyright (c) 2020 Raspberry Pi (Trading) Ltd.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
+ */
+
 #include <assert.h>
-#include <stddef.h>
-#include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "circular_buffer.h"
 
-/// This implementation is threadsafe for a single producer and single consumer
-
-// The definition of our circular buffer structure is hidden from the user
-struct hal_queue_t {
-  uint8_t *data;
-  unsigned int element_count; // of the buffer
-  size_t element_size;
-  size_t head;
-  size_t tail;
-};
-
-#pragma mark - Private Functions -
-
-static inline unsigned int advance_headtail_value(unsigned int value,
-                                                  unsigned int element_count) {
-  if (++value > element_count) {
-    value = 0;
+int queue_init(queue_t *q, uint element_size, uint element_count) {
+  if (pthread_mutex_init(&(q->lock), NULL) != 0) {
+    printf("\n mutex init has failed\n");
+    return 1;
   }
 
-  return value;
+  if (pthread_cond_init(&(q->in_cond), NULL) != 0) {
+    printf("\n cond init has failed\n");
+    return 1;
+  }
+
+  if (pthread_cond_init(&(q->out_cond), NULL) != 0) {
+    printf("\n cond init has failed\n");
+    return 1;
+  }
+
+  q->data = (uint8_t *)calloc(element_count + 1, element_size);
+  q->element_count = (uint16_t)element_count;
+  q->element_size = (uint16_t)element_size;
+  q->wptr = 0;
+  q->rptr = 0;
+  return 0;
 }
 
-static inline void *element_ptr(hal_queue_handle_t q, unsigned int index) {
+void queue_free(queue_t *q) {
+  free(q->data);
+  free(q);
+}
+
+static inline void *element_ptr(queue_t *q, uint index) {
   assert(index <= q->element_count);
   return q->data + index * q->element_size;
 }
 
-#pragma mark - APIs -
+static inline uint16_t inc_index(queue_t *q, uint16_t index) {
+  if (++index >
+      q->element_count) { // > because we have element_count + 1 elements
+    index = 0;
+  }
 
-hal_queue_handle_t circular_buf_init(unsigned int element_count,
-                                     size_t element_size) {
-  assert(element_size > 0);
+#if PICO_QUEUE_MAX_LEVEL
+  uint16_t level = queue_get_level_unsafe(q);
+  if (level > q->max_level) {
+    q->max_level = level;
+  }
+#endif
 
-  hal_queue_handle_t cbuf = malloc(sizeof(hal_queue_t));
-  assert(cbuf);
-
-  cbuf->data = calloc(element_count, element_size);
-  cbuf->element_count = element_count;
-  circular_buf_reset(cbuf);
-
-  assert(circular_buf_empty(cbuf));
-
-  return cbuf;
+  return index;
 }
 
-void circular_buf_free(hal_queue_handle_t me) {
-  assert(me);
-  free(me->data);
-  free(me);
-}
+static bool queue_add_internal(queue_t *q, const void *data, bool block) {
+  do {
+    pthread_mutex_lock(&(q->lock));
+    // uint32_t save = spin_lock_blocking(q->core.spin_lock);
+    if (queue_get_level_unsafe(q) != q->element_count) {
+      memcpy(element_ptr(q, q->wptr), data, q->element_size);
+      q->wptr = inc_index(q, q->wptr);
+      pthread_mutex_unlock(&(q->lock));
+      pthread_cond_signal(&(q->in_cond));
 
-void circular_buf_reset(hal_queue_handle_t me) {
-  assert(me);
-
-  me->head = 0;
-  me->tail = 0;
-}
-
-unsigned int circular_buf_size(hal_queue_handle_t me) {
-  assert(me);
-
-  // We account for the space we can't use for thread safety
-  unsigned int size = me->element_count;
-
-  if (!circular_buf_full(me)) {
-    if (me->head >= me->tail) {
-      size = (me->head - me->tail);
-    } else {
-      // off by one?
-      size = (me->element_count + me->head - me->tail);
+      // lock_internal_spin_unlock_with_notify(&q->core, save);
+      return true;
     }
-  }
 
-  return size;
+    if (block) {
+      pthread_cond_wait(&(q->in_cond), &(q->lock));
+      // lock_internal_spin_unlock_with_wait(&q->core, save);
+    } else {
+      pthread_mutex_unlock(&(q->lock));
+
+      // spin_unlock(q->core.spin_lock, save);
+      return false;
+    }
+  } while (true);
 }
 
-unsigned int circular_buf_capacity(hal_queue_handle_t me) {
-  assert(me);
+static bool queue_remove_internal(queue_t *q, void *data, bool block) {
+  pthread_mutex_lock(&(q->lock));
+  do {
+    // uint32_t save = spin_lock_blocking(q->core.spin_lock);
+    if (queue_get_level_unsafe(q) != 0) {
+      memcpy(data, element_ptr(q, q->rptr), q->element_size);
+      q->rptr = inc_index(q, q->rptr);
+      pthread_mutex_unlock(&(q->lock));
+      pthread_cond_signal(&(q->out_cond));
 
-  // We account for the space we can't use for thread safety
-  return me->element_count;
+      // lock_internal_spin_unlock_with_notify(&q->core, save);
+      return true;
+    }
+    if (block) {
+      pthread_cond_wait(&(q->in_cond), &(q->lock));
+      // lock_internal_spin_unlock_with_wait(&q->core, save);
+    } else {
+      pthread_mutex_unlock(&(q->lock));
+      // spin_unlock(q->core.spin_lock, save);
+      return false;
+    }
+  } while (true);
 }
 
-/// For thread safety, do not use put - use try_put.
-/// Because this version, which will overwrite the existing contents
-/// of the buffer, will involve modifying the tail pointer, which is also
-/// modified by get.
-void circular_buf_put(hal_queue_handle_t me, uint8_t data) {
-  assert(me && me->data);
+static bool queue_peek_internal(queue_t *q, void *data, bool block) {
+  do {
+    pthread_mutex_lock(&(q->lock));
+    // uint32_t save = spin_lock_blocking(q->core.spin_lock);
+    if (queue_get_level_unsafe(q) != 0) {
+      memcpy(data, element_ptr(q, q->rptr), q->element_size);
+      pthread_mutex_unlock(&(q->lock));
+      pthread_cond_signal(&(q->out_cond));
 
-  me->data[me->head * me->element_size] = data;
-  if (circular_buf_full(me)) {
-    // THIS CONDITION IS NOT THREAD SAFE
-    me->tail = advance_headtail_value(me->tail, me->element_count);
-  }
+      // lock_internal_spin_unlock_with_notify(&q->core, save);
+      return true;
+    }
+    if (block) {
+      pthread_cond_wait(&(q->out_cond), &(q->lock));
 
-  me->head = advance_headtail_value(me->head, me->element_count);
+      // lock_internal_spin_unlock_with_wait(&q->core, save);
+    } else {
+      pthread_mutex_unlock(&(q->lock));
+      // spin_unlock(q->core.spin_lock, save);
+      return false;
+    }
+  } while (true);
 }
 
-int circular_buf_try_put(hal_queue_handle_t me, uint8_t data) {
-  assert(me && me->data);
-
-  int r = -1;
-
-  if (!circular_buf_full(me)) {
-    me->data[me->head * me->element_size] = data;
-    me->head = advance_headtail_value(me->head, me->element_count);
-    r = 0;
-  }
-
-  return r;
+bool queue_try_add(queue_t *q, const void *data) {
+  return queue_add_internal(q, data, false);
 }
 
-int circular_buf_get(hal_queue_handle_t me, uint8_t *data) {
-  assert(me && data && me->data);
-
-  int r = -1;
-
-  if (!circular_buf_empty(me)) {
-    *data = me->data[me->tail * me->element_size];
-    me->tail = advance_headtail_value(me->tail, me->element_count);
-    r = 0;
-  }
-
-  return r;
+bool queue_try_remove(queue_t *q, void *data) {
+  return queue_remove_internal(q, data, false);
 }
 
-bool circular_buf_empty(hal_queue_handle_t me) {
-  assert(me);
-  return me->head == me->tail;
+bool queue_try_peek(queue_t *q, void *data) {
+  return queue_peek_internal(q, data, false);
 }
 
-bool circular_buf_full(hal_queue_handle_t me) {
-  // We want to check, not advance, so we don't save the output here
-  return advance_headtail_value(me->head, me->element_count) == me->tail;
+void queue_add_blocking(queue_t *q, const void *data) {
+  queue_add_internal(q, data, true);
 }
 
-int circular_buf_peek(hal_queue_handle_t me, uint8_t *data,
-                      unsigned int look_ahead_counter) {
-  int r = -1;
-  size_t pos;
+void queue_remove_blocking(queue_t *q, void *data) {
+  queue_remove_internal(q, data, true);
+}
 
-  assert(me && data && me->data);
-
-  // We can't look beyond the current buffer size
-  if (circular_buf_empty(me) || look_ahead_counter > circular_buf_size(me)) {
-    return r;
-  }
-
-  pos = me->tail;
-  for (unsigned int i = 0; i < look_ahead_counter; i++) {
-    data[i] = me->data[pos * me->element_size];
-    pos = advance_headtail_value(pos, me->element_count);
-  }
-
-  return 0;
+void queue_peek_blocking(queue_t *q, void *data) {
+  queue_peek_internal(q, data, true);
 }

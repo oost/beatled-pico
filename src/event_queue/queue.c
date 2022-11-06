@@ -11,7 +11,7 @@
 
 // static queue_t event_queue;
 
-void *event_queue_ptr;
+hal_queue_handle_t event_queue_ptr;
 
 int add_payload_to_event_queue(void *buffer_payload, size_t size) {
   return event_queue_add_message(event_server_message, buffer_payload, size);

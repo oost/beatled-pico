@@ -1,80 +1,229 @@
-/// https://embeddedartistry.com/blog/2017/05/17/creating-a-circular-buffer-in-c-and-c/
+/*
+ * Copyright (c) 2020 Raspberry Pi (Trading) Ltd.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
+ */
 
-#ifndef CIRCULAR_BUFFER_H_
-#define CIRCULAR_BUFFER_H_
+#ifndef _UTIL_QUEUE_H
+#define _UTIL_QUEUE_H
 
+// PICO_CONFIG: PICO_QUEUE_MAX_LEVEL, Maintain a field for the highest level
+// that has been reached by a queue, type=bool, default=0, advanced=true,
+// group=queue
+#ifndef PICO_QUEUE_MAX_LEVEL
+#define PICO_QUEUE_MAX_LEVEL 0
+#endif
+
+/** \file queue.h
+ * \defgroup queue queue
+ * Multi-core and IRQ safe queue implementation.
+ *
+ * Note that this queue stores values of a specified size, and pushed values are
+ * copied into the queue \ingroup pico_util
+ */
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include <pthread.h>
 #include <stdbool.h>
-#include <stddef.h>
 #include <stdint.h>
 
-#include "hal/queue.h"
+#include "hal/pico_int.h"
 
-/// Pass in a storage buffer and size, returns a circular buffer handle
-/// Requires: buffer is not NULL, size > 0 (size > 1 for the threadsafe
-//  version, because it holds size - 1 elements)
-/// Ensures: me has been created and is returned in an empty state
-hal_queue_handle_t circular_buf_init(unsigned int element_count,
-                                     size_t element_size);
+typedef struct hal_queue_t {
+  pthread_mutex_t lock;
+  pthread_cond_t in_cond;
+  pthread_cond_t out_cond;
+  uint8_t *data;
+  uint16_t wptr;
+  uint16_t rptr;
+  uint16_t element_size;
+  uint16_t element_count;
+#if PICO_QUEUE_MAX_LEVEL
+  uint16_t max_level;
+#endif
+} queue_t;
 
-/// Free a circular buffer structure
-/// Requires: me is valid and created by circular_buf_init
-/// Does not free data buffer; owner is responsible for that
-void circular_buf_free(hal_queue_handle_t me);
+/*! \brief Initialise a queue, allocating a (possibly shared) spinlock
+ *  \ingroup queue
+ *
+ * \param q Pointer to a queue_t structure, used as a handle
+ * \param element_size Size of each value in the queue
+ * \param element_count Maximum number of entries in the queue
+ */
+int queue_init(queue_t *q, uint element_size, uint element_count);
 
-/// Reset the circular buffer to empty, head == tail. Data not cleared
-/// Requires: me is valid and created by circular_buf_init
-void circular_buf_reset(hal_queue_handle_t me);
+/*! \brief Destroy the specified queue.
+ *  \ingroup queue
+ *
+ * \param q Pointer to a queue_t structure, used as a handle
+ *
+ * Does not deallocate the queue_t structure itself.
+ */
+void queue_free(queue_t *q);
 
-/// Put that continues to add data if the buffer is full
-/// Old data is overwritten
-/// Note: if you are using the threadsafe version, this API cannot be used,
-/// because it modifies the tail pointer in some cases. Use circular_buf_try_put
-/// instead. Requires: me is valid and created by circular_buf_init
-void circular_buf_put(hal_queue_handle_t me, uint8_t data);
+/*! \brief Unsafe check of level of the specified queue.
+ *  \ingroup queue
+ *
+ * \param q Pointer to a queue_t structure, used as a handle
+ * \return Number of entries in the queue
+ *
+ * This does not use the spinlock, so may return incorrect results if the
+ * spin lock is not externally locked
+ */
+static inline uint queue_get_level_unsafe(queue_t *q) {
+  int32_t rc = (int32_t)q->wptr - (int32_t)q->rptr;
+  if (rc < 0) {
+    rc += q->element_count + 1;
+  }
+  return (uint)rc;
+}
 
-/// Put that rejects new data if the buffer is full
-/// Note: if you are using the threadsafe version, *this* is the put you should
-/// use Requires: me is valid and created by circular_buf_init Returns 0 on
-/// success, -1 if buffer is full
-int circular_buf_try_put(hal_queue_handle_t me, uint8_t data);
+static inline uint queue_get_capacity(queue_t *q) { return q->element_count; }
 
-/// Retrieve a value from the buffer
-/// Requires: me is valid and created by circular_buf_init
-/// Returns 0 on success, -1 if the buffer is empty
-int circular_buf_get(hal_queue_handle_t me, uint8_t *data);
+/*! \brief Check of level of the specified queue.
+ *  \ingroup queue
+ *
+ * \param q Pointer to a queue_t structure, used as a handle
+ * \return Number of entries in the queue
+ */
+static inline uint queue_get_level(queue_t *q) {
+  pthread_mutex_lock(&(q->lock));
+  // uint32_t save = spin_lock_blocking(q->core.spin_lock);
+  uint level = queue_get_level_unsafe(q);
+  // spin_unlock(q->core.spin_lock, save);
+  pthread_mutex_unlock(&(q->lock));
 
-/// CHecks if the buffer is empty
-/// Requires: me is valid and created by circular_buf_init
-/// Returns true if the buffer is empty
-bool circular_buf_empty(hal_queue_handle_t me);
+  return level;
+}
 
-/// Checks if the buffer is full
-/// Requires: me is valid and created by circular_buf_init
-/// Returns true if the buffer is full
-bool circular_buf_full(hal_queue_handle_t me);
+#if PICO_QUEUE_MAX_LEVEL
+/*! \brief Returns the highest level reached by the specified queue since it was
+ * created or since the max level was reset \ingroup queue
+ *
+ * \param q Pointer to a queue_t structure, used as a handle
+ * \return Maximum level of the queue
+ */
+static inline uint queue_get_max_level(queue_t *q) { return q->max_level; }
+#endif
 
-/// Check the capacity of the buffer
-/// Requires: me is valid and created by circular_buf_init
-/// Returns the maximum capacity of the buffer
-unsigned int circular_buf_capacity(hal_queue_handle_t me);
+#if PICO_QUEUE_MAX_LEVEL
+/*! \brief Reset the highest level reached of the specified queue.
+ *  \ingroup queue
+ *
+ * \param q Pointer to a queue_t structure, used as a handle
+ */
+static inline void queue_reset_max_level(queue_t *q) {
+  // uint32_t save = spin_lock_blocking(q->core.spin_lock);
+  pthread_mutex_lock(&(q->mtx));
 
-/// Check the number of elements stored in the buffer
-/// Requires: me is valid and created by circular_buf_init
-/// Returns the current number of elements in the buffer
-unsigned int circular_buf_size(hal_queue_handle_t me);
+  q->max_level = queue_get_level_unsafe(q);
+  // spin_unlock(q->core.spin_lock, save);
+  pthread_mutex_unlock(&(q->mtx));
+}
+#endif
 
-/// Look ahead at values stored in the circular buffer without removing the data
-/// Requires:
-///		- me is valid and created by circular_buf_init
-///		- look_ahead_counter is less than or equal to the value returned
-/// by circular_buf_size()
-/// Returns 0 if successful, -1 if data is not available
-int circular_buf_peek(hal_queue_handle_t me, uint8_t *data,
-                      unsigned int look_ahead_counter);
+/*! \brief Check if queue is empty
+ *  \ingroup queue
+ *
+ * \param q Pointer to a queue_t structure, used as a handle
+ * \return true if queue is empty, false otherwise
+ *
+ * This function is interrupt and multicore safe.
+ */
+static inline bool queue_is_empty(queue_t *q) {
+  return queue_get_level(q) == 0;
+}
 
-// TODO: int circular_buf_get_range(circular_buf_t me, uint8_t *data, size_t
-// len);
-// TODO: int circular_buf_put_range(circular_buf_t me, uint8_t * data, size_t
-// len);
+/*! \brief Check if queue is full
+ *  \ingroup queue
+ *
+ * \param q Pointer to a queue_t structure, used as a handle
+ * \return true if queue is full, false otherwise
+ *
+ * This function is interrupt and multicore safe.
+ */
+static inline bool queue_is_full(queue_t *q) {
+  return queue_get_level(q) == q->element_count;
+}
 
-#endif // CIRCULAR_BUFFER_H_
+// nonblocking queue access functions:
+
+/*! \brief Non-blocking add value queue if not full
+ *  \ingroup queue
+ *
+ * \param q Pointer to a queue_t structure, used as a handle
+ * \param data Pointer to value to be copied into the queue
+ * \return true if the value was added
+ *
+ * If the queue is full this function will return immediately with false,
+ * otherwise the data is copied into a new value added to the queue, and this
+ * function will return true.
+ */
+bool queue_try_add(queue_t *q, const void *data);
+
+/*! \brief Non-blocking removal of entry from the queue if non empty
+ *  \ingroup queue
+ *
+ * \param q Pointer to a queue_t structure, used as a handle
+ * \param data Pointer to the location to receive the removed value
+ * \return true if a value was removed
+ *
+ * If the queue is not empty function will copy the removed value into the
+ * location provided and return immediately with true, otherwise the function
+ * will return immediately with false.
+ */
+bool queue_try_remove(queue_t *q, void *data);
+
+/*! \brief Non-blocking peek at the next item to be removed from the queue
+ *  \ingroup queue
+ *
+ * \param q Pointer to a queue_t structure, used as a handle
+ * \param data Pointer to the location to receive the peeked value
+ * \return true if there was a value to peek
+ *
+ * If the queue is not empty this function will return immediately with true
+ * with the peeked entry copied into the location specified by the data
+ * parameter, otherwise the function will return false.
+ */
+bool queue_try_peek(queue_t *q, void *data);
+
+// blocking queue access functions:
+
+/*! \brief Blocking add of value to queue
+ *  \ingroup queue
+ *
+ * \param q Pointer to a queue_t structure, used as a handle
+ * \param data Pointer to value to be copied into the queue
+ *
+ * If the queue is full this function will block, until a removal happens on the
+ * queue
+ */
+void queue_add_blocking(queue_t *q, const void *data);
+
+/*! \brief Blocking remove entry from queue
+ *  \ingroup queue
+ *
+ * \param q Pointer to a queue_t structure, used as a handle
+ * \param data Pointer to the location to receive the removed value
+ *
+ * If the queue is empty this function will block until a value is added.
+ */
+void queue_remove_blocking(queue_t *q, void *data);
+
+/*! \brief Blocking peek at next value to be removed from queue
+ *  \ingroup queue
+ *
+ * \param q Pointer to a queue_t structure, used as a handle
+ * \param data Pointer to the location to receive the peeked value
+ *
+ * If the queue is empty function will block until a value is added
+ */
+void queue_peek_blocking(queue_t *q, void *data);
+
+#ifdef __cplusplus
+}
+#endif
+#endif
