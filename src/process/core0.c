@@ -5,6 +5,7 @@
 #include "command.h"
 #include "constants.h"
 #include "core0.h"
+#include "event/event_loop.h"
 #include "hal/blink.h"
 #include "hal/process.h"
 #include "state_manager/state_manager.h"
@@ -38,19 +39,21 @@ void core0_loop() {
   test_tempo();
 #endif // PICO_AUTOTEST
 
-  while (1) {
-    while (1) {
-      if (!event_queue_pop_message(&event)) {
-        break;
-      };
+  event_loop(CONTROL_CORE_SLEEP_MS, &handle_event);
 
-      puts("Got a message, going to parse it...");
+  // while (1) {
+  //   while (1) {
+  //     if (!event_queue_pop_message(&event)) {
+  //       break;
+  //     };
 
-      if (handle_event(&event)) {
-        puts("Error parsing command :-(");
-      }
-    }
+  //     puts("Got a message, going to parse it...");
 
-    sleep_ms(CONTROL_CORE_SLEEP_MS);
-  }
+  //     if (handle_event(&event)) {
+  //       puts("Error parsing command :-(");
+  //     }
+  //   }
+
+  //   sleep_ms(CONTROL_CORE_SLEEP_MS);
+  // }
 }

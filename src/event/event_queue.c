@@ -3,9 +3,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "event_queue.h"
 #include "hal/queue.h"
 #include "hal/time.h"
-#include "queue.h"
 
 #define MAX_QUEUE_COUNT 20
 

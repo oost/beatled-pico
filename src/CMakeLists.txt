@@ -8,7 +8,7 @@ add_subdirectory(ws2812)
 add_subdirectory(state_manager)
 add_subdirectory(command)
 add_subdirectory(clock)
-add_subdirectory(event_queue)
+add_subdirectory(event)
 add_subdirectory(process)
 
 add_executable(pico_w_beatled 

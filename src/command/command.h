@@ -3,8 +3,8 @@
 
 #include <stdlib.h>
 
+#include "event/event_queue.h"
 #include "hello/hello.h"
-#include "queue.h"
 #include "tempo/tempo.h"
 #include "time/time.h"
 

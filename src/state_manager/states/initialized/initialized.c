@@ -14,10 +14,10 @@
 int enter_initialized_state() {
   // Launch core 1
 
-  start_core1(&core0_entry);
-  start_core0(&core1_entry);
-  // start_core0(&isr_entry);
-  join_cores();
+  // start_core1(&core0_entry);
+  // start_core0(&core1_entry);
+  // // start_core0(&isr_entry);
+  // join_cores();
   // start_core1(&core1_entry);
   // // multicore_launch_core1(core1_entry);
 

@@ -6,6 +6,7 @@ add_library(beatled_process)
 target_sources(beatled_process PUBLIC 
   core0.c
   core1.c
+  isr_thread.c
 )
 
 target_link_libraries(beatled_process PUBLIC
@@ -15,7 +16,7 @@ target_link_libraries(beatled_process PUBLIC
   beatled_autotest
   beatled_state_manager
   beatled_ws2812
-
+  beatled_event
 )
 
 target_include_directories(beatled_process INTERFACE ${CMAKE_CURRENT_LIST_DIR})

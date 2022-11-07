@@ -4,7 +4,7 @@
 
 #include "clock.h"
 #include "constants.h"
-#include "event_queue/queue.h"
+#include "event/event_queue.h"
 #include "hal/blink.h"
 #include "hal/board.h"
 #include "hal/process.h"
@@ -42,9 +42,6 @@ int enter_started_state() {
 
   puts("- Starting WS2812 Manager");
   led_init();
-
-  puts("- Starting Event queue");
-  event_queue_init();
 
   puts("- Sending Hello message via UDP");
   udp_print_all_ip_addresses();

@@ -9,7 +9,7 @@ target_link_libraries(beatled_autotest INTERFACE
   beatled_protocol
   beatled_clock
   beatled_hal_network
-  event_queue
+  beatled_event
 )
 
 target_include_directories(beatled_autotest INTERFACE ${CMAKE_CURRENT_LIST_DIR})
