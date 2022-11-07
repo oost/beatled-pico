@@ -2,26 +2,26 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "clock.h"
+// #include "clock.h"
 #include "constants.h"
 #include "event/event_queue.h"
-#include "hal/blink.h"
+// #include "hal/blink.h"
 #include "hal/board.h"
 #include "hal/process.h"
-#include "hal/queue.h"
+// #include "hal/queue.h"
 #include "hal/udp.h"
 #include "hal/wifi.h"
-#include "process/core0.h"
-#include "process/core1.h"
-#include "process/intercore_queue.h"
+// #include "process/core0.h"
+// #include "process/core1.h"
+// #include "process/intercore_queue.h"
 #include "started.h"
 #include "state.h"
 #include "state_manager.h"
 #include "ws2812.h"
 
-#include "command/hello/hello.h"
-#include "command/tempo/tempo.h"
-#include "command/time/time.h"
+// #include "command/hello/hello.h"
+// #include "command/tempo/tempo.h"
+// #include "command/time/time.h"
 
 hal_queue_handle_t intercore_command_queue;
 
@@ -43,7 +43,7 @@ int enter_started_state() {
   puts("- Starting WS2812 Manager");
   led_init();
 
-  puts("- Sending Hello message via UDP");
+  puts("- Starting IP stack");
   udp_print_all_ip_addresses();
 
   resolve_server_address_blocking(SERVER_NAME);

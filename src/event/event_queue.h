@@ -12,6 +12,7 @@ void event_queue_init();
 
 bool event_queue_add_message(event_type_t event_type, void *event_data,
                              size_t data_length);
-bool event_queue_pop_message(event_t *event);
+
+void event_queue_pop_message_blocking(event_t *event);
 
 #endif // EVENT__EVENT_QUEUE_H

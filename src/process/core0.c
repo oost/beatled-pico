@@ -39,21 +39,5 @@ void core0_loop() {
   test_tempo();
 #endif // PICO_AUTOTEST
 
-  event_loop(CONTROL_CORE_SLEEP_MS, &handle_event);
-
-  // while (1) {
-  //   while (1) {
-  //     if (!event_queue_pop_message(&event)) {
-  //       break;
-  //     };
-
-  //     puts("Got a message, going to parse it...");
-
-  //     if (handle_event(&event)) {
-  //       puts("Error parsing command :-(");
-  //     }
-  //   }
-
-  //   sleep_ms(CONTROL_CORE_SLEEP_MS);
-  // }
+  run_event_loop(&handle_event);
 }

@@ -35,6 +35,6 @@ bool event_queue_add_message(event_type_t event_type, void *event_data,
   return hal_queue_add_message(event_queue_ptr, &event);
 }
 
-bool event_queue_pop_message(event_t *event) {
-  return hal_queue_pop_message(event_queue_ptr, event);
+void event_queue_pop_message_blocking(event_t *event) {
+  hal_queue_pop_message_blocking(event_queue_ptr, event);
 }

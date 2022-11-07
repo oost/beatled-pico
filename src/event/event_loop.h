@@ -7,6 +7,6 @@
 
 typedef int (*handle_event_fn)(event_t *);
 
-void event_loop(uint32_t event_loop_sleep_ms, handle_event_fn handle_event);
+void run_event_loop(handle_event_fn handle_event);
 
 #endif // EVENT__EVENT_LOOP_H_
