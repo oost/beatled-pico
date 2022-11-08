@@ -35,7 +35,9 @@
 			"blink.h": "c",
 			"intercore_queue.h": "c",
 			"state.h": "c",
-			"in.h": "c"
+			"in.h": "c",
+			"inet.h": "c",
+			"unistd.h": "c"
 		},
 		"editor.tokenColorCustomizations": {
 			"textMateRules": [

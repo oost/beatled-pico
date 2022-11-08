@@ -26,6 +26,7 @@ int transition_state(state_manager_state_t new_state) {
   int err = 0;
 
   if (((transition_matrix[current_state] & (0x01 << new_state)) == 0)) {
+    puts("Transition not allowed");
     return 2;
   }
 

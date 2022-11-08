@@ -45,6 +45,7 @@ int enter_started_state() {
 
   puts("- Starting IP stack");
   udp_print_all_ip_addresses();
+  // get_ip_address();
 
   resolve_server_address_blocking(SERVER_NAME);
   sleep_ms(500);

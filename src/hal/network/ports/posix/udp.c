@@ -1,10 +1,13 @@
 #include <arpa/inet.h>
+#include <ifaddrs.h>
+#include <net/if.h>
 #include <netdb.h>
 #include <netinet/in.h>
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/ioctl.h>
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -104,14 +107,19 @@ void *start_udp_server(void *data) {
     return NULL;
   }
 
+  printf("waiting on port %d\n", params->udp_port);
   for (;;) {
-    printf("waiting on port %d\n", params->udp_port);
-    recvlen = recvfrom(sockfd, buffer, MAXLINE, 0, (struct sockaddr *)&remaddr,
-                       &addrlen);
+    recvlen = recvfrom(sockfd, buffer, MAXLINE - 1, 0,
+                       (struct sockaddr *)&remaddr, &addrlen);
     printf("received %d bytes\n", recvlen);
     if (recvlen > 0) {
       buffer[recvlen] = 0;
       printf("received message: \"%s\"\n", buffer);
+      void *server_msg = (void *)malloc(recvlen);
+      memcpy(server_msg, buffer, recvlen);
+      if ((params->process_response)(server_msg, recvlen)) {
+        puts("Error while queueing UDP message on event loop");
+      }
     }
   }
 
@@ -135,8 +143,82 @@ int init_server_udp_pcb(uint16_t udp_port, uint16_t udp_server_port,
   start_udp_thread(udp_port, process_response);
   return 0;
 }
-const uint32_t *get_ip_address() { return NULL; }
-void udp_print_all_ip_addresses() {}
+const uint32_t *get_ip_address() {
+  unsigned char ip_address[15];
+  int fd;
+  struct ifreq ifr;
+
+  /*AF_INET - to define network interface IPv4*/
+  /*Creating soket for it.*/
+  fd = socket(AF_INET, SOCK_DGRAM, 0);
+
+  /*AF_INET - to define IPv4 Address type.*/
+  ifr.ifr_addr.sa_family = AF_INET;
+
+  /*eth0 - define the ifr_name - port name
+  where network attached.*/
+  memcpy(ifr.ifr_name, "eth0", IFNAMSIZ - 1);
+
+  /*Accessing network interface information by
+  passing address using ioctl.*/
+  ioctl(fd, SIOCGIFADDR, &ifr);
+  /*closing fd*/
+  close(fd);
+
+  /*Extract IP Address*/
+  strcpy((void *)ip_address,
+         inet_ntoa(((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr));
+
+  printf("System IP Address is: %s\n", ip_address);
+  return NULL;
+}
+
+void udp_print_all_ip_addresses() {
+  struct ifaddrs *ifaddr;
+  int family, s;
+  char host[NI_MAXHOST];
+
+  if (getifaddrs(&ifaddr) == -1) {
+    perror("getifaddrs");
+    exit(EXIT_FAILURE);
+  }
+
+  /* Walk through linked list, maintaining head pointer so we
+     can free list later. */
+
+  for (struct ifaddrs *ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next) {
+    if (ifa->ifa_addr == NULL)
+      continue;
+
+    family = ifa->ifa_addr->sa_family;
+
+    /* Display interface name and family (including symbolic
+       form of the latter for the common families). */
+
+    printf("%-8s %s (%d)\n", ifa->ifa_name,
+           (family == AF_INET)    ? "AF_INET"
+           : (family == AF_INET6) ? "AF_INET6"
+                                  : "???",
+           family);
+
+    /* For an AF_INET* interface address, display the address. */
+
+    if (family == AF_INET || family == AF_INET6) {
+      s = getnameinfo(ifa->ifa_addr,
+                      (family == AF_INET) ? sizeof(struct sockaddr_in)
+                                          : sizeof(struct sockaddr_in6),
+                      host, NI_MAXHOST, NULL, 0, NI_NUMERICHOST);
+      if (s != 0) {
+        printf("getnameinfo() failed: %s\n", gai_strerror(s));
+        exit(EXIT_FAILURE);
+      }
+
+      printf("\t\taddress: <%s>\n", host);
+    }
+  }
+
+  freeifaddrs(ifaddr);
+}
 
 int send_udp_request(size_t msg_length, prepare_payload_fn prepare_payload) {
   int err = 0;

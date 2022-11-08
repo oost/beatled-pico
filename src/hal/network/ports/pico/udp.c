@@ -27,8 +27,8 @@ void dgram_recv(void *arg, struct udp_pcb *pcb, struct pbuf *p,
     printf("Received: %d bytes\n", copied_length);
     printf("The string is: %.*s\n", copied_length, server_msg);
 
-    if (!process_response_(server_msg, data_length)) {
-      puts("Error processing message to queue");
+    if (process_response_(server_msg, data_length)) {
+      puts("Error while queueing UDP message on event loop");
     }
     // if (!event_queue_add_message(event_server_message, server_msg,
     //                              data_length)) {
