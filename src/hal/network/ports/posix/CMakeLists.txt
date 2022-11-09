@@ -1,5 +1,6 @@
 target_sources(${CURRENT_LIBRARY_NAME} PUBLIC
     udp.c
+    dns.c
 )
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)

@@ -22,6 +22,7 @@ int prepare_hello_request(void *buffer_payload, size_t buf_len) {
 }
 
 int send_hello_request() {
+  puts("Sending hello request");
   return send_udp_request(sizeof(beatled_hello_msg_t), prepare_hello_request);
 }
 

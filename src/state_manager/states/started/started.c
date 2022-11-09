@@ -29,12 +29,15 @@ int enter_started_state() {
   // board_id_handle_t board_id_ptr = get_unique_board_id();
 
   // printf("Starting on pico board %s\n", state_manager_get_unique_board_id());
+  puts("- Initializing event queue");
+  event_queue_init();
+
+  puts("- Initializing intercore queue");
+  intercore_command_queue =
+      hal_queue_init(sizeof(state_update_t), MAX_INTERCORE_QUEUE_COUNT);
 
   puts("- Starting STDIO");
   hal_stdio_init();
-
-  intercore_command_queue =
-      hal_queue_init(sizeof(state_update_t), MAX_INTERCORE_QUEUE_COUNT);
 
   puts("- Starting Wifi");
   wifi_init();
@@ -47,14 +50,14 @@ int enter_started_state() {
   udp_print_all_ip_addresses();
   // get_ip_address();
 
-  resolve_server_address_blocking(SERVER_NAME);
+  // resolve_server_address_blocking(SERVER_NAME);
   sleep_ms(500);
 
-  // puts("- Starting SNTP poll");
-  // sntp_sync_init();
-
   puts("- Starting Beat Server");
-  init_server_udp_pcb(UDP_PORT, UDP_SERVER_PORT, &add_payload_to_event_queue);
+  // init_udp_receive_socket(UDP_PORT, &add_payload_to_event_queue);
+  // init_udp_send_socket(SERVER_NAME, UDP_SERVER_PORT);
+  start_udp(SERVER_NAME, UDP_SERVER_PORT, UDP_PORT,
+            &add_payload_to_event_queue);
 
   state_manager_set_state(STATE_INITIALIZED);
   return 0;

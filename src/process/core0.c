@@ -26,10 +26,8 @@ void core0_init() {
 }
 
 void core0_loop() {
-  sleep_ms(2000);
   printf("Starting core 0 loop\n");
   blink(MESSAGE_BLINK_SPEED, MESSAGE_WELCOME);
-  sleep_ms(1000);
 
   send_hello_request();
 

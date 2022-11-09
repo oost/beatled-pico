@@ -134,10 +134,9 @@ int send_udp_request(size_t msg_length, prepare_payload_fn prepare_payload) {
 }
 
 // Perform initialisation
-int init_server_udp_pcb(uint16_t udp_port, uint16_t udp_server_port,
-                        process_response_fn process_response) {
+int init_udp_send_socket(uint16_t udp_port,
+                         process_response_fn process_response) {
   udp_port_ = udp_port;
-  udp_server_port_ = udp_server_port;
   process_response_ = process_response;
 
   cyw43_arch_lwip_begin();

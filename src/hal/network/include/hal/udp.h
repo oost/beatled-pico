@@ -10,12 +10,14 @@ extern "C" {
 typedef int (*prepare_payload_fn)(void *buffer_payload, size_t size);
 typedef int (*process_response_fn)(void *buffer_payload, size_t size);
 
-void resolve_server_address(const char *server_name);
-void resolve_server_address_blocking(const char *server_name);
+// void resolve_server_address(const char *server_name);
+// void resolve_server_address_blocking(const char *server_name);
+
+void start_udp(const char *server_name, uint16_t server_port, uint16_t udp_port,
+               process_response_fn process_response);
 
 // Perform initialisation
-int init_server_udp_pcb(uint16_t udp_port, uint16_t udp_server_port,
-                        process_response_fn process_response);
+
 const uint32_t *get_ip_address();
 void udp_print_all_ip_addresses();
 

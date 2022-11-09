@@ -1,4 +1,5 @@
 #include <arpa/inet.h>
+#include <errno.h>
 #include <ifaddrs.h>
 #include <net/if.h>
 #include <netdb.h>
@@ -12,104 +13,89 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include "dns.h"
 #include "hal/udp.h"
 #define MAXLINE 1024
 
-pthread_t udp_thread;
+pthread_t udp_thread_;
+
+int send_socket_fd;
+int receive_socket_fd;
+struct sockaddr_in server_addr;
+
 typedef struct pbuf {
   void *payload;
 } pbuf;
 
 typedef struct udp_parameters {
+  const char *server_name;
+  uint16_t server_port;
   uint16_t udp_port;
   process_response_fn process_response;
 } udp_parameters_t;
 
-void resolve_server_address(const char *server_name) {
-  struct addrinfo *result, *rp;
-  int sfd, s;
+int create_receive_socked(udp_parameters_t *udp_params) {
+  struct sockaddr_in device_addr;
 
-  struct addrinfo hints = {0};
-  hints.ai_family = AF_UNSPEC;
-  hints.ai_socktype = SOCK_DGRAM;
-  hints.ai_flags = AI_PASSIVE;
-  hints.ai_protocol = 0;
-
-  s = getaddrinfo(server_name, NULL, &hints, &result);
-  if (s != 0) {
-    fprintf(stderr, "getaddrinfo: %s (servername: %s)\n", gai_strerror(s),
-            server_name);
-    exit(EXIT_FAILURE);
+  if ((receive_socket_fd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0) {
+    perror("socket creation failed");
+    return 1;
   }
 
-  /* getaddrinfo() returns a list of address structures.
-     Try each address until a successful bind().
-     If socket(2) (or bind(2)) fails, close the socket
-     and try the next address. */
+  // Filling server information
+  device_addr.sin_family = AF_INET; // IPv4
+  device_addr.sin_addr.s_addr = INADDR_ANY;
+  device_addr.sin_port = htons(udp_params->udp_port);
 
-  char ipstr[INET6_ADDRSTRLEN];
-  // struct sockaddr_in sa; // pretend this is loaded with something
-  printf("Resolved %s:\n", server_name);
-  for (rp = result; rp != NULL; rp = rp->ai_next) {
-    void *addr;
-    char *ipver;
-
-    // get the pointer to the address itself,
-    // different fields in IPv4 and IPv6:
-    if (rp->ai_family == AF_INET) { // IPv4
-      struct sockaddr_in *ipv4 = (struct sockaddr_in *)rp->ai_addr;
-      addr = &(ipv4->sin_addr);
-      ipver = "IPv4";
-    } else { // IPv6
-      struct sockaddr_in6 *ipv6 = (struct sockaddr_in6 *)rp->ai_addr;
-      addr = &(ipv6->sin6_addr);
-      ipver = "IPv6";
-    }
-
-    // convert the IP to a string and print it:
-    inet_ntop(rp->ai_family, addr, ipstr, sizeof ipstr);
-    printf("  %s: %s\n", ipver, ipstr);
+  // Bind the socket with the server address
+  if (bind(receive_socket_fd, (const struct sockaddr *)&device_addr,
+           sizeof(device_addr)) < 0) {
+    perror("bind failed");
+    return 1;
   }
-
-  freeaddrinfo(result); /* No longer needed */
+  return 0;
 }
-void resolve_server_address_blocking(const char *server_name) {
-  resolve_server_address(server_name);
+
+int create_send_socket(udp_parameters_t *udp_params) {
+  if (resolve_server_address_blocking(udp_params->server_name, &server_addr)) {
+    return 1;
+  }
+  struct sockaddr_in *addr = (struct sockaddr_in *)&server_addr;
+  addr->sin_port = htons(udp_params->server_port);
+
+  if ((send_socket_fd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0) {
+    perror("socket creation failed");
+    return 1;
+  }
+  return 0;
+}
+
+int create_udp_sockets(udp_parameters_t *udp_params) {
+  if (create_receive_socked(udp_params)) {
+    perror("Error creating receive socket");
+    return 1;
+  }
+
+  if (create_send_socket(udp_params)) {
+    perror("Error creating send socket");
+    return 1;
+  }
+
+  return 0;
 }
 
 void *start_udp_server(void *data) {
   udp_parameters_t *params = (udp_parameters_t *)data;
-  // udp_parameters params= (udp_parameters*data;
 
-  int sockfd;
   char buffer[MAXLINE];
   int recvlen; /* # bytes received */
-  struct sockaddr_in ownaddr;
+
   struct sockaddr_in remaddr;          /* remote address */
   socklen_t addrlen = sizeof(remaddr); /* length of addresses */
 
-  // Creating socket file descriptor
-
-  if ((sockfd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0) {
-    perror("socket creation failed");
-    return NULL;
-  }
-
-  // Filling server information
-  ownaddr.sin_family = AF_INET; // IPv4
-  ownaddr.sin_addr.s_addr = inet_addr("127.0.0.1");
-
-  ownaddr.sin_port = htons(params->udp_port);
-
-  // Bind the socket with the server address
-  if (bind(sockfd, (const struct sockaddr *)&ownaddr, sizeof(ownaddr)) < 0) {
-    perror("bind failed");
-    return NULL;
-  }
-
   printf("waiting on port %d\n", params->udp_port);
   for (;;) {
-    recvlen = recvfrom(sockfd, buffer, MAXLINE - 1, 0,
+    recvlen = recvfrom(receive_socket_fd, buffer, MAXLINE - 1, 0,
                        (struct sockaddr *)&remaddr, &addrlen);
     printf("received %d bytes\n", recvlen);
     if (recvlen > 0) {
@@ -126,23 +112,22 @@ void *start_udp_server(void *data) {
   return NULL;
 }
 
-void start_udp_thread(uint16_t udp_port, process_response_fn process_response) {
+void start_udp(const char *server_name, uint16_t server_port, uint16_t udp_port,
+               process_response_fn process_response) {
   udp_parameters_t *params = malloc(sizeof(udp_parameters_t));
-
   params->udp_port = udp_port;
   params->process_response = process_response;
-  pthread_create(&udp_thread, NULL, &start_udp_server, params);
+  params->server_name = server_name;
+  params->server_port = server_port;
+
+  if (create_udp_sockets(params)) {
+    perror("Error createing sockets");
+    return;
+  }
+
+  pthread_create(&udp_thread_, NULL, &start_udp_server, params);
 }
 
-// Perform initialisation
-int init_server_udp_pcb(uint16_t udp_port, uint16_t udp_server_port,
-                        process_response_fn process_response) {
-  udp_parameters_t params = {.udp_port = udp_port,
-                             .process_response = process_response};
-  // start_udp_server(&params);
-  start_udp_thread(udp_port, process_response);
-  return 0;
-}
 const uint32_t *get_ip_address() {
   unsigned char ip_address[15];
   int fd;
@@ -220,6 +205,27 @@ void udp_print_all_ip_addresses() {
   freeifaddrs(ifaddr);
 }
 
+int sendall(int s, char *buf, size_t *len, const struct sockaddr_in *addr) {
+  int total = 0;        // how many bytes we've sent
+  int bytesleft = *len; // how many we have left to send
+  int n;
+
+  while (total < *len) {
+    n = sendto(s, buf + total, bytesleft, 0, (const struct sockaddr *)addr,
+               sizeof(*addr));
+    if (n == -1) {
+      printf("an error: %s\n", strerror(errno));
+      break;
+    }
+    total += n;
+    bytesleft -= n;
+  }
+
+  *len = total; // return number actually sent here
+
+  return n == -1 ? -1 : 0; // return -1 on failure, 0 on success
+}
+
 int send_udp_request(size_t msg_length, prepare_payload_fn prepare_payload) {
   int err = 0;
   pbuf *buffer = (pbuf *)malloc(sizeof(pbuf));
@@ -238,19 +244,18 @@ int send_udp_request(size_t msg_length, prepare_payload_fn prepare_payload) {
       err = 1;
     }
 
-    // if (udp_sendto(server_udp_pcb, buffer, &server_address, udp_server_port_)
-    // !=
-    //     ERR_OK) {
-    //   printf("Error sending message to %s:%u ...\n",
-    //          ipaddr_ntoa(&server_address), udp_server_port_);
-    //   err = 1;
+    if (sendall(receive_socket_fd, buffer->payload, &msg_length,
+                &server_addr)) {
+      printf("Error sending message\n");
+    }
   }
 
-  // printf("Sent message to %s:%u ... Command %x .. len %u\n",
-  //        ipaddr_ntoa(&server_address), udp_server_port_, req[0], msg_length);
-  // printf("The string is ");
-  // print_buffer_as_hex(req, msg_length);
-  printf("Sent UDP request\n");
+  char ip4[INET_ADDRSTRLEN]; // space to hold the IPv4 string
+  const struct sockaddr_in *recipient_addr =
+      (const struct sockaddr_in *)&server_addr;
+  inet_ntop(AF_INET, &(recipient_addr->sin_addr), ip4, INET_ADDRSTRLEN);
+  printf("Sent UDP request to %s:%d\n", ip4, ntohs(recipient_addr->sin_port));
+
   free(buffer->payload);
   free(buffer);
 

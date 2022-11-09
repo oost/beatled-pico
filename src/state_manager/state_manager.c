@@ -17,7 +17,6 @@ void state_manager_init() {}
 int transition_state(state_manager_state_t new_state) {
   state_manager_state_t old_state = current_state;
 
-  printf("Transitioning from %d to %d\n", old_state, new_state);
   if (old_state == new_state) {
     puts("Transitioning to the same state... Noop");
     return 1;
@@ -26,9 +25,11 @@ int transition_state(state_manager_state_t new_state) {
   int err = 0;
 
   if (((transition_matrix[current_state] & (0x01 << new_state)) == 0)) {
-    puts("Transition not allowed");
+    printf("Transition not allowed from %d to %d\n", old_state, new_state);
     return 2;
   }
+
+  printf("Transitioning from %d to %d\n", old_state, new_state);
 
   if (exit_current_state) {
     err = exit_current_state();
