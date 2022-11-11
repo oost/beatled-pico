@@ -5,11 +5,15 @@
 extern "C" {
 #endif
 
-typedef struct board_id board_id_t;
+#include <stdint.h>
 
-typedef board_id_t *board_id_handle_t;
+#define BOARD_ID_SIZE_BYTES 8
 
-board_id_handle_t get_unique_board_id();
+typedef struct {
+  uint8_t id[BOARD_ID_SIZE_BYTES];
+} board_id_t;
+
+void get_unique_board_id(board_id_t *board_id);
 
 #ifdef __cplusplus
 }

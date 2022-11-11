@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 
+#include "macros.h"
+
 #ifndef PICO_UNIQUE_BOARD_ID_SIZE_BYTES
 #define PICO_UNIQUE_BOARD_ID_SIZE_BYTES 8
 #endif // PICO_UNIQUE_BOARD_ID_SIZE_BYTES
@@ -12,67 +14,67 @@ extern "C" {
 #endif
 
 typedef enum {
-  eBeatledError = 0,
-  eBeatledHello,
-  eBeatledTempo,
-  eBeatledTime,
-  eBeatledProgram
+  BEATLED_MESSAGE_ERROR = 0,
+  BEATLED_MESSAGE_HELLO,
+  BEATLED_MESSAGE_TEMPO,
+  BEATLED_MESSAGE_TIME,
+  BEATLED_MESSAGE_PROGRAM
 } beatled_message_type_t;
 
 typedef enum {
-  unknownError = 0,
-  unknownMessageType,
-  noData
+  BEATLED_ERROR_UNKNOWN = 0,
+  BEATLED_ERROR_UNKNOWN_MESSAGE_TYPE,
+  BEATLED_ERROR_NO_DATA
 } beatled_error_codes;
 
 typedef struct {
   uint8_t type; // beatled_message_type_t
-} __attribute__((packed)) beatled_message_t;
+} PACK_STRUCT_STRUCT beatled_message_t;
 
-// Tempo message. eCommandType = eBeatledError
+// Tempo message. eCommandType = BEATLED_MESSAGE_ERROR
 typedef struct {
   beatled_message_t base;
   uint8_t error_code;
-} __attribute__((packed)) beatled_error_msg_t;
+} PACK_STRUCT_STRUCT beatled_error_msg_t;
 
-// Tempo message. eCommandType = eBeatledTempo
+// Tempo message. eCommandType = BEATLED_MESSAGE_TEMPO
 typedef struct {
   beatled_message_t base;
   uint64_t beat_time_ref;
   uint32_t tempo_period_us;
-} __attribute__((packed)) beatled_tempo_msg_t;
+} PACK_STRUCT_STRUCT beatled_tempo_msg_t;
 
-// Hello. eCommandType = eBeatledHello
+// Hello. eCommandType = BEATLED_MESSAGE_HELLO
 typedef struct {
   beatled_message_t base;
   char board_id[2 * PICO_UNIQUE_BOARD_ID_SIZE_BYTES + 1];
-} __attribute__((packed)) beatled_hello_msg_t;
+} PACK_STRUCT_STRUCT beatled_hello_msg_t;
 
 typedef struct {
   beatled_message_t base;
   uint16_t pico_id;
-} __attribute__((packed)) beatled_hello_response_t;
+} PACK_STRUCT_STRUCT beatled_hello_response_t;
 
-// eCommandType = eBeatledTime
+// eCommandType = BEATLED_MESSAGE_TIME
 typedef struct {
   beatled_message_t base;
   uint64_t orig_time;
-} __attribute__((packed)) beatled_time_req_msg_t;
+} PACK_STRUCT_STRUCT beatled_time_req_msg_t;
 
-// eCommandType = eBeatledTime
+// eCommandType = BEATLED_MESSAGE_TIME
 typedef struct {
   beatled_message_t base;
   uint64_t orig_time;
   uint64_t recv_time;
   uint64_t xmit_time;
-} __attribute__((packed)) beatled_time_resp_msg_t;
+} PACK_STRUCT_STRUCT beatled_time_resp_msg_t;
 
-// eCommandType = eBeatledProgram
+// eCommandType = BEATLED_MESSAGE_PROGRAM
 typedef struct {
   beatled_message_t base;
   uint64_t orig_time;
   uint32_t program_id;
-} __attribute__((packed)) beatled_program_msg_t;
+} PACK_STRUCT_STRUCT beatled_program_msg_t;
 
 #ifdef __cplusplus
 } /*extern "C" */

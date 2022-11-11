@@ -18,7 +18,7 @@ void test_tempo() {
   beatled_tempo_msg_t *tempo_msg =
       (beatled_tempo_msg_t *)malloc(sizeof(beatled_tempo_msg_t));
 
-  tempo_msg->base.type = eBeatledTempo;
+  tempo_msg->base.type = BEATLED_MESSAGE_TEMPO;
 
   printf("Time since boot: %llu (%llx)\n", server_time_ref_us,
          server_time_ref_us);

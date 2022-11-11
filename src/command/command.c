@@ -40,23 +40,23 @@ int handle_server_message(void *event_data, size_t data_length,
 
   int err = 0;
   switch (server_msg->type) {
-  case eBeatledHello:
+  case BEATLED_MESSAGE_HELLO:
     err = process_hello_msg(server_msg, data_length);
     break;
 
-  case eBeatledProgram:
+  case BEATLED_MESSAGE_PROGRAM:
     err = command_program(server_msg, data_length);
     break;
 
-  case eBeatledTempo:
+  case BEATLED_MESSAGE_TEMPO:
     err = process_tempo_msg(server_msg, data_length);
     break;
 
-  case eBeatledTime:
+  case BEATLED_MESSAGE_TIME:
     err = process_time_msg(server_msg, data_length, dest_time);
     break;
 
-  case eBeatledError:
+  case BEATLED_MESSAGE_ERROR:
     err = command_error(server_msg, data_length);
     break;
 

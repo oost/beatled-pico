@@ -15,7 +15,7 @@ int prepare_time_request(void *buffer_payload, size_t buf_len) {
   }
 
   beatled_time_req_msg_t *msg = buffer_payload;
-  msg->base.type = eBeatledTime;
+  msg->base.type = BEATLED_MESSAGE_TIME;
   uint64_t orig_time = time_us_64();
   printf("Sending time request. \n - orig_time: %llu / %llx\n", orig_time,
          orig_time);

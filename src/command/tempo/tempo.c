@@ -16,7 +16,7 @@ int prepare_tempo_request(void *buffer_payload, size_t buf_len) {
   }
 
   beatled_tempo_msg_t *msg = buffer_payload;
-  msg->base.type = eBeatledTempo;
+  msg->base.type = BEATLED_MESSAGE_TEMPO;
   return 0;
 }
 
