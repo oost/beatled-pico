@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-typedef struct board_id_t board_id_t;
+typedef struct board_id board_id_t;
 
 typedef board_id_t *board_id_handle_t;
 

@@ -8,8 +8,9 @@ extern "C" {
 #include <stdbool.h>
 #include <stddef.h>
 
-/// Opaque circular buffer structure
-typedef struct hal_queue_t hal_queue_t;
+// #include "hal/port/queue.h"
+
+typedef struct hal_queue hal_queue_t;
 
 /// Handle type, the way users interact with the API
 typedef hal_queue_t *hal_queue_handle_t;

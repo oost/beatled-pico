@@ -17,5 +17,6 @@ typedef int (*exit_state_fn)();
 
 void state_manager_init();
 int state_manager_set_state(state_manager_state_t state);
+state_manager_state_t state_manager_get_state();
 
 #endif // STATE_MANAGER__STATE_MANAGER_H

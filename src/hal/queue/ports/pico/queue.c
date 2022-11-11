@@ -5,14 +5,19 @@
 
 #include "hal/queue.h"
 
+struct hal_queue {
+  queue_t impl;
+};
+
 hal_queue_handle_t hal_queue_init(size_t msg_size, int queue_size) {
-  queue_t *new_queue = (queue_t *)malloc(sizeof(queue_t));
-  queue_init(new_queue, msg_size, queue_size);
+  hal_queue_handle_t new_queue =
+      (hal_queue_handle_t)malloc(sizeof(hal_queue_t));
+  queue_init(&(new_queue->impl), msg_size, queue_size);
   return new_queue;
 }
 
 bool hal_queue_add_message(hal_queue_handle_t queue, void *data) {
-  if (!queue_try_add(queue, data)) {
+  if (!queue_try_add(&(queue->impl), data)) {
     puts("Queued is FULL!!!");
     return false;
   }
@@ -20,11 +25,19 @@ bool hal_queue_add_message(hal_queue_handle_t queue, void *data) {
   return true;
 }
 
+void hal_queue_add_message_blocking(hal_queue_handle_t queue, void *data) {
+  queue_add_blocking(&(queue->impl), data);
+}
+
 bool hal_queue_pop_message(hal_queue_handle_t queue, void *data) {
-  if (!queue_try_remove(queue, data)) {
+  if (!queue_try_remove(&(queue->impl), data)) {
     return false;
   }
 
   puts("Popped a message from queue");
   return true;
+}
+
+void hal_queue_pop_message_blocking(hal_queue_handle_t queue, void *data) {
+  queue_remove_blocking(&(queue->impl), data);
 }

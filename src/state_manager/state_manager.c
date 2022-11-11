@@ -14,6 +14,8 @@ uint16_t transition_matrix[] = {
 
 void state_manager_init() {}
 
+state_manager_state_t state_manager_get_state() { return current_state; }
+
 int transition_state(state_manager_state_t new_state) {
   state_manager_state_t old_state = current_state;
 

@@ -2,7 +2,7 @@
 
 #include "hal/unique_id.h"
 
-struct board_id_t {
+struct board_id {
   unsigned int id;
 };
 

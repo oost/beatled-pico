@@ -28,11 +28,11 @@ int send_hello_request() {
 
 int process_hello_msg(beatled_message_t *server_msg, size_t data_length) {
   puts("Hello!");
-  if (!check_size(data_length, sizeof(beatled_hello_msg_t))) {
+  if (!check_size(data_length, sizeof(beatled_hello_response_t))) {
     return 1;
   }
 
-  beatled_hello_msg_t *hello_msg = (beatled_hello_msg_t *)server_msg;
+  beatled_hello_response_t *hello_msg = (beatled_hello_response_t *)server_msg;
   blink(MESSAGE_BLINK_SPEED, MESSAGE_HELLO);
   state_manager_set_state(STATE_REGISTERED);
 

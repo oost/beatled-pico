@@ -3,4 +3,4 @@
 
 #include "hal/process.h"
 
-void sleep_ms(uint32_t duration) { usleep(duration / 1000); }
+void sleep_ms(uint32_t duration) { usleep(((uint64_t)duration) * 1000); }

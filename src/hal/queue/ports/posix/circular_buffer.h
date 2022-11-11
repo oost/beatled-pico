@@ -32,7 +32,7 @@ extern "C" {
 
 #include "hal/pico_int.h"
 
-typedef struct hal_queue_t {
+typedef struct hal_queue {
   pthread_mutex_t lock;
   pthread_cond_t in_cond;
   pthread_cond_t out_cond;

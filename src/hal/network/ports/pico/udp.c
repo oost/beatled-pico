@@ -1,12 +1,10 @@
 #include <lwip/dns.h>
 #include <lwip/pbuf.h>
+#include <pico/cyw43_arch.h>
 #include <pico/unique_id.h>
 
-// #include "beatled/protocol.h"
-// #include "event_queue/queue.h"
-#include "../utils/network.h"
-#include "udp.h"
-#include "ws2812/ws2812.h"
+#include "hal/network.h"
+#include "hal/udp.h"
 
 static bool server_address_resolved = false;
 static ip_addr_t server_address;
@@ -158,7 +156,7 @@ int init_udp_send_socket(uint16_t udp_port,
     return 1;
   }
 
-  ip_set_option(server_udp_pcb, SOF_BROADCAST);
+  // ip_set_option(server_udp_pcb, SOF_BROADCAST);
   ip_set_option(server_udp_pcb, IP_SOF_BROADCAST_RECV);
 
   // Add callback
@@ -170,7 +168,14 @@ int init_udp_send_socket(uint16_t udp_port,
   return 0;
 }
 
-const ip4_addr_t *get_ip_address() {
+void start_udp(const char *server_name, uint16_t server_port, uint16_t udp_port,
+               process_response_fn process_response) {
+  init_udp_send_socket(udp_port, process_response);
+  resolve_server_address_blocking(server_name);
+  udp_server_port_ = server_port;
+}
+
+const uint32_t get_ip_address() {
   cyw43_arch_lwip_begin();
 
   // w0 on Pico W is the only network interface.
@@ -179,7 +184,7 @@ const ip4_addr_t *get_ip_address() {
   if (netif_ptr == NULL) {
     printf("Netif #%d is not defined\n", 1);
     cyw43_arch_lwip_end();
-    return NULL;
+    return 0;
   }
 
   printf("Netif #%d is defined with name %s\n", 1, netif_ptr->name);
@@ -187,7 +192,7 @@ const ip4_addr_t *get_ip_address() {
   const ip4_addr_t *addr = netif_ip4_addr(netif_ptr);
   cyw43_arch_lwip_end();
 
-  return addr;
+  return ip_addr_get_ip4_u32(addr);
 }
 
 void udp_print_all_ip_addresses() {

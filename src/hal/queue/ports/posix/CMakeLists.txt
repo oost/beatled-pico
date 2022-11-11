@@ -8,3 +8,4 @@ target_link_libraries(${CURRENT_LIBRARY_NAME}
   Threads::Threads
   beatled_hal_utils
 )
+

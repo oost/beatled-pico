@@ -2,7 +2,7 @@
 // #include "hal/blink/blink.h"
 #include <pico/cyw43_arch.h>
 
-#include "wifi.h"
+#include "hal/wifi.h"
 
 int wifi_connect(const char *wifi_ssid, const char *wifi_password) {
   if (cyw43_arch_wifi_connect_blocking(wifi_ssid, wifi_password,

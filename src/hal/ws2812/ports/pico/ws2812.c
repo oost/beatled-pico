@@ -9,7 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "ws2812.h"
+#include "hal/ws2812.h"
 
 #include "ws2812.pio.h"
 #include "ws2812_dma.h"

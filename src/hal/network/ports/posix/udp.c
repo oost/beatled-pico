@@ -15,12 +15,12 @@
 
 #include "dns.h"
 #include "hal/udp.h"
+
 #define MAXLINE 1024
 
 pthread_t udp_thread_;
 
-int send_socket_fd;
-int receive_socket_fd;
+int udp_socket_fd;
 struct sockaddr_in server_addr;
 
 typedef struct pbuf {
@@ -34,10 +34,16 @@ typedef struct udp_parameters {
   process_response_fn process_response;
 } udp_parameters_t;
 
-int create_receive_socked(udp_parameters_t *udp_params) {
+int create_udp_socket(udp_parameters_t *udp_params) {
+  struct sockaddr_in *addr;
   struct sockaddr_in device_addr;
+  if (resolve_server_address_blocking(udp_params->server_name, &server_addr)) {
+    return 1;
+  }
+  addr = (struct sockaddr_in *)&server_addr;
+  addr->sin_port = htons(udp_params->server_port);
 
-  if ((receive_socket_fd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0) {
+  if ((udp_socket_fd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0) {
     perror("socket creation failed");
     return 1;
   }
@@ -48,7 +54,7 @@ int create_receive_socked(udp_parameters_t *udp_params) {
   device_addr.sin_port = htons(udp_params->udp_port);
 
   // Bind the socket with the server address
-  if (bind(receive_socket_fd, (const struct sockaddr *)&device_addr,
+  if (bind(udp_socket_fd, (const struct sockaddr *)&device_addr,
            sizeof(device_addr)) < 0) {
     perror("bind failed");
     return 1;
@@ -56,35 +62,7 @@ int create_receive_socked(udp_parameters_t *udp_params) {
   return 0;
 }
 
-int create_send_socket(udp_parameters_t *udp_params) {
-  if (resolve_server_address_blocking(udp_params->server_name, &server_addr)) {
-    return 1;
-  }
-  struct sockaddr_in *addr = (struct sockaddr_in *)&server_addr;
-  addr->sin_port = htons(udp_params->server_port);
-
-  if ((send_socket_fd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0) {
-    perror("socket creation failed");
-    return 1;
-  }
-  return 0;
-}
-
-int create_udp_sockets(udp_parameters_t *udp_params) {
-  if (create_receive_socked(udp_params)) {
-    perror("Error creating receive socket");
-    return 1;
-  }
-
-  if (create_send_socket(udp_params)) {
-    perror("Error creating send socket");
-    return 1;
-  }
-
-  return 0;
-}
-
-void *start_udp_server(void *data) {
+void *udp_socket_listen(void *data) {
   udp_parameters_t *params = (udp_parameters_t *)data;
 
   char buffer[MAXLINE];
@@ -95,7 +73,7 @@ void *start_udp_server(void *data) {
 
   printf("waiting on port %d\n", params->udp_port);
   for (;;) {
-    recvlen = recvfrom(receive_socket_fd, buffer, MAXLINE - 1, 0,
+    recvlen = recvfrom(udp_socket_fd, buffer, MAXLINE - 1, 0,
                        (struct sockaddr *)&remaddr, &addrlen);
     printf("received %d bytes\n", recvlen);
     if (recvlen > 0) {
@@ -120,15 +98,15 @@ void start_udp(const char *server_name, uint16_t server_port, uint16_t udp_port,
   params->server_name = server_name;
   params->server_port = server_port;
 
-  if (create_udp_sockets(params)) {
+  if (create_udp_socket(params)) {
     perror("Error createing sockets");
     return;
   }
 
-  pthread_create(&udp_thread_, NULL, &start_udp_server, params);
+  pthread_create(&udp_thread_, NULL, &udp_socket_listen, params);
 }
 
-const uint32_t *get_ip_address() {
+const uint32_t get_ip_address() {
   unsigned char ip_address[15];
   int fd;
   struct ifreq ifr;
@@ -155,7 +133,7 @@ const uint32_t *get_ip_address() {
          inet_ntoa(((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr));
 
   printf("System IP Address is: %s\n", ip_address);
-  return NULL;
+  return 0;
 }
 
 void udp_print_all_ip_addresses() {
@@ -205,23 +183,25 @@ void udp_print_all_ip_addresses() {
   freeifaddrs(ifaddr);
 }
 
-int sendall(int s, char *buf, size_t *len, const struct sockaddr_in *addr) {
-  int total = 0;        // how many bytes we've sent
-  int bytesleft = *len; // how many we have left to send
+int sendall(int socket_fd, char *data_buffer, size_t *data_length,
+            const struct sockaddr_in *recipient_addr) {
+  int total = 0;                // how many bytes we've sent
+  int bytesleft = *data_length; // how many we have left to send
   int n;
 
-  while (total < *len) {
-    n = sendto(s, buf + total, bytesleft, 0, (const struct sockaddr *)addr,
-               sizeof(*addr));
+  while (total < *data_length) {
+    n = sendto(socket_fd, data_buffer + total, bytesleft, 0,
+               (const struct sockaddr *)recipient_addr,
+               sizeof(*recipient_addr));
     if (n == -1) {
-      printf("an error: %s\n", strerror(errno));
+      printf("UDP Send: %s\n", strerror(errno));
       break;
     }
     total += n;
     bytesleft -= n;
   }
 
-  *len = total; // return number actually sent here
+  *data_length = total; // return number actually sent here
 
   return n == -1 ? -1 : 0; // return -1 on failure, 0 on success
 }
@@ -244,8 +224,7 @@ int send_udp_request(size_t msg_length, prepare_payload_fn prepare_payload) {
       err = 1;
     }
 
-    if (sendall(receive_socket_fd, buffer->payload, &msg_length,
-                &server_addr)) {
+    if (sendall(udp_socket_fd, buffer->payload, &msg_length, &server_addr)) {
       printf("Error sending message\n");
     }
   }

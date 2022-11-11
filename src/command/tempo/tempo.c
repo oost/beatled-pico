@@ -29,6 +29,12 @@ int process_tempo_msg(beatled_message_t *server_msg, size_t data_length) {
   if (!check_size(data_length, sizeof(beatled_tempo_msg_t))) {
     return 1;
   }
+
+  if (state_manager_get_state() != STATE_TIME_SYNCED) {
+    printf("Can't set tempo while in state %d\n", state_manager_get_state());
+    return 1;
+  }
+
   beatled_tempo_msg_t *tempo_msg = (beatled_tempo_msg_t *)server_msg;
 
   uint64_t beat_time_ref = ntohll(tempo_msg->beat_time_ref);
@@ -40,8 +46,6 @@ int process_tempo_msg(beatled_message_t *server_msg, size_t data_length) {
 
   state_update_t state_update = {.tempo_time_ref = beat_local_time_ref,
                                  .tempo_period_us = tempo_period_us};
-
-  state_manager_set_state(STATE_TIME_SYNCED);
 
   if (!hal_queue_add_message(intercore_command_queue, &state_update)) {
     puts("Intercore queue is FULL!!!");
