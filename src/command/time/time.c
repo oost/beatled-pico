@@ -8,14 +8,14 @@
 #include "state_manager/states/states.h"
 
 int prepare_time_request(void *buffer_payload, size_t buf_len) {
-  if (buf_len != sizeof(beatled_time_req_msg_t)) {
+  if (buf_len != sizeof(beatled_message_time_request_t)) {
     printf("Error sizes don't match %zu, %zu", buf_len,
-           sizeof(beatled_time_req_msg_t));
+           sizeof(beatled_message_time_request_t));
     return 1;
   }
 
-  beatled_time_req_msg_t *msg = buffer_payload;
-  msg->base.type = BEATLED_MESSAGE_TIME;
+  beatled_message_time_request_t *msg = buffer_payload;
+  msg->base.type = BEATLED_MESSAGE_TIME_REQUEST;
   uint64_t orig_time = time_us_64();
   printf("Sending time request. \n - orig_time: %llu / %llx\n", orig_time,
          orig_time);
@@ -29,18 +29,18 @@ int prepare_time_request(void *buffer_payload, size_t buf_len) {
 }
 
 int send_time_request() {
-  return send_udp_request(sizeof(beatled_time_req_msg_t),
+  return send_udp_request(sizeof(beatled_message_time_request_t),
                           &prepare_time_request);
 }
 
 int process_time_msg(beatled_message_t *server_msg, size_t data_length,
                      uint64_t dest_time) {
   puts("Time!");
-  if (!check_size(data_length, sizeof(beatled_time_resp_msg_t))) {
+  if (!check_size(data_length, sizeof(beatled_message_time_response_t))) {
     return 1;
   }
-  beatled_time_resp_msg_t *time_resp_msg =
-      (beatled_time_resp_msg_t *)server_msg;
+  beatled_message_time_response_t *time_resp_msg =
+      (beatled_message_time_response_t *)server_msg;
 
   uint64_t orig_time = ntohll(time_resp_msg->orig_time);
   uint64_t recv_time = ntohll(time_resp_msg->recv_time);

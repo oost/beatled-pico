@@ -11,10 +11,11 @@
 
 int command_program(beatled_message_t *server_msg, size_t data_length) {
   puts("Program!");
-  if (!check_size(data_length, sizeof(beatled_program_msg_t))) {
+  if (!check_size(data_length, sizeof(beatled_message_program_t))) {
     return 1;
   }
-  beatled_program_msg_t *program_msg = (beatled_program_msg_t *)server_msg;
+  beatled_message_program_t *program_msg =
+      (beatled_message_program_t *)server_msg;
 
   // led_update_pattern_idx(program_msg->program_id);
   return 0;
@@ -22,10 +23,10 @@ int command_program(beatled_message_t *server_msg, size_t data_length) {
 
 int command_error(beatled_message_t *server_msg, size_t data_length) {
   puts("Error");
-  if (!check_size(data_length, sizeof(beatled_error_msg_t))) {
+  if (!check_size(data_length, sizeof(beatled_message_error_t))) {
     return 1;
   }
-  beatled_error_msg_t *error_msg = (beatled_error_msg_t *)server_msg;
+  beatled_message_error_t *error_msg = (beatled_message_error_t *)server_msg;
 
   printf("Communication error %u\n", error_msg->error_code);
   return 0;
@@ -40,7 +41,7 @@ int handle_server_message(void *event_data, size_t data_length,
 
   int err = 0;
   switch (server_msg->type) {
-  case BEATLED_MESSAGE_HELLO:
+  case BEATLED_MESSAGE_HELLO_RESPONSE:
     err = process_hello_msg(server_msg, data_length);
     break;
 
@@ -48,11 +49,11 @@ int handle_server_message(void *event_data, size_t data_length,
     err = command_program(server_msg, data_length);
     break;
 
-  case BEATLED_MESSAGE_TEMPO:
+  case BEATLED_MESSAGE_TEMPO_RESPONSE:
     err = process_tempo_msg(server_msg, data_length);
     break;
 
-  case BEATLED_MESSAGE_TIME:
+  case BEATLED_MESSAGE_TIME_RESPONSE:
     err = process_time_msg(server_msg, data_length, dest_time);
     break;
 

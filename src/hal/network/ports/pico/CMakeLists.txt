@@ -1,5 +1,7 @@
 target_sources(${CURRENT_LIBRARY_NAME} PUBLIC
-    udp.c
+    dns.c
+    udp_sender.c
+    udp_server.c
 )
 
 target_link_libraries(${CURRENT_LIBRARY_NAME}

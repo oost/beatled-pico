@@ -9,7 +9,8 @@ typedef enum {
   STATE_STARTED,
   STATE_INITIALIZED,
   STATE_REGISTERED,
-  STATE_TIME_SYNCED
+  STATE_TIME_SYNCED,
+  STATE_TEMPO_SYNCED
 } state_manager_state_t;
 
 typedef int (*enter_state_fn)();

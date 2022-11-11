@@ -9,8 +9,13 @@ static state_manager_state_t current_state = 0;
 exit_state_fn exit_current_state;
 
 uint16_t transition_matrix[] = {
-    0x01 << STATE_STARTED, 0x01 << STATE_INITIALIZED, 0x01 << STATE_REGISTERED,
-    0x01 << STATE_TIME_SYNCED};
+    0x01 << STATE_STARTED,      // STATE_UNKNOWN
+    0x01 << STATE_INITIALIZED,  // STATE_STARTED
+    0x01 << STATE_REGISTERED,   // STATE_INITIALIZED
+    0x01 << STATE_TIME_SYNCED,  // STATE_REGISTERED
+    0x01 << STATE_TEMPO_SYNCED, // STATE_TIME_SYNCED
+    0x01 << STATE_TIME_SYNCED   // STATE_TIME_SYNCED
+};
 
 void state_manager_init() {}
 

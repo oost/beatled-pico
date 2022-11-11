@@ -15,10 +15,11 @@ void init_test() { server_time_ref_us = get_sntp_server_time_ref_us(); }
 void test_tempo() {
   float tempo = 60;
 
-  beatled_tempo_msg_t *tempo_msg =
-      (beatled_tempo_msg_t *)malloc(sizeof(beatled_tempo_msg_t));
+  beatled_message_tempo_response_t *tempo_msg =
+      (beatled_message_tempo_response_t *)malloc(
+          sizeof(beatled_message_tempo_response_t));
 
-  tempo_msg->base.type = BEATLED_MESSAGE_TEMPO;
+  tempo_msg->base.type = BEATLED_MESSAGE_TEMPO_RESPONSE;
 
   printf("Time since boot: %llu (%llx)\n", server_time_ref_us,
          server_time_ref_us);
@@ -32,7 +33,7 @@ void test_tempo() {
   printf("Tempo period big endian: %u (%x)\n", tempo_msg->tempo_period_us,
          tempo_msg->tempo_period_us);
 
-  size_t data_length = sizeof(beatled_tempo_msg_t);
+  size_t data_length = sizeof(beatled_message_tempo_response_t);
 
   if (event_queue_add_message(event_server_message, (void *)tempo_msg,
                               data_length)) {

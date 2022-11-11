@@ -9,30 +9,33 @@
 #include "state_manager/state_manager.h"
 
 int prepare_hello_request(void *buffer_payload, size_t buf_len) {
-  if (buf_len != sizeof(beatled_hello_msg_t)) {
+  if (buf_len != sizeof(beatled_message_hello_request_t)) {
     printf("Error sizes don't match %zu, %zu", buf_len,
-           sizeof(beatled_hello_msg_t));
+           sizeof(beatled_message_hello_request_t));
     return 1;
   }
 
-  beatled_hello_msg_t *msg = (beatled_hello_msg_t *)buffer_payload;
-  msg->base.type = BEATLED_MESSAGE_HELLO;
+  beatled_message_hello_request_t *msg =
+      (beatled_message_hello_request_t *)buffer_payload;
+  msg->base.type = BEATLED_MESSAGE_HELLO_REQUEST;
   // pico_get_unique_board_id_string(msg->board_id, count_of(msg->board_id));
   return 0;
 }
 
 int send_hello_request() {
   puts("Sending hello request");
-  return send_udp_request(sizeof(beatled_hello_msg_t), prepare_hello_request);
+  return send_udp_request(sizeof(beatled_message_hello_request_t),
+                          prepare_hello_request);
 }
 
 int process_hello_msg(beatled_message_t *server_msg, size_t data_length) {
   puts("Hello!");
-  if (!check_size(data_length, sizeof(beatled_hello_response_t))) {
+  if (!check_size(data_length, sizeof(beatled_message_hello_response_t))) {
     return 1;
   }
 
-  beatled_hello_response_t *hello_msg = (beatled_hello_response_t *)server_msg;
+  beatled_message_hello_response_t *hello_msg =
+      (beatled_message_hello_response_t *)server_msg;
   blink(MESSAGE_BLINK_SPEED, MESSAGE_HELLO);
   state_manager_set_state(STATE_REGISTERED);
 

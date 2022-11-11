@@ -9,24 +9,25 @@
 #include "state_manager/state_manager.h"
 
 int prepare_tempo_request(void *buffer_payload, size_t buf_len) {
-  if (buf_len != sizeof(beatled_tempo_msg_t)) {
+  if (buf_len != sizeof(beatled_message_tempo_request_t)) {
     printf("Error sizes don't match %zu, %zu", buf_len,
-           sizeof(beatled_tempo_msg_t));
+           sizeof(beatled_message_tempo_request_t));
     return 1;
   }
 
-  beatled_tempo_msg_t *msg = buffer_payload;
-  msg->base.type = BEATLED_MESSAGE_TEMPO;
+  beatled_message_tempo_request_t *msg = buffer_payload;
+  msg->base.type = BEATLED_MESSAGE_TEMPO_REQUEST;
   return 0;
 }
 
 int send_tempo_request() {
-  return send_udp_request(sizeof(beatled_tempo_msg_t), prepare_tempo_request);
+  return send_udp_request(sizeof(beatled_message_tempo_request_t),
+                          prepare_tempo_request);
 }
 
 int process_tempo_msg(beatled_message_t *server_msg, size_t data_length) {
   puts("Tempo!");
-  if (!check_size(data_length, sizeof(beatled_tempo_msg_t))) {
+  if (!check_size(data_length, sizeof(beatled_message_tempo_response_t))) {
     return 1;
   }
 
@@ -35,7 +36,8 @@ int process_tempo_msg(beatled_message_t *server_msg, size_t data_length) {
     return 1;
   }
 
-  beatled_tempo_msg_t *tempo_msg = (beatled_tempo_msg_t *)server_msg;
+  beatled_message_tempo_response_t *tempo_msg =
+      (beatled_message_tempo_response_t *)server_msg;
 
   uint64_t beat_time_ref = ntohll(tempo_msg->beat_time_ref);
   uint32_t tempo_period_us = ntohl(tempo_msg->tempo_period_us);
