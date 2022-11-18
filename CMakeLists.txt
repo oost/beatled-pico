@@ -1,6 +1,6 @@
-# Generated Cmake Pico project file
-
 cmake_minimum_required(VERSION 3.13)
+
+project(pico_w_beatled C CXX ASM)
 
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
@@ -56,7 +56,6 @@ IF(PICO_AUTOTEST)
     ADD_DEFINITIONS(-DPICO_AUTOTEST)
 ENDIF(PICO_AUTOTEST)
 
-project(pico_w_beatled C CXX ASM)
 
 
 set(BEATLED_PROTOCOL_PATH "${CMAKE_CURRENT_LIST_DIR}/lib/beatled_protocol")

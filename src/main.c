@@ -5,8 +5,7 @@
 #include "event/event_queue.h"
 #include "hal/process.h"
 #include "process/core0.h"
-#include "state_manager/state.h"
-#include "state_manager/state_manager.h"
+#include "state_manager.h"
 
 int main(void) {
   puts("Starting beatled");

@@ -7,6 +7,7 @@ target_sources(
         states/initialized/initialized.c
         states/registered/registered.c
         states/time_synced/time_synced.c
+        states/tempo_synced/tempo_synced.c
 )
 target_compile_definitions(beatled_state_manager INTERFACE
         WIFI_SSID=\"${WIFI_SSID}\"

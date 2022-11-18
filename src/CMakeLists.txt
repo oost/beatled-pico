@@ -10,6 +10,7 @@ add_subdirectory(command)
 add_subdirectory(clock)
 add_subdirectory(event)
 add_subdirectory(process)
+add_subdirectory(registry)
 
 add_executable(pico_w_beatled 
         main.c
@@ -37,6 +38,7 @@ target_link_libraries(pico_w_beatled
     beatled_hal
     beatled_process
     beatled_autotest
+    beatled_registry
 )
 
 if (PICO_PORT)
@@ -56,7 +58,7 @@ if (PICO_PORT)
   pico_enable_stdio_usb(pico_w_beatled 0)
 
   add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-    COMMAND arm-none-eabi-size --format=berkeley "pico_w_beatled.elf")
+    COMMAND arm-none-eabi-size --format=berkeley "pico_w_beatled")
 
 endif()
 

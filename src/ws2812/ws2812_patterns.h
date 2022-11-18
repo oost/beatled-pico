@@ -11,10 +11,10 @@ typedef struct {
   const char *name;
 } pattern;
 
-void get_all_patterns_table(const pattern *pattern_table,
-                            size_t *pattern_count);
+// size_t num_patterns();
+size_t get_pattern_count();
 
-size_t num_patterns();
+const char *pattern_get_name(uint8_t pattern_idx);
 
 void run_pattern(int pattern_idx, uint32_t *stream, size_t len,
                  uint32_t beat_pos);

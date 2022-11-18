@@ -125,18 +125,27 @@ const pattern _pattern_table[] = {
     {pattern_fade, "Fade"},
 };
 
-size_t num_patterns() {
-  return (sizeof(_pattern_table) / sizeof((_pattern_table)[0]));
-}
+const size_t num_patterns =
+    sizeof(_pattern_table) / sizeof((_pattern_table)[0]);
 
 void get_all_patterns_table(const pattern *pattern_table,
                             size_t *pattern_count) {
   pattern_table = _pattern_table;
-  *pattern_count = num_patterns();
+  *pattern_count = num_patterns;
 }
 
 void run_pattern(int pattern_idx, uint32_t *stream, size_t len,
                  uint32_t beat_pos) {
-  pattern_idx = pattern_idx % num_patterns();
+  pattern_idx = pattern_idx % num_patterns;
   _pattern_table[pattern_idx].pat(stream, len, beat_pos);
 }
+
+const char *pattern_get_name(uint8_t pattern_idx) {
+  if (pattern_idx >= num_patterns) {
+    puts("Index out of range idx...");
+  }
+  pattern_idx = pattern_idx;
+  return _pattern_table[pattern_idx % num_patterns].name;
+}
+
+size_t get_pattern_count() { return num_patterns; }

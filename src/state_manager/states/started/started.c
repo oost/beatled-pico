@@ -14,8 +14,8 @@
 // #include "process/core0.h"
 // #include "process/core1.h"
 // #include "process/intercore_queue.h"
+#include "registry.h"
 #include "started.h"
-#include "state.h"
 #include "state_manager.h"
 #include "ws2812.h"
 
@@ -34,7 +34,7 @@ int enter_started_state() {
 
   puts("- Initializing intercore queue");
   intercore_command_queue =
-      hal_queue_init(sizeof(state_update_t), MAX_INTERCORE_QUEUE_COUNT);
+      hal_queue_init(sizeof(registry_update_t), MAX_INTERCORE_QUEUE_COUNT);
 
   puts("- Starting STDIO");
   hal_stdio_init();
