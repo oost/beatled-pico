@@ -4,6 +4,7 @@
 #include "command/utils.h"
 #include "constants.h"
 #include "hal/blink.h"
+#include "hal/network.h"
 #include "hal/udp.h"
 #include "hello.h"
 #include "state_manager/state_manager.h"
@@ -36,6 +37,8 @@ int process_hello_msg(beatled_message_t *server_msg, size_t data_length) {
 
   beatled_message_hello_response_t *hello_msg =
       (beatled_message_hello_response_t *)server_msg;
+  uint16_t client_id = ntohs(hello_msg->client_id);
+  printf("Registered with client id: %d", client_id);
   blink(MESSAGE_BLINK_SPEED, MESSAGE_HELLO);
   state_manager_set_state(STATE_REGISTERED);
 

@@ -64,7 +64,7 @@ typedef struct {
 // Hello. eCommandType = BEATLED_MESSAGE_HELLO_RESPONSE
 typedef struct {
   beatled_message_t base;
-  uint16_t pico_id;
+  uint16_t client_id;
 } __attribute__((__packed__)) beatled_message_hello_response_t;
 
 // eCommandType = BEATLED_MESSAGE_TIME_REQUEST
