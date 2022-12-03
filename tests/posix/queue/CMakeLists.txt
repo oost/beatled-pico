@@ -5,5 +5,6 @@ target_link_libraries(test_queue PRIVATE
   Catch2::Catch2WithMain
   beatled_hal_queue
 )
-
-catch_discover_tests(test_queue)
+if(NOT VCPKG_TARGET_TRIPLET)
+  catch_discover_tests(test_queue)
+endif()

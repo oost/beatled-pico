@@ -1,6 +1,7 @@
 #ifndef COMMAND__CONSTANTS_H
 #define COMMAND__CONSTANTS_H
 
+#include <stdbool.h>
 #include <stdint.h>
 
 #include "macros.h"
