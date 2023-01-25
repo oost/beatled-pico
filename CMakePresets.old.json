@@ -15,31 +15,14 @@
       "environment": {}
     },
     {
-      "name": "ARM",
-      "displayName": "GCC 10.3.1 arm-none-eabi",
-      "description": "Using compilers: C = /usr/local/bin/arm-none-eabi-gcc, CXX = /usr/local/bin/arm-none-eabi-g++",
+      "name": "ARM-GCC",
+      "displayName": "GCC 10 arm-none-eabi",
+      "description": "Using compilers: C = /Applications/ArmGNUToolchain/12.2.rel1/arm-none-eabi/bin/arm-none-eabi-gcc , CXX = /Applications/ArmGNUToolchain/12.2.rel1/arm-none-eabi/bin/arm-none-eabi-g++",
       "inherits": ["default"],
       "cacheVariables": {
         "CMAKE_INSTALL_PREFIX": "${sourceDir}/out/install/${presetName}",
-        "CMAKE_C_COMPILER": "/usr/local/bin/arm-none-eabi-gcc",
-        "CMAKE_CXX_COMPILER": "/usr/local/bin/arm-none-eabi-g++",
-        "CMAKE_BUILD_TYPE": "Debug",
-        "PORT": "pico"
-      },
-      "environment": {
-        "PICO_SDK_PATH": "../pico-sdk",
-        "PICO_BOARD": "pico_w"
-      }
-    },
-    {
-      "name": "ARM-GCC11",
-      "displayName": "GCC 11 arm-none-eabi",
-      "description": "Using compilers: C = /Applications/ArmGNUToolchain/11.3.rel1/arm-none-eabi/bin/arm-none-eabi-gcc , CXX = /Applications/ArmGNUToolchain/11.3.rel1/arm-none-eabi/bin/arm-none-eabi-g++",
-      "inherits": ["default"],
-      "cacheVariables": {
-        "CMAKE_INSTALL_PREFIX": "${sourceDir}/out/install/${presetName}",
-        "CMAKE_C_COMPILER": "/Applications/ArmGNUToolchain/11.3.rel1/arm-none-eabi/bin/arm-none-eabi-gcc",
-        "CMAKE_CXX_COMPILER": "/Applications/ArmGNUToolchain/11.3.rel1/arm-none-eabi/bin/arm-none-eabi-g++",
+        "CMAKE_C_COMPILER": "arm-none-eabi-gcc",
+        "CMAKE_CXX_COMPILER": "arm-none-eabi-g++",
         "CMAKE_BUILD_TYPE": "Debug",
         "PORT": "pico"
       },
@@ -85,6 +68,24 @@
         "PORT": "posix"
       },
       "environment": {}
+    },
+    {
+      "name": "ARM GCC 10.3",
+      "displayName": "GCC 10.3.1 arm-none-eabi",
+      "inherits": ["default"],
+      "description": "Using compilers: C = /usr/local/bin/arm-none-eabi-gcc, CXX = /usr/local/bin/arm-none-eabi-g++",
+      "binaryDir": "${sourceDir}/out/build/${presetName}",
+      "cacheVariables": {
+        "CMAKE_INSTALL_PREFIX": "${sourceDir}/out/install/${presetName}",
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_C_COMPILER": "/usr/local/bin/arm-none-eabi-gcc",
+        "CMAKE_CXX_COMPILER": "/usr/local/bin/arm-none-eabi-g++",
+        "PORT": "pico"
+      },
+      "environment": {
+        "PICO_SDK_PATH": "../pico-sdk",
+        "PICO_BOARD": "pico_w"
+      }
     }
   ],
   "buildPresets": [

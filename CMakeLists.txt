@@ -1,61 +1,29 @@
 cmake_minimum_required(VERSION 3.13)
 
+include(cmake/port.cmake)
+include(cmake/hal_module.cmake)
+include(cmake/utils.cmake)
+
 project(pico_w_beatled C CXX ASM)
 
 set(CMAKE_C_STANDARD 11)
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
+list(APPEND CMAKE_CXX_SOURCE_FILE_EXTENSIONS c)
 
-include (cmake/hal_module.cmake)
+port_init()
 
 
 set(WIFI_SSID "$ENV{WIFI_SSID}" CACHE INTERNAL "WiFi SSID for examples")
 set(WIFI_PASSWORD "$ENV{WIFI_PASSWORD}" CACHE INTERNAL "WiFi password for examples")
 set(SNTP_SERVER_ADDRESS "raspberrypi1.local")
-set(SERVER_NAME "Oscars-MacBook-Pro.local")
+set(SERVER_NAME "raspberrypi1.local")
+# set(SERVER_NAME "Oscars-MacBook-Pro.local")
 
-option(PORT "Port to build" OFF)
-message("Got port=${PORT}")
 option(PICO_AUTOTEST "Run with auto tests"   OFF)
-
-
-list(APPEND CMAKE_CXX_SOURCE_FILE_EXTENSIONS c)
-
-if(PORT STREQUAL "pico")
-  set(PICO_PORT ON) 
-  add_compile_definitions(PICO_PORT)
-
-elseif(PORT STREQUAL "posix")
-
-  SET(POSIX_PORT ON)
-  add_compile_definitions(POSIX_PORT)
-
-  if(STDC_NO_THREADS)
-    message( FATAL_ERROR "Need thread support" )
-  else()
-    message("Threads are supported.")
-  endif()
-
-else()
-  message(FATAL_ERROR "Need to specify port. Got PORT='${PORT}'")
-endif()
-
-message("Building ${PORT} port")
-
-
-if (PICO_PORT)
-  # Initialise pico_sdk from installed location
-  # (note this can come from environment, CMake cache etc)
-  set(PICO_SDK_PATH "${CMAKE_CURRENT_LIST_DIR}/lib/pico-sdk")
-  # Pull in Raspberry Pi Pico SDK (must be before project)
-  include(pico_sdk_import.cmake)
-  pico_sdk_init()
-endif()
-
 
 IF(PICO_AUTOTEST)
     ADD_DEFINITIONS(-DPICO_AUTOTEST)
 ENDIF(PICO_AUTOTEST)
-
 
 
 set(BEATLED_PROTOCOL_PATH "${CMAKE_CURRENT_LIST_DIR}/lib/beatled_protocol")

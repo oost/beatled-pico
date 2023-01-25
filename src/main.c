@@ -8,7 +8,7 @@
 #include "state_manager.h"
 
 int main(void) {
-  puts("Starting beatled");
+  puts("Starting beatled...");
 
   puts("- Starting State Manager");
   state_manager_init();

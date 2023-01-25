@@ -27,9 +27,7 @@ if (PICO_PORT)
     )
 
 
-    add_custom_command(TARGET pico_ws2812 POST_BUILD
-        COMMAND arm-none-eabi-size --format=berkeley "pico_ws2812.elf")
-
+    print_memsize(pico_ws2812)
 
     add_executable(pico_ws2812_parallel
         main_parallel.c
@@ -50,21 +48,14 @@ if (PICO_PORT)
 
     # Add any user requested libraries
     target_link_libraries(pico_ws2812_parallel
-    pico_stdlib 
-    hardware_pio 
-    hardware_dma
+        pico_stdlib 
+        hardware_pio 
+        hardware_dma
     )
 
-
-    add_custom_command(TARGET pico_ws2812_parallel POST_BUILD
-    COMMAND arm-none-eabi-size --format=berkeley "pico_ws2812_parallel.elf")
-
-
-
+    print_memsize(pico_ws2812_parallel)
 
     # DMA 
-
-
     add_executable(pico_ws2812_dma
         main_dma.c
     )
@@ -89,8 +80,6 @@ if (PICO_PORT)
     hardware_dma
     )
 
-
-    add_custom_command(TARGET pico_ws2812_dma POST_BUILD
-    COMMAND arm-none-eabi-size --format=berkeley "pico_ws2812_dma.elf")
+    print_memsize(pico_ws2812_dma)
 
 endif()

@@ -31,7 +31,9 @@ int process_tempo_msg(beatled_message_t *server_msg, size_t data_length) {
     return 1;
   }
 
-  if (state_manager_get_state() != STATE_TIME_SYNCED) {
+  int current_state = state_manager_get_state();
+  if (current_state != STATE_TIME_SYNCED &&
+      current_state != STATE_TEMPO_SYNCED) {
     printf("Can't set tempo while in state %d\n", state_manager_get_state());
     return 1;
   }

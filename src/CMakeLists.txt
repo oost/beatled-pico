@@ -57,8 +57,7 @@ if (PICO_PORT)
   pico_enable_stdio_uart(pico_w_beatled 1)
   pico_enable_stdio_usb(pico_w_beatled 0)
 
-  add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-    COMMAND arm-none-eabi-size --format=berkeley "pico_w_beatled")
+  print_memsize(${PROJECT_NAME})
 
 endif()
 
