@@ -27,6 +27,10 @@ macro(port_init)
 
     add_compile_definitions(POSIX_PORT)
 
+    if(APPLE)
+      add_subdirectory(lib/metal)
+    endif()
+
     if(STDC_NO_THREADS)
       message( FATAL_ERROR "Need thread support" )
     else()

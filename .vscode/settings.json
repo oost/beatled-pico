@@ -18,12 +18,12 @@
   "cmake.environment": {
     "PICO_SDK_PATH": "../pico-sdk",
     "PICO_BOARD": "pico_w",
-    // "PICO_TOOLCHAIN_PATH": "/Applications/ArmGNUToolchain/12.2.rel1/arm-none-eabi"
+    "PICO_TOOLCHAIN_PATH": "/Applications/ArmGNUToolchain/12.2.rel1/arm-none-eabi"
   },
   "cmake.buildBeforeRun": true,
   "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
   "cmake.configureSettings": {
-    "PORT": "pico",
-    //   "CMAKE_TOOLCHAIN_FILE": "/Users/oscarostlund/Programmation/projects/vcpkg/scripts/buildsystems/vcpkg.cmake"
+    "PORT": "posix",
+    "CMAKE_TOOLCHAIN_FILE": "/Users/oscarostlund/Programmation/projects/vcpkg/scripts/buildsystems/vcpkg.cmake"
   }
 }

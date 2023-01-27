@@ -1,0 +1,20 @@
+message("Building simulator")
+
+# list(APPEND RUNTIME_SOURCES 
+
+# ) 
+# list(APPEND RUNTIME_LIBRARIES METAL_CPP) 
+
+# set(RUNTIME_SOURCES ${RUNTIME_SOURCES} PARENT_SCOPE)
+# set(RUNTIME_LIBRARIES ${RUNTIME_LIBRARIES} PARENT_SCOPE)
+
+target_sources(${CURRENT_LIBRARY_NAME} PUBLIC
+  ${CMAKE_CURRENT_LIST_DIR}/startup.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/renderer.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/mtk_view_delegate.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/app_delegate.cpp
+)
+
+target_link_libraries(${CURRENT_LIBRARY_NAME}
+  METAL_CPP
+)

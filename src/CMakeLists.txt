@@ -12,38 +12,40 @@ add_subdirectory(event)
 add_subdirectory(process)
 add_subdirectory(registry)
 
+
 add_executable(pico_w_beatled 
-        main.c
+  main.c
 ) 
 
 
 target_compile_definitions(pico_w_beatled PRIVATE
-        WIFI_SSID=\"${WIFI_SSID}\"
-        WIFI_PASSWORD=\"${WIFI_PASSWORD}\"
-        SNTP_SERVER_ADDRESS="${SNTP_SERVER_ADDRESS}"
-        SERVER_NAME="${SERVER_NAME}"
-        )
+  WIFI_SSID=\"${WIFI_SSID}\"
+  WIFI_PASSWORD=\"${WIFI_PASSWORD}\"
+  SNTP_SERVER_ADDRESS="${SNTP_SERVER_ADDRESS}"
+  SERVER_NAME="${SERVER_NAME}"
+)
 
 target_include_directories(pico_w_beatled PRIVATE
-        ${CMAKE_CURRENT_LIST_DIR}
-        )
+  ${CMAKE_CURRENT_LIST_DIR}
+)
 
 # Add any user requested libraries
 target_link_libraries(pico_w_beatled
-    beatled_ws2812
-    beatled_state_manager
-    beatled_commands
-    beatled_protocol
-    beatled_clock
-    beatled_hal
-    beatled_process
-    beatled_autotest
-    beatled_registry
+  ${RUNTIME_LIBRARIES}
+  beatled_ws2812
+  beatled_state_manager
+  beatled_commands
+  beatled_protocol
+  beatled_clock
+  beatled_hal
+  beatled_process
+  beatled_autotest
+  beatled_registry
 )
 
 if (PICO_PORT)
   if (NOT PICO_CYW43_SUPPORTED AND NOT TARGET pico_cyw43_arch)
-          message(FATAL_ERROR "Skipping Pico W examples as support is not available ${PICO_CYW43_SUPPORTED}")
+      message(FATAL_ERROR "Skipping Pico W examples as support is not available ${PICO_CYW43_SUPPORTED}")
   endif()
   # generate the header file into the source tree as it is included in the RP2040 datasheet
   # pico_generate_pio_header(pico_w_beatled ${CMAKE_CURRENT_LIST_DIR}/ws2812/ws2812.pio OUTPUT_DIR ${CMAKE_CURRENT_LIST_DIR}/generated)

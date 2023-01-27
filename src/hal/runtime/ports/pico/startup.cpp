@@ -1,0 +1,1 @@
+int startup() { return 0; }

@@ -7,8 +7,12 @@
 #include "process/core0.h"
 #include "state_manager.h"
 
+#include "hal/startup.h"
+
 int main(void) {
-  puts("Starting beatled...");
+  startup();
+
+  puts("Starting beatled.");
 
   puts("- Starting State Manager");
   state_manager_init();
