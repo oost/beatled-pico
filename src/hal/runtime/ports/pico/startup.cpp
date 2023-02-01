@@ -1,1 +1,1 @@
-int startup() { return 0; }
+void startup(startup_main_t startup_main) { startup_main(); }

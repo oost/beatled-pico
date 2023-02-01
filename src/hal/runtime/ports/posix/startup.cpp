@@ -1,6 +1,8 @@
 #include <AppKit/AppKit.hpp>
 #include <Metal/Metal.hpp>
 #include <MetalKit/MetalKit.hpp>
+#include <cstdlib>
+#include <thread>
 
 #include "app_delegate.h"
 #include "hal/startup.h"
@@ -10,15 +12,20 @@
 #define MTK_PRIVATE_IMPLEMENTATION
 #define CA_PRIVATE_IMPLEMENTATION
 
-int startup() {
+void startup(startup_main_t startup_main) {
+
+  auto simulator_thread = std::thread{startup_main};
+
   NS::AutoreleasePool *pAutoreleasePool = NS::AutoreleasePool::alloc()->init();
 
   MyAppDelegate del;
 
   NS::Application *pSharedApplication = NS::Application::sharedApplication();
   pSharedApplication->setDelegate(&del);
-  pSharedApplication->run();
 
+  pSharedApplication->run();
   pAutoreleasePool->release();
-  return 0;
+
+  // simulator_thread.join();
+  // exit(EXIT_SUCCESS);
 }

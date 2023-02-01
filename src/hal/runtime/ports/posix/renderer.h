@@ -4,25 +4,34 @@
 #include <Metal/Metal.hpp>
 #include <MetalKit/MetalKit.hpp>
 
+static constexpr size_t kInstanceRows = 10;
+static constexpr size_t kInstanceColumns = 10;
+static constexpr size_t kInstanceDepth = 10;
+static constexpr size_t kNumInstances =
+    (kInstanceRows * kInstanceColumns * kInstanceDepth);
+static constexpr size_t kMaxFramesInFlight = 3;
+
 class Renderer {
 public:
   Renderer(MTL::Device *pDevice);
   ~Renderer();
-  void draw(MTK::View *pView);
   void buildShaders();
+  void buildDepthStencilStates();
+  void buildTextures();
   void buildBuffers();
-  void buildFrameData();
+  void draw(MTK::View *pView);
 
 private:
   MTL::Device *_pDevice;
   MTL::CommandQueue *_pCommandQueue;
   MTL::Library *_pShaderLibrary;
   MTL::RenderPipelineState *_pPSO;
-
-  MTL::Buffer *_pArgBuffer;
-  MTL::Buffer *_pVertexPositionsBuffer;
-  MTL::Buffer *_pVertexColorsBuffer;
-  MTL::Buffer *_pFrameData[3];
+  MTL::DepthStencilState *_pDepthStencilState;
+  MTL::Texture *_pTexture;
+  MTL::Buffer *_pVertexDataBuffer;
+  MTL::Buffer *_pInstanceDataBuffer[kMaxFramesInFlight];
+  MTL::Buffer *_pCameraDataBuffer[kMaxFramesInFlight];
+  MTL::Buffer *_pIndexBuffer;
   float _angle;
   int _frame;
   dispatch_semaphore_t _semaphore;

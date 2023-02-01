@@ -9,8 +9,7 @@
 
 #include "hal/startup.h"
 
-int main(void) {
-  startup();
+void start_beatled() {
 
   puts("Starting beatled.");
 
@@ -18,12 +17,16 @@ int main(void) {
   state_manager_init();
 
   if (state_manager_set_state(STATE_STARTED) != 0) {
-    return 1;
+    return;
   }
 
   core0_entry(NULL);
 
   join_cores();
+}
+
+int main(void) {
+  startup(&start_beatled);
 
   return 0;
 }

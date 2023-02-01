@@ -5,7 +5,9 @@
 extern "C" {
 #endif
 
-int startup();
+typedef void (*startup_main_t)();
+
+void startup(startup_main_t startup_main);
 
 #ifdef __cplusplus
 }

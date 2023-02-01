@@ -13,24 +13,26 @@ add_subdirectory(process)
 add_subdirectory(registry)
 
 
-add_executable(pico_w_beatled 
+set(CURRENT_TARGET "pico_w_beatled")
+
+add_executable(${CURRENT_TARGET} 
   main.c
 ) 
 
 
-target_compile_definitions(pico_w_beatled PRIVATE
+target_compile_definitions(${CURRENT_TARGET}  PRIVATE
   WIFI_SSID=\"${WIFI_SSID}\"
   WIFI_PASSWORD=\"${WIFI_PASSWORD}\"
   SNTP_SERVER_ADDRESS="${SNTP_SERVER_ADDRESS}"
   SERVER_NAME="${SERVER_NAME}"
 )
 
-target_include_directories(pico_w_beatled PRIVATE
+target_include_directories(${CURRENT_TARGET} PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}
 )
 
 # Add any user requested libraries
-target_link_libraries(pico_w_beatled
+target_link_libraries(${CURRENT_TARGET} 
   ${RUNTIME_LIBRARIES}
   beatled_ws2812
   beatled_state_manager
@@ -50,16 +52,29 @@ if (PICO_PORT)
   # generate the header file into the source tree as it is included in the RP2040 datasheet
   # pico_generate_pio_header(pico_w_beatled ${CMAKE_CURRENT_LIST_DIR}/ws2812/ws2812.pio OUTPUT_DIR ${CMAKE_CURRENT_LIST_DIR}/generated)
 
-  pico_add_extra_outputs(pico_w_beatled)
+  pico_add_extra_outputs(${CURRENT_TARGET} )
 
 
-  pico_set_program_name(pico_w_beatled "pico_w_beatled")
-  pico_set_program_version(pico_w_beatled "0.1")
+  pico_set_program_name(${CURRENT_TARGET}  "pico_w_beatled")
+  pico_set_program_version(${CURRENT_TARGET}  "0.1")
 
-  pico_enable_stdio_uart(pico_w_beatled 1)
-  pico_enable_stdio_usb(pico_w_beatled 0)
+  pico_enable_stdio_uart(${CURRENT_TARGET}  1)
+  pico_enable_stdio_usb(${CURRENT_TARGET}  0)
 
   print_memsize(${PROJECT_NAME})
 
+elseif(POSIX_PORT AND APPLE)
+  # set_target_properties(${CURRENT_TARGET} PROPERTIES )            
+  set_target_properties(${CURRENT_TARGET}  PROPERTIES
+      MACOSX_BUNDLE True
+      BUNDLE True
+      MACOSX_BUNDLE_GUI_IDENTIFIER my.domain.style.identifier.${CURRENT_TARGET} 
+      MACOSX_BUNDLE_BUNDLE_NAME ${CURRENT_TARGET} 
+      MACOSX_BUNDLE_BUNDLE_VERSION "0.1"
+      MACOSX_BUNDLE_SHORT_VERSION_STRING "0.1"
+      MACOSX_BUNDLE_INFO_PLIST ${CMAKE_SOURCE_DIR}/cmake/customtemplate.plist.in
+  )
 endif()
+
+
 
