@@ -17,7 +17,6 @@ public:
   ~Renderer();
   void buildShaders();
   void buildDepthStencilStates();
-  void buildTextures();
   void buildBuffers();
   void draw(MTK::View *pView);
 
@@ -27,7 +26,6 @@ private:
   MTL::Library *_pShaderLibrary;
   MTL::RenderPipelineState *_pPSO;
   MTL::DepthStencilState *_pDepthStencilState;
-  MTL::Texture *_pTexture;
   MTL::Buffer *_pVertexDataBuffer;
   MTL::Buffer *_pInstanceDataBuffer[kMaxFramesInFlight];
   MTL::Buffer *_pCameraDataBuffer[kMaxFramesInFlight];
