@@ -45,8 +45,9 @@ int process_tempo_msg(beatled_message_t *server_msg, size_t data_length) {
   uint32_t tempo_period_us = ntohl(tempo_msg->tempo_period_us);
 
   uint64_t beat_local_time_ref = server_time_to_local_time(beat_time_ref);
-  // printf("Updated beat ref to %llu (%llx)\n", beat_time_ref, beat_time_ref);
-  // printf("Updated tempo to %lu (%lx)\n", tempo_period_us, tempo_period_us);
+  printf("Updated beat ref to %llu (%llx)\n", beat_time_ref, beat_time_ref);
+  printf("Updated tempo period to %u (%x)\n", tempo_period_us, tempo_period_us);
+  printf(" - equivalent tempo to %u\n", 1000000 * 60 / tempo_period_us);
 
   state_manager_set_state(STATE_TEMPO_SYNCED);
 

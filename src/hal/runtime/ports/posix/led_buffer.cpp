@@ -2,8 +2,8 @@
 
 #include "led_buffer.h"
 
-LEDBuffer::Ptr instance_ = std::make_shared<LEDBuffer>(
-    LEDColor{.red = 255, .blue = 0, .green = 0}, 16);
+LEDBuffer::Ptr instance_ =
+    std::make_shared<LEDBuffer>(LEDColor{.red = 0, .blue = 1, .green = 0}, 16);
 
 LEDBuffer::Ptr LEDBuffer::load_instance() {
   std::atomic_thread_fence(std::memory_order_relaxed);

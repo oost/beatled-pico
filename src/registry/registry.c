@@ -17,7 +17,9 @@ registry_t registry;
 
 void registry_init() {
   memset(&registry, 0, sizeof(registry));
-  registry.tempo_period_us = 120 * 1000000 / 60; // Default to 120Hz
+  // registry.tempo_period_us = 120.0 * 1000000 / 60; // Default to 120Hz
+  registry.tempo_period_us = 60 * 1000000 / 60; // Default to 0Hz
+  registry.program_idx = 0;
 }
 
 void registry_set_time_offset(uint64_t time_offset, uint64_t update_timestamp) {

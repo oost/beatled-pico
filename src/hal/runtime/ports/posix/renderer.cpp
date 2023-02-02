@@ -203,9 +203,10 @@ MTL::Buffer *Renderer::getInstanceDataBuffers() {
     float b = sinf(M_PI * 2.0f * iDivNumInstances);
 
     c = led_data->at(i);
-    pInstanceData[i].instanceColor = (float4){
-        static_cast<float>(c.red) / 255, static_cast<float>(c.green) / 255,
-        static_cast<float>(c.blue) / 255, 1.0f};
+    pInstanceData[i].instanceColor = (float4){c.red, c.green, c.blue, 1.0f};
+    // pInstanceData[i].instanceColor = (float4){
+    //     static_cast<float>(c.red) / 255, static_cast<float>(c.green) / 255,
+    //     static_cast<float>(c.blue) / 255, 1.0f};
     // pInstanceData[i].instanceColor = (float4){r, g, b, 1.0f};
 
     ix += 1;

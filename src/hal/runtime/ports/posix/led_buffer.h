@@ -6,9 +6,9 @@
 #include <vector>
 
 struct LEDColor {
-  uint8_t blue;
-  uint8_t red;
-  uint8_t green;
+  float blue;
+  float red;
+  float green;
 };
 
 class LEDBuffer {
@@ -22,9 +22,10 @@ public:
 
   LEDBuffer(uint32_t *stream, std::size_t num_led) : stream_(num_led) {
     for (int i = 0; i < num_led; i++) {
-      stream_[i] = LEDColor{.blue = (uint8_t)(stream[i] >> 8),
-                            .red = (uint8_t)(stream[i] >> 16),
-                            .green = (uint8_t)(stream[i] >> 24)};
+      stream_[i] =
+          LEDColor{.blue = static_cast<uint8_t>(stream[i] >> 8) / 255.f,
+                   .red = static_cast<uint8_t>(stream[i] >> 16) / 255.f,
+                   .green = static_cast<uint8_t>(stream[i] >> 24) / 255.f};
     }
   }
 

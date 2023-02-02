@@ -7,6 +7,6 @@
 add_hal_module(beatled_hal_network)
 
 
-target_include_directories(${CURRENT_LIBRARY_NAME} PRIVATE
-  ${CMAKE_CURRENT_LIST_DIR}/..
-)
+# target_include_directories(${CURRENT_LIBRARY_NAME} PRIVATE
+#   ${CMAKE_CURRENT_LIST_DIR}/..
+# )
