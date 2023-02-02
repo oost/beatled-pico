@@ -4,11 +4,7 @@
 #include <Metal/Metal.hpp>
 #include <MetalKit/MetalKit.hpp>
 
-static constexpr size_t kInstanceRows = 10;
-static constexpr size_t kInstanceColumns = 10;
-static constexpr size_t kInstanceDepth = 10;
-static constexpr size_t kNumInstances =
-    (kInstanceRows * kInstanceColumns * kInstanceDepth);
+static constexpr size_t kNumInstances = 16;
 static constexpr size_t kMaxFramesInFlight = 3;
 
 class Renderer {
@@ -21,6 +17,9 @@ public:
   void draw(MTK::View *pView);
 
 private:
+  MTL::Buffer *getInstanceDataBuffers();
+  MTL::Buffer *getCameraBuffer();
+
   MTL::Device *_pDevice;
   MTL::CommandQueue *_pCommandQueue;
   MTL::Library *_pShaderLibrary;

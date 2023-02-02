@@ -28,6 +28,7 @@ target_sources(${CURRENT_LIBRARY_NAME} PUBLIC
   ${CMAKE_CURRENT_LIST_DIR}/mtk_view_delegate.cpp
   ${CMAKE_CURRENT_LIST_DIR}/app_delegate.cpp
   ${CMAKE_CURRENT_LIST_DIR}/math.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/led_buffer.cpp
 )
 
 target_link_libraries(${CURRENT_LIBRARY_NAME}

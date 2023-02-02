@@ -6,6 +6,7 @@
 
 #include "app_delegate.h"
 #include "hal/startup.h"
+#include "led_buffer.h"
 
 #define NS_PRIVATE_IMPLEMENTATION
 #define MTL_PRIVATE_IMPLEMENTATION
@@ -28,4 +29,8 @@ void startup(startup_main_t startup_main) {
 
   // simulator_thread.join();
   // exit(EXIT_SUCCESS);
+}
+
+void push_color_stream(uint32_t *stream, uint16_t num_pixel) {
+  LEDBuffer::create_instance(stream, num_pixel);
 }

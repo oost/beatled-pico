@@ -1,7 +1,9 @@
 #include <simd/simd.h>
 
+#include "led_buffer.h"
 #include "math.h"
 #include "renderer.h"
+#include "shader_types.h"
 #include "shaders/triangle.metal.h"
 
 const int Renderer::kMaxFramesInFlight = 3;
@@ -31,25 +33,6 @@ Renderer::~Renderer() {
   _pCommandQueue->release();
   _pDevice->release();
 }
-
-namespace shader_types {
-struct VertexData {
-  simd::float3 position;
-  simd::float3 normal;
-};
-
-struct InstanceData {
-  simd::float4x4 instanceTransform;
-  simd::float3x3 instanceNormalTransform;
-  simd::float4 instanceColor;
-};
-
-struct CameraData {
-  simd::float4x4 perspectiveTransform;
-  simd::float4x4 worldTransform;
-  simd::float3x3 worldNormalTransform;
-};
-} // namespace shader_types
 
 void Renderer::buildShaders() {
   using NS::StringEncoding::UTF8StringEncoding;
@@ -167,28 +150,16 @@ void Renderer::buildBuffers() {
   }
 }
 
-void Renderer::draw(MTK::View *pView) {
+MTL::Buffer *Renderer::getInstanceDataBuffers() {
+  LEDBuffer::Ptr led_data = LEDBuffer::load_instance();
+
   using simd::float3;
   using simd::float4;
   using simd::float4x4;
 
-  NS::AutoreleasePool *pPool = NS::AutoreleasePool::alloc()->init();
-
-  _frame = (_frame + 1) % Renderer::kMaxFramesInFlight;
   MTL::Buffer *pInstanceDataBuffer = _pInstanceDataBuffer[_frame];
 
-  MTL::CommandBuffer *pCmd = _pCommandQueue->commandBuffer();
-  dispatch_semaphore_wait(_semaphore, DISPATCH_TIME_FOREVER);
-  Renderer *pRenderer = this;
-  pCmd->addCompletedHandler(^void(MTL::CommandBuffer *pCmd) {
-    dispatch_semaphore_signal(pRenderer->_semaphore);
-  });
-
-  _angle += 0.002f;
-
-  // Update instance positions:
-
-  const float scl = 0.2f;
+  const float scl = 0.1f;
   shader_types::InstanceData *pInstanceData =
       reinterpret_cast<shader_types::InstanceData *>(
           pInstanceDataBuffer->contents());
@@ -205,23 +176,19 @@ void Renderer::draw(MTK::View *pView) {
   size_t ix = 0;
   size_t iy = 0;
   size_t iz = 0;
+  float radius = 1.5;
+  LEDColor c;
   for (size_t i = 0; i < kNumInstances; ++i) {
-    if (ix == kInstanceRows) {
-      ix = 0;
-      iy += 1;
-    }
-    if (iy == kInstanceRows) {
-      iy = 0;
-      iz += 1;
-    }
+    float rot_angle = 2 * M_PI * (float)i / (float)kNumInstances;
 
     float4x4 scale = math::makeScale((float3){scl, scl, scl});
     float4x4 zrot = math::makeZRotate(_angle * sinf((float)ix));
     float4x4 yrot = math::makeYRotate(_angle * cosf((float)iy));
 
-    float x = ((float)ix - (float)kInstanceRows / 2.f) * (2.f * scl) + scl;
-    float y = ((float)iy - (float)kInstanceColumns / 2.f) * (2.f * scl) + scl;
-    float z = ((float)iz - (float)kInstanceDepth / 2.f) * (2.f * scl);
+    float x = radius * cos(rot_angle);
+    float y = radius * sin(rot_angle);
+    float z = 0;
+
     float4x4 translate =
         math::makeTranslate(math::add(objectPosition, {x, y, z}));
 
@@ -234,14 +201,22 @@ void Renderer::draw(MTK::View *pView) {
     float r = iDivNumInstances;
     float g = 1.0f - r;
     float b = sinf(M_PI * 2.0f * iDivNumInstances);
-    pInstanceData[i].instanceColor = (float4){r, g, b, 1.0f};
+
+    c = led_data->at(i);
+    pInstanceData[i].instanceColor = (float4){
+        static_cast<float>(c.red) / 255, static_cast<float>(c.green) / 255,
+        static_cast<float>(c.blue) / 255, 1.0f};
+    // pInstanceData[i].instanceColor = (float4){r, g, b, 1.0f};
 
     ix += 1;
   }
   pInstanceDataBuffer->didModifyRange(
       NS::Range::Make(0, pInstanceDataBuffer->length()));
 
-  // Update camera state:
+  return pInstanceDataBuffer;
+}
+
+MTL::Buffer *Renderer::getCameraBuffer() {
 
   MTL::Buffer *pCameraDataBuffer = _pCameraDataBuffer[_frame];
   shader_types::CameraData *pCameraData =
@@ -254,6 +229,29 @@ void Renderer::draw(MTK::View *pView) {
       math::discardTranslation(pCameraData->worldTransform);
   pCameraDataBuffer->didModifyRange(
       NS::Range::Make(0, sizeof(shader_types::CameraData)));
+  return pCameraDataBuffer;
+}
+
+void Renderer::draw(MTK::View *pView) {
+
+  NS::AutoreleasePool *pPool = NS::AutoreleasePool::alloc()->init();
+
+  _frame = (_frame + 1) % Renderer::kMaxFramesInFlight;
+
+  MTL::CommandBuffer *pCmd = _pCommandQueue->commandBuffer();
+  dispatch_semaphore_wait(_semaphore, DISPATCH_TIME_FOREVER);
+  Renderer *pRenderer = this;
+  pCmd->addCompletedHandler(^void(MTL::CommandBuffer *pCmd) {
+    dispatch_semaphore_signal(pRenderer->_semaphore);
+  });
+
+  _angle += 0.002f;
+
+  // Update instance positions:
+  MTL::Buffer *pInstanceDataBuffer = getInstanceDataBuffers();
+
+  // Update camera state:
+  MTL::Buffer *pCameraDataBuffer = getCameraBuffer();
 
   // Begin render pass:
 
