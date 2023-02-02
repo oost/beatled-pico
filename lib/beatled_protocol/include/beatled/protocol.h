@@ -54,6 +54,7 @@ typedef struct {
   beatled_message_t base;
   uint64_t beat_time_ref;
   uint32_t tempo_period_us;
+  uint16_t program_id;
 } __attribute__((__packed__)) beatled_message_tempo_response_t;
 
 // Hello. eCommandType = BEATLED_MESSAGE_HELLO_REQUEST
@@ -86,7 +87,7 @@ typedef struct {
 typedef struct {
   beatled_message_t base;
   uint64_t orig_time;
-  uint32_t program_id;
+  uint16_t program_id;
 } __attribute__((__packed__)) beatled_message_program_t;
 
 #ifdef __cplusplus
