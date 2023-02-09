@@ -43,16 +43,18 @@ int process_tempo_msg(beatled_message_t *server_msg, size_t data_length) {
 
   uint64_t beat_time_ref = ntohll(tempo_msg->beat_time_ref);
   uint32_t tempo_period_us = ntohl(tempo_msg->tempo_period_us);
+  uint16_t program_id = ntohs(tempo_msg->program_id);
 
   uint64_t beat_local_time_ref = server_time_to_local_time(beat_time_ref);
   printf("Updated beat ref to %llu (%llx)\n", beat_time_ref, beat_time_ref);
-  printf("Updated tempo period to %u (%x)\n", tempo_period_us, tempo_period_us);
-  printf(" - equivalent tempo to %u\n", 1000000 * 60 / tempo_period_us);
+  printf("Updated tempo period to %u (%x), equivalent tempo %f\n",
+         tempo_period_us, tempo_period_us, 1000000.0 * 60 / tempo_period_us);
 
   state_manager_set_state(STATE_TEMPO_SYNCED);
 
   registry_update_t registry_update = {.tempo_time_ref = beat_local_time_ref,
                                        .tempo_period_us = tempo_period_us,
+                                       .program_id = program_id,
                                        .update_timestamp = time_us_64(),
                                        .registry_update_fields =
                                            (0x01 << REGISTRY_UPDATE_TEMPO)};

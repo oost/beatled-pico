@@ -22,16 +22,17 @@ void core1_init() {
 
 void update_state(registry_update_t *update_values) {
   if (update_values->registry_update_fields & (0x01 << REGISTRY_UPDATE_TEMPO)) {
-    registry_set_tempo(update_values->tempo_time_ref,
-                       update_values->tempo_period_us,
-                       update_values->update_timestamp);
+    registry_set_tempo(
+        update_values->tempo_time_ref, update_values->tempo_period_us,
+        update_values->program_id, update_values->update_timestamp);
   }
+
   if (update_values->registry_update_fields &
       (0x01 << REGISTRY_UPDATE_PROGRAM)) {
-    registry_set_program(update_values->program_idx);
+    registry_set_program(update_values->program_id);
 
     printf("Updated pattern to: %s\n",
-           pattern_get_name(update_values->program_idx));
+           pattern_get_name(update_values->program_id));
   }
 
   // if (new_state->tempo_time_ref) {
@@ -49,6 +50,7 @@ void core1_loop() {
   registry_update_t new_state;
   printf("Starting core 1 loop\n");
 
+  uint32_t idx = 0;
   while (1) {
     if (hal_queue_pop_message(intercore_command_queue, &new_state)) {
       puts("Updating state in core 1");
@@ -57,5 +59,6 @@ void core1_loop() {
 
     led_update();
     sleep_ms(LED_CORE_SLEEP_MS);
+    idx++;
   }
 }

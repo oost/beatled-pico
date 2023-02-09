@@ -5,9 +5,17 @@
 #include "state_manager.h"
 #include "states/states.h"
 
-static state_manager_state_t current_state = 0;
+typedef struct state_manager_internal_state {
+  state_manager_state_t current_state;
+  int64_t last_tempo_sync_time;
+} state_manager_internal_state_t;
+
+state_manager_internal_state_t internal_state = {.current_state = 0,
+                                                 .last_tempo_sync_time = 0};
 exit_state_fn exit_current_state;
 
+// Each element in the matrix is a mask determining the states that can be
+// transitioned to from a given state.
 uint16_t transition_matrix[] = {
     0x01 << STATE_STARTED,      // STATE_UNKNOWN
     0x01 << STATE_INITIALIZED,  // STATE_STARTED
@@ -19,10 +27,12 @@ uint16_t transition_matrix[] = {
 
 void state_manager_init() {}
 
-state_manager_state_t state_manager_get_state() { return current_state; }
+state_manager_state_t state_manager_get_state() {
+  return internal_state.current_state;
+}
 
 int transition_state(state_manager_state_t new_state) {
-  state_manager_state_t old_state = current_state;
+  state_manager_state_t old_state = internal_state.current_state;
 
   if (old_state == new_state) {
     puts("Transitioning to the same state... Noop");
@@ -31,7 +41,8 @@ int transition_state(state_manager_state_t new_state) {
 
   int err = 0;
 
-  if (((transition_matrix[current_state] & (0x01 << new_state)) == 0)) {
+  if (((transition_matrix[internal_state.current_state] &
+        (0x01 << new_state)) == 0)) {
     printf("Transition not allowed from %d to %d\n", old_state, new_state);
     return 2;
   }
@@ -42,7 +53,7 @@ int transition_state(state_manager_state_t new_state) {
     err = exit_current_state();
   }
 
-  current_state = new_state;
+  internal_state.current_state = new_state;
 
   switch (new_state) {
   case STATE_STARTED:

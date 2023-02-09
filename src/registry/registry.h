@@ -7,7 +7,7 @@ typedef struct registry {
   uint64_t tempo_time_ref;
   uint32_t tempo_period_us;
   uint64_t tempo_time_update_timestamp;
-  uint8_t program_idx;
+  uint16_t program_id;
 } registry_t;
 
 typedef enum {
@@ -21,7 +21,7 @@ typedef struct registry_update {
   uint64_t time_offset;
   uint64_t tempo_time_ref;
   uint32_t tempo_period_us;
-  uint8_t program_idx;
+  uint16_t program_id;
   uint8_t registry_update_fields;
 } registry_update_t;
 
@@ -32,8 +32,8 @@ void registry_init();
 void registry_set_time_offset(uint64_t time_offset, uint64_t update_timestamp);
 
 void registry_set_tempo(uint64_t tempo_time_ref, uint32_t tempo_period_us,
-                        uint64_t update_timestamp);
+                        uint16_t program_id, uint64_t update_timestamp);
 
-void registry_set_program(uint8_t program_idx);
+void registry_set_program(uint8_t program_id);
 
 #endif // REGISTRY__REGISTRY_H

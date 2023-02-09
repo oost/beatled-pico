@@ -30,7 +30,7 @@ void led_set_random_pattern() {
 void led_beat() { cycle_idx = 0; }
 
 void led_update() {
-  if (registry.tempo_time_ref == 0) {
+  if (registry.tempo_time_ref == 0 || registry.tempo_period_us == 0) {
     return;
   }
 
@@ -49,7 +49,7 @@ void led_update() {
     puts("Beat ... ");
   }
 
-  run_pattern(registry.program_idx, colors[current_stream], NUM_PIXELS,
+  run_pattern(registry.program_id, colors[current_stream], NUM_PIXELS,
               beat_frac);
 
   output_strings_dma(colors[current_stream]);

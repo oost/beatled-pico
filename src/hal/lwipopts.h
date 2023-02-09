@@ -1,5 +1,5 @@
-#ifndef _LWIPOPTS_EXAMPLE_COMMONH_H
-#define _LWIPOPTS_EXAMPLE_COMMONH_H
+#ifndef _LWIPOPTS_H
+#define _LWIPOPTS_H
 
 // #include "clock/clock.h"
 

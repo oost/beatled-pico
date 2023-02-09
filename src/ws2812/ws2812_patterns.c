@@ -29,7 +29,7 @@ static inline uint32_t rgb_u32(uint8_t r, uint8_t g, uint8_t b) {
 }
 
 void pattern_snakes(uint32_t *stream, size_t len, uint32_t t) {
-  uint32_t pos = t >> 26;
+  uint8_t pos = t >> 26;
 
   for (unsigned int i = 0; i < len; ++i) {
     unsigned int x = (i + (pos >> 1)) % 64;
@@ -98,6 +98,15 @@ void pattern_solid(uint32_t *stream, size_t len, uint32_t t) {
 int level = 8;
 
 void pattern_fade(uint32_t *stream, size_t len, uint32_t t) {
+  uint8_t value = 255 - (t >> 24);
+  uint32_t v = value * 0x01010100;
+
+  for (int i = 0; i < len; ++i) {
+    stream[i] = v;
+  }
+}
+
+void pattern_fade_exp(uint32_t *stream, size_t len, uint32_t t) {
   unsigned int shift = 4;
 
   unsigned int max = 16; // let's not draw too much current!
@@ -122,7 +131,7 @@ const pattern _pattern_table[] = {
     {pattern_snakes, "Snakes!"},   {pattern_random, "Random data"},
     {pattern_sparkle, "Sparkles"}, {pattern_greys, "Greys"},
     {pattern_drops, "Drops"},      {pattern_solid, "Solid!"},
-    {pattern_fade, "Fade"},
+    {pattern_fade, "Fade"},        {pattern_fade_exp, "Fade Exponential"},
 };
 
 const size_t num_patterns =
