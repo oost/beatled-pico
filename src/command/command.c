@@ -6,6 +6,7 @@
 #include "command/utils.h"
 #include "constants.h"
 #include "hal/blink.h"
+#include "next_beat/next_beat.h"
 #include "tempo/tempo.h"
 #include "time/time.h"
 
@@ -55,6 +56,10 @@ int handle_server_message(void *event_data, size_t data_length,
 
   case BEATLED_MESSAGE_TIME_RESPONSE:
     err = process_time_msg(server_msg, data_length, dest_time);
+    break;
+
+  case BEATLED_MESSAGE_NEXT_BEAT:
+    err = process_next_beat_msg(server_msg, data_length);
     break;
 
   case BEATLED_MESSAGE_ERROR:

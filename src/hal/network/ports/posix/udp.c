@@ -38,6 +38,7 @@ int create_udp_socket(udp_parameters_t *udp_params) {
   struct sockaddr_in *addr;
   struct sockaddr_in device_addr;
   if (resolve_server_address_blocking(udp_params->server_name, &server_addr)) {
+    perror("socket creation failed");
     return 1;
   }
   addr = (struct sockaddr_in *)&server_addr;
@@ -99,7 +100,7 @@ void start_udp(const char *server_name, uint16_t server_port, uint16_t udp_port,
   params->server_port = server_port;
 
   if (create_udp_socket(params)) {
-    perror("Error createing sockets");
+    perror("Error creating sockets");
     return;
   }
 
