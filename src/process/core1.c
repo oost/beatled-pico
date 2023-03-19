@@ -4,8 +4,8 @@
 #include "../constants.h"
 #include "core1.h"
 #include "hal/process.h"
+#include "hal/registry.h"
 #include "intercore_queue.h"
-#include "registry.h"
 #include "ws2812.h"
 #include "ws2812_patterns.h"
 
@@ -15,47 +15,53 @@ void *core1_entry(void *data) {
   return NULL;
 }
 
-void core1_init() {
-  printf("Initializing core 1\n");
-  registry_init();
-}
+void core1_init() { printf("Initializing core 1\n"); }
 
-void update_state(registry_update_t *update_values) {
-  if (update_values->registry_update_fields & (0x01 << REGISTRY_UPDATE_TEMPO)) {
-    registry_set_tempo(
-        update_values->tempo_time_ref, update_values->tempo_period_us,
-        update_values->program_id, update_values->update_timestamp);
-  }
+// void update_state(registry_update_t *update_values) {
+//   if (update_values->registry_update_fields & (0x01 <<
+//   REGISTRY_UPDATE_TEMPO)) {
+//     registry_set_tempo(
+//         update_values->tempo_time_ref, update_values->tempo_period_us,
+//         update_values->program_id, update_values->update_timestamp);
+//   }
 
-  if (update_values->registry_update_fields &
-      (0x01 << REGISTRY_UPDATE_PROGRAM)) {
-    registry_set_program(update_values->program_id);
+//   if (update_values->registry_update_fields &
+//       (0x01 << REGISTRY_UPDATE_NEXT_BEAT)) {
+//     registry_set_next_beat(
+//         update_values->tempo_time_ref, update_values->tempo_period_us,
+//         update_values->program_id, update_values->update_timestamp);
+//   }
 
-    printf("Updated pattern to: %s\n",
-           pattern_get_name(update_values->program_id));
-  }
+//   if (update_values->registry_update_fields &
+//       (0x01 << REGISTRY_UPDATE_PROGRAM)) {
+//     registry_set_program(update_values->program_id);
 
-  // if (new_state->tempo_time_ref) {
-  //   led_update_time_ref(new_state->tempo_time_ref);
-  // }
-  // if (new_state->tempo_period_us) {
-  //   led_update_tempo(new_state->tempo_period_us);
-  // }
-  // if (new_state->program_idx) {
-  //   led_update_pattern_idx(new_state->program_idx);
-  // }
-}
+//     printf("Updated pattern to: %s\n",
+//            pattern_get_name(update_values->program_id));
+//   }
+
+//   // if (new_state->tempo_time_ref) {
+//   //   led_update_time_ref(new_state->tempo_time_ref);
+//   // }
+//   // if (new_state->tempo_period_us) {
+//   //   led_update_tempo(new_state->tempo_period_us);
+//   // }
+//   // if (new_state->program_idx) {
+//   //   led_update_pattern_idx(new_state->program_idx);
+//   // }
+// }
 
 void core1_loop() {
-  registry_update_t new_state;
+  // registry_update_t new_state;
   printf("Starting core 1 loop\n");
 
   uint32_t idx = 0;
   while (1) {
-    if (hal_queue_pop_message(intercore_command_queue, &new_state)) {
-      puts("Updating state in core 1");
-      update_state(&new_state);
-    }
+    // // Do we need to add skips to prevent DoS?
+    // if (hal_queue_pop_message(intercore_command_queue, &new_state)) {
+    //   puts("Updating state in core 1");
+    //   update_state(&new_state);
+    // }
 
     led_update();
     sleep_ms(LED_CORE_SLEEP_MS);

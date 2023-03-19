@@ -10,7 +10,9 @@
 
 static uint64_t server_time_ref_us;
 
-void init_test() { server_time_ref_us = get_sntp_server_time_ref_us(); }
+void init_test() {
+  // server_time_ref_us = get_sntp_server_time_ref_us();
+}
 
 void test_tempo() {
   float tempo = 60;

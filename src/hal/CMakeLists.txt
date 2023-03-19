@@ -11,6 +11,7 @@ add_subdirectory(time)
 add_subdirectory(process)
 add_subdirectory(board)
 add_subdirectory(runtime)
+add_subdirectory(registry)
 
 add_library(beatled_hal)
 
@@ -23,4 +24,5 @@ target_link_libraries(beatled_hal PUBLIC
   beatled_hal_process
   beatled_hal_board
   beatled_hal_runtime
+  beatled_hal_registry
 )

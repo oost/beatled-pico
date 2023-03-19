@@ -15,23 +15,32 @@ void dgram_recv(void *arg, struct udp_pcb *pcb, struct pbuf *p,
   // printf("Received UDP datagram from port %d\n", port);
   size_t data_length = p->tot_len;
   void *server_msg = (void *)malloc(data_length);
+
+  // Copy message to our buffer and free the pbuf.
   uint16_t copied_length = pbuf_copy_partial(p, server_msg, data_length, 0);
+  pbuf_free(p);
+
+  int server_msg_enqueue_error = 1;
 
   if (copied_length > 0 && copied_length == data_length) {
     printf("Received: %d bytes\n", copied_length);
-    printf("The string is: %.*s\n", copied_length, server_msg);
+    // printf("The string is: %.*s\n", copied_length, server_msg);
 
-    if (process_response_(server_msg, data_length)) {
+    // Let's process the message
+    int server_msg_enqueue_error = process_response_(server_msg, data_length);
+    if (server_msg_enqueue_error) {
       puts("Error while queueing UDP message on event loop");
     }
-    // if (!event_queue_add_message(event_server_message, server_msg,
-    //                              data_length)) {
-    //   puts("Error adding message to queue");
-    // }
   } else {
     puts(" **** Error with msg...");
   }
-  pbuf_free(p);
+
+  if (server_msg_enqueue_error) {
+    // We didn't manage to enqueue the message so we are still the owner. Let's
+    // free it...
+    free(server_msg);
+  }
+
   puts("Done");
 }
 

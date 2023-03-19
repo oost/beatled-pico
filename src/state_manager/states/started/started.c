@@ -14,7 +14,7 @@
 // #include "process/core0.h"
 // #include "process/core1.h"
 // #include "process/intercore_queue.h"
-#include "registry.h"
+#include "hal/registry.h"
 #include "started.h"
 #include "state_manager.h"
 #include "ws2812.h"
@@ -28,13 +28,16 @@ hal_queue_handle_t intercore_command_queue;
 int enter_started_state() {
   // board_id_handle_t board_id_ptr = get_unique_board_id();
 
+  puts("- Initializing registry");
+  registry_init();
+
   // printf("Starting on pico board %s\n", state_manager_get_unique_board_id());
   puts("- Initializing event queue");
   event_queue_init();
 
-  puts("- Initializing intercore queue");
-  intercore_command_queue =
-      hal_queue_init(sizeof(registry_update_t), MAX_INTERCORE_QUEUE_COUNT);
+  // puts("- Initializing intercore queue");
+  // intercore_command_queue =
+  //     hal_queue_init(sizeof(registry_update_t), MAX_INTERCORE_QUEUE_COUNT);
 
   puts("- Starting STDIO");
   hal_stdio_init();

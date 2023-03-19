@@ -117,7 +117,9 @@
 			"random": "cpp",
 			"semaphore": "cpp",
 			"set": "cpp",
-			"algorithm": "cpp"
+			"algorithm": "cpp",
+			"stdint.h": "c",
+			"registry.h": "c"
 		},
 		"editor.tokenColorCustomizations": {
 			"textMateRules": [

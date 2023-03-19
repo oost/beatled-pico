@@ -3,9 +3,9 @@
 #include "clock/clock.h"
 #include "command/utils.h"
 #include "hal/network.h"
+#include "hal/registry.h"
 #include "hal/udp.h"
 #include "process/intercore_queue.h"
-#include "registry.h"
 #include "state_manager/state_manager.h"
 
 int prepare_tempo_request(void *buffer_payload, size_t buf_len) {
@@ -52,17 +52,22 @@ int process_tempo_msg(beatled_message_t *server_msg, size_t data_length) {
 
   state_manager_set_state(STATE_TEMPO_SYNCED);
 
-  registry_update_t registry_update = {.tempo_time_ref = beat_local_time_ref,
-                                       .tempo_period_us = tempo_period_us,
-                                       .program_id = program_id,
-                                       .update_timestamp = time_us_64(),
-                                       .registry_update_fields =
-                                           (0x01 << REGISTRY_UPDATE_TEMPO)};
+  registry_lock_mutex();
+  registry.tempo_period_us = tempo_period_us;
+  registry.update_timestamp = time_us_64();
+  registry_unlock_mutex();
 
-  if (!hal_queue_add_message(intercore_command_queue, &registry_update)) {
-    puts("Intercore queue is FULL!!!");
-    return 1;
-  }
+  // registry_update_t registry_update = {.tempo_time_ref = beat_local_time_ref,
+  //                                      .tempo_period_us = tempo_period_us,
+  //                                      .program_id = program_id,
+  //                                      .update_timestamp = time_us_64(),
+  //                                      .registry_update_fields =
+  //                                          (0x01 << REGISTRY_UPDATE_TEMPO)};
+
+  // if (!hal_queue_add_message(intercore_command_queue, &registry_update)) {
+  //   puts("Intercore queue is FULL!!!");
+  //   return 1;
+  // }
 
   return 0;
 }

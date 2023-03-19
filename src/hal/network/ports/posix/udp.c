@@ -72,14 +72,14 @@ void *udp_socket_listen(void *data) {
   struct sockaddr_in remaddr;          /* remote address */
   socklen_t addrlen = sizeof(remaddr); /* length of addresses */
 
-  printf("waiting on port %d\n", params->udp_port);
+  printf("Waiting on port %d\n", params->udp_port);
   for (;;) {
     recvlen = recvfrom(udp_socket_fd, buffer, MAXLINE - 1, 0,
                        (struct sockaddr *)&remaddr, &addrlen);
-    printf("received %d bytes\n", recvlen);
+    printf("Received %d bytes\n", recvlen);
     if (recvlen > 0) {
       buffer[recvlen] = 0;
-      printf("received message: \"%s\"\n", buffer);
+      // printf("Received message: \"%s\"\n", buffer);
       void *server_msg = (void *)malloc(recvlen);
       memcpy(server_msg, buffer, recvlen);
       if ((params->process_response)(server_msg, recvlen)) {

@@ -33,6 +33,47 @@ int command_error(beatled_message_t *server_msg, size_t data_length) {
   return 0;
 }
 
+int validate_server_message(void *event_data, size_t data_length) {
+  if (sizeof(beatled_message_t) >= data_length) {
+    return 1;
+  }
+  beatled_message_t *server_msg = (beatled_message_t *)event_data;
+
+  int err = 0;
+  switch (server_msg->type) {
+  case BEATLED_MESSAGE_HELLO_RESPONSE:
+    err = !(sizeof(beatled_message_hello_response_t) == data_length);
+    break;
+
+  case BEATLED_MESSAGE_PROGRAM:
+    err = !(sizeof(beatled_message_program_t) == data_length);
+    break;
+
+  case BEATLED_MESSAGE_TEMPO_RESPONSE:
+    err = !(sizeof(beatled_message_tempo_response_t) == data_length);
+    break;
+
+  case BEATLED_MESSAGE_TIME_RESPONSE:
+    err = !(sizeof(beatled_message_time_response_t) == data_length);
+    break;
+
+  case BEATLED_MESSAGE_NEXT_BEAT:
+    err = !(sizeof(beatled_message_next_beat_t) == data_length);
+    break;
+
+  case BEATLED_MESSAGE_ERROR:
+    err = !(sizeof(beatled_message_error_t) == data_length);
+    break;
+
+  default:
+    puts("Unknown command...");
+    blink(ERROR_BLINK_SPEED, ERROR_COMMAND);
+    err = 1;
+  }
+
+  return err;
+}
+
 int handle_server_message(void *event_data, size_t data_length,
                           uint64_t dest_time) {
   if (sizeof(beatled_message_t) >= data_length) {
@@ -81,6 +122,7 @@ int handle_event(event_t *event) {
   int err;
   switch (event->event_type) {
   case event_server_message:
+    // err = validate_server_message(event->data, event->data_length);
     err = handle_server_message(event->data, event->data_length, event->time);
     break;
 

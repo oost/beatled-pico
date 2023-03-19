@@ -1,5 +1,5 @@
-#ifndef EVENT__EVENT_H
-#define EVENT__EVENT_H
+#ifndef SRC__EVENT__EVENT__H_
+#define SRC__EVENT__EVENT__H_
 
 #include <stdint.h>
 
@@ -12,4 +12,4 @@ typedef struct {
   void *data;
 } event_t;
 
-#endif // EVENT__EVENT_H
+#endif // SRC__EVENT__EVENT__H_

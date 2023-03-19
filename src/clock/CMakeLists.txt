@@ -5,7 +5,7 @@ target_sources(
         clock.c
 )
 
-target_link_libraries(beatled_autotest INTERFACE
+target_link_libraries(beatled_clock INTERFACE
   beatled_hal_blink
   beatled_hal_time
 )

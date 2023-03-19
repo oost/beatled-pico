@@ -33,6 +33,15 @@ int send_time_request() {
                           &prepare_time_request);
 }
 
+int validate_time_msg(beatled_message_t *server_msg, size_t data_length,
+                      uint64_t dest_time) {
+  puts("Time!");
+  if (!check_size(data_length, sizeof(beatled_message_time_response_t))) {
+    return 1;
+  }
+  return 0;
+}
+
 int process_time_msg(beatled_message_t *server_msg, size_t data_length,
                      uint64_t dest_time) {
   puts("Time!");

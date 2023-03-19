@@ -10,7 +10,6 @@ add_subdirectory(command)
 add_subdirectory(clock)
 add_subdirectory(event)
 add_subdirectory(process)
-add_subdirectory(registry)
 
 
 set(CURRENT_TARGET "pico_w_beatled")
@@ -42,7 +41,6 @@ target_link_libraries(${CURRENT_TARGET}
   beatled_hal
   beatled_process
   beatled_autotest
-  beatled_registry
 )
 
 if (PICO_PORT)

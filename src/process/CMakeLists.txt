@@ -17,7 +17,6 @@ target_link_libraries(beatled_process PUBLIC
   beatled_state_manager
   beatled_ws2812
   beatled_event
-  beatled_registry
 )
 
 target_include_directories(beatled_process INTERFACE ${CMAKE_CURRENT_LIST_DIR})
