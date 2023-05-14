@@ -62,7 +62,11 @@ int enter_started_state() {
   start_udp(SERVER_NAME, UDP_SERVER_PORT, UDP_PORT,
             &add_payload_to_event_queue);
 
-  state_manager_set_state(STATE_INITIALIZED);
+  if (!schedule_state_transition(STATE_INITIALIZED)) {
+    puts("- Can't schedule transition to initialized state. Fatal error.");
+    exit(1);
+  }
+
   return 0;
 }
 

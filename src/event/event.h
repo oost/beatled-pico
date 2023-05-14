@@ -3,7 +3,11 @@
 
 #include <stdint.h>
 
-typedef enum { event_error = 0, event_server_message } event_type_t;
+typedef enum {
+  event_error = 0,
+  event_server_message,
+  event_state_transition
+} event_type_t;
 
 typedef struct {
   event_type_t event_type;

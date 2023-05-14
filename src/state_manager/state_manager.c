@@ -1,7 +1,9 @@
 // #include <pico/sync.h>
-#include "hal/unique_id.h"
 #include <stdio.h>
+#include <stdlib.h>
 
+#include "event/event_queue.h"
+#include "hal/unique_id.h"
 #include "state_manager.h"
 #include "states/states.h"
 
@@ -35,7 +37,7 @@ int transition_state(state_manager_state_t new_state) {
   state_manager_state_t old_state = internal_state.current_state;
 
   if (old_state == new_state) {
-    puts("Transitioning to the same state... Noop");
+    printf("Transitioning to the same state (%d)... Noop\n", old_state);
     return 1;
   }
 
@@ -51,6 +53,9 @@ int transition_state(state_manager_state_t new_state) {
 
   if (exit_current_state) {
     err = exit_current_state();
+    exit_current_state = NULL;
+  } else if (old_state) {
+    puts("Something is wrong...");
   }
 
   internal_state.current_state = new_state;
@@ -84,4 +89,11 @@ int transition_state(state_manager_state_t new_state) {
 
 int state_manager_set_state(state_manager_state_t state) {
   return transition_state(state);
+}
+
+bool schedule_state_transition(state_manager_state_t next_state) {
+  state_event_t *state_event = (state_event_t *)malloc(sizeof(state_event_t));
+  state_event->next_state = next_state;
+  return event_queue_add_message(event_state_transition, state_event,
+                                 sizeof(state_event_t));
 }

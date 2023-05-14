@@ -76,7 +76,7 @@ void *udp_socket_listen(void *data) {
   for (;;) {
     recvlen = recvfrom(udp_socket_fd, buffer, MAXLINE - 1, 0,
                        (struct sockaddr *)&remaddr, &addrlen);
-    printf("Received %d bytes\n", recvlen);
+    // printf("Received %d bytes\n", recvlen);
     if (recvlen > 0) {
       buffer[recvlen] = 0;
       // printf("Received message: \"%s\"\n", buffer);

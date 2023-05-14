@@ -34,7 +34,7 @@ int process_tempo_msg(beatled_message_t *server_msg, size_t data_length) {
   int current_state = state_manager_get_state();
   if (current_state != STATE_TIME_SYNCED &&
       current_state != STATE_TEMPO_SYNCED) {
-    printf("Can't set tempo while in state %d\n", state_manager_get_state());
+    // printf("Can't set tempo while in state %d\n", state_manager_get_state());
     return 1;
   }
 
@@ -50,7 +50,9 @@ int process_tempo_msg(beatled_message_t *server_msg, size_t data_length) {
   printf("Updated tempo period to %u (%x), equivalent tempo %f\n",
          tempo_period_us, tempo_period_us, 1000000.0 * 60 / tempo_period_us);
 
-  state_manager_set_state(STATE_TEMPO_SYNCED);
+  if (!schedule_state_transition(STATE_TEMPO_SYNCED)) {
+    puts("- Can't schedule transition to tempo synced state. Fatal error.");
+  }
 
   registry_lock_mutex();
   registry.tempo_period_us = tempo_period_us;

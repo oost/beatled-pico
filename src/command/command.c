@@ -7,6 +7,7 @@
 #include "constants.h"
 #include "hal/blink.h"
 #include "next_beat/next_beat.h"
+#include "state_manager.h"
 #include "tempo/tempo.h"
 #include "time/time.h"
 
@@ -66,7 +67,7 @@ int validate_server_message(void *event_data, size_t data_length) {
     break;
 
   default:
-    puts("Unknown command...");
+    printf("Unknown command type %d...\n", server_msg->type);
     blink(ERROR_BLINK_SPEED, ERROR_COMMAND);
     err = 1;
   }
@@ -108,7 +109,7 @@ int handle_server_message(void *event_data, size_t data_length,
     break;
 
   default:
-    puts("Unknown command...");
+    printf("Unknown message type %d...\n", server_msg->type);
     blink(ERROR_BLINK_SPEED, ERROR_COMMAND);
     err = 1;
   }
@@ -116,14 +117,23 @@ int handle_server_message(void *event_data, size_t data_length,
   return err;
 }
 
+int handle_state_change(void *event_data) {
+  state_event_t *state_event = (state_event_t *)event_data;
+  state_manager_set_state(state_event->next_state);
+  return 0;
+}
+
 int handle_event(event_t *event) {
   puts("Handling event");
-
   int err;
   switch (event->event_type) {
   case event_server_message:
     // err = validate_server_message(event->data, event->data_length);
     err = handle_server_message(event->data, event->data_length, event->time);
+    break;
+
+  case event_state_transition:
+    err = handle_state_change(event->data);
     break;
 
   case event_error:
@@ -133,12 +143,16 @@ int handle_event(event_t *event) {
     break;
 
   default:
-    puts("Unknown command...");
+    printf("Unknown event type %d...\n", event->event_type);
     blink(ERROR_BLINK_SPEED, ERROR_COMMAND);
     err = 1;
   }
+  puts("Event handled.");
   if (event->data != NULL) {
+    // puts("Deleteing event data.");
+    printf("Freeing memory at %x\n", event->data);
     free(event->data);
   }
+
   return err;
 }

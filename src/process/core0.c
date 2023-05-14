@@ -29,8 +29,6 @@ void core0_loop() {
   printf("Starting core 0 loop\n");
   blink(MESSAGE_BLINK_SPEED, MESSAGE_WELCOME);
 
-  send_hello_request();
-
   event_t event;
 
 #ifdef PICO_AUTOTEST

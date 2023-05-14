@@ -16,14 +16,41 @@
     },
   },
   "cmake.environment": {
-    "PICO_SDK_PATH": "../pico-sdk",
+    "PICO_SDK_PATH": "./lib/pico-sdk",
     "PICO_BOARD": "pico_w",
-    "PICO_TOOLCHAIN_PATH": "/Applications/ArmGNUToolchain/12.2.rel1/arm-none-eabi"
+    // "PICO_TOOLCHAIN_PATH": "/Applications/ArmGNUToolchain/12.2.rel1/arm-none-eabi"
   },
   "cmake.buildBeforeRun": true,
   "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
   "cmake.configureSettings": {
-    "PORT": "posix",
-    "CMAKE_TOOLCHAIN_FILE": "/Users/oscarostlund/Programmation/projects/vcpkg/scripts/buildsystems/vcpkg.cmake"
+    "PORT": "pico"
+    // "PORT": "posix",
+    // "CMAKE_TOOLCHAIN_FILE": "/Users/oscarostlund/Programmation/projects/vcpkg/scripts/buildsystems/vcpkg.cmake"
+  },
+  "editor.tokenColorCustomizations": {
+    "textMateRules": [
+      {
+        "scope": "googletest.failed",
+        "settings": {
+          "foreground": "#f00"
+        }
+      },
+      {
+        "scope": "googletest.passed",
+        "settings": {
+          "foreground": "#0f0"
+        }
+      },
+      {
+        "scope": "googletest.run",
+        "settings": {
+          "foreground": "#0f0"
+        }
+      }
+    ]
+  },
+  "files.associations": {
+    "time.h": "c",
+    "network.h": "c"
   }
 }

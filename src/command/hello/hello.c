@@ -38,9 +38,13 @@ int process_hello_msg(beatled_message_t *server_msg, size_t data_length) {
   beatled_message_hello_response_t *hello_msg =
       (beatled_message_hello_response_t *)server_msg;
   uint16_t client_id = ntohs(hello_msg->client_id);
-  printf("Registered with client id: %d", client_id);
+  printf("Registered with client id: %d\n", client_id);
   blink(MESSAGE_BLINK_SPEED, MESSAGE_HELLO);
-  state_manager_set_state(STATE_REGISTERED);
+
+  if (!schedule_state_transition(STATE_REGISTERED)) {
+    puts("- Can't schedule transition to registered state. Fatal error.");
+    exit(1);
+  }
 
   return 0;
 }

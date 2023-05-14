@@ -1,4 +1,5 @@
 #include <pico/sync.h>
+#include <string.h>
 
 #include "hal/registry.h"
 
@@ -17,5 +18,5 @@ void registry_lock_mutex() { mutex_enter_blocking(&registry_mutex); }
 void registry_unlock_mutex() { mutex_exit(&registry_mutex); }
 
 bool registry_try_lock_mutex() {
-  return nmutex_try_enter(&registry_mutex, NULL);
+  return mutex_try_enter(&registry_mutex, NULL);
 }

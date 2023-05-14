@@ -57,7 +57,7 @@ int process_time_msg(beatled_message_t *server_msg, size_t data_length,
 
   uint64_t delay = (dest_time - orig_time) - (xmit_time - recv_time);
   int64_t clock_offset =
-      ((recv_time - orig_time) - (xmit_time - dest_time)) / 2;
+      ((signed)(recv_time - orig_time) + (signed)(xmit_time - dest_time)) / 2;
   printf(
       "Got times\n - orig: %llu\n - recv: %llu\n - xmit: %llu\n - dest: %llu\n",
       orig_time, recv_time, xmit_time, dest_time);
@@ -65,7 +65,10 @@ int process_time_msg(beatled_message_t *server_msg, size_t data_length,
 
   set_server_time_offset(clock_offset);
 
-  state_manager_set_state(STATE_TIME_SYNCED);
+  if (!schedule_state_transition(STATE_TIME_SYNCED)) {
+    puts("- Can't schedule transition to time synced state. Fatal error.");
+    exit(1);
+  }
 
   return 0;
 }

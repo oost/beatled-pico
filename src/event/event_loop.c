@@ -12,7 +12,7 @@ void run_event_loop(handle_event_fn handle_event) {
   while (1) {
     event_queue_pop_message_blocking(&event);
 
-    puts("Got a message, going to parse it...");
+    // puts("Got a message, going to parse it...");
 
     if (handle_event(&event)) {
       puts("Error parsing command :-(");

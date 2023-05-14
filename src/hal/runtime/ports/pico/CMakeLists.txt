@@ -8,6 +8,6 @@ target_sources(${CURRENT_LIBRARY_NAME} PUBLIC
   ${CMAKE_CURRENT_LIST_DIR}/startup.cpp
 )
 
-target_link_libraries(${CURRENT_LIBRARY_NAME}
-  METAL_CPP
-)
+# target_link_libraries(${CURRENT_LIBRARY_NAME}
+#   METAL_CPP
+# )

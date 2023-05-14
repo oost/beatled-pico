@@ -18,9 +18,9 @@ bool repeating_timer_callback() { return true; }
 void *timer_thread_loop(void *data) {
 
   uint64_t start_time = time_us_64();
-
+  hal_alarm_t *alarm = (hal_alarm_t *)data;
   while (1) {
-    hal_alarm_t *alarm = (hal_alarm_t *)data;
+
     // bool should_kill_thread =
     //     alarm->timer_delegate(pthread_self(), start_time, time_us_64());
 
@@ -28,8 +28,9 @@ void *timer_thread_loop(void *data) {
     //   pthread_cancel(pthread_self());
 
     alarm->callback_fn(alarm->user_data);
-
+    printf("Sleeping %llu microsecs\n", alarm->useconds);
     usleep(alarm->useconds);
+    puts("slept");
   }
 }
 
@@ -39,6 +40,7 @@ hal_alarm_t *hal_add_repeating_timer(int64_t delay_us,
   hal_alarm_t *alarm = (hal_alarm_t *)malloc(sizeof(hal_alarm_t));
   alarm->callback_fn = callback_fn;
   alarm->user_data = user_data;
+  alarm->useconds = delay_us;
   // alarm->timer_delegate = should_kill_thread;
 
   int id = pthread_create(&alarm->thread_id, NULL, timer_thread_loop, alarm);
