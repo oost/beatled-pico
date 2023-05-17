@@ -5,9 +5,9 @@
 
 #ifndef __APPLE__
 #if BYTE_ORDER == BIG_ENDIAN
-#define htonll(x) ((((uint64_t)htonl(x)) << 32) + htonl((x) >> 32))
-#else
 #define htonll(x) x
+#else
+#define htonll(x) ((((uint64_t)htonl(x)) << 32) + htonl((x) >> 32))
 #endif
 #define ntohll(x) htonll(x)
 #else
