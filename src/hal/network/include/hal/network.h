@@ -8,12 +8,20 @@ extern "C" {
 #ifdef PICO_PORT
 #include <lwip/def.h>
 
-#if BYTE_ORDER == BIG_ENDIAN
+#if defined(__BYTE_ORDER) && __BYTE_ORDER == __BIG_ENDIAN ||                   \
+    defined(__BIG_ENDIAN__) || defined(__ARMEB__) || defined(__THUMBEB__) ||   \
+    defined(__AARCH64EB__) || defined(_MIBSEB) || defined(__MIBSEB) ||         \
+    defined(__MIBSEB__)
 #define pico_htonll(x) ((u64_t)(x))
 #define pico_ntohll(x) ((u64_t)(x))
-#else /* BYTE_ORDER != BIG_ENDIAN */
+#elif defined(__BYTE_ORDER) && __BYTE_ORDER == __LITTLE_ENDIAN ||              \
+    defined(__LITTLE_ENDIAN__) || defined(__ARMEL__) ||                        \
+    defined(__THUMBEL__) || defined(__AARCH64EL__) || defined(_MIPSEL) ||      \
+    defined(__MIPSEL) || defined(__MIPSEL__)
 #define pico_htonll(x) ((((uint64_t)htonl(x)) << 32) + htonl((x) >> 32))
 #define pico_ntohll(x) pico_htonll(x)
+#else
+#error "I don't know what architecture this is!"
 #endif
 
 #define htonll(x) pico_htonll(x)

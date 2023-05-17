@@ -21,7 +21,7 @@ bool hal_queue_add_message(hal_queue_handle_t queue, void *data) {
     puts("Queued is FULL!!!");
     return false;
   }
-  puts("Queued message");
+  // puts("Queued message");
   return true;
 }
 

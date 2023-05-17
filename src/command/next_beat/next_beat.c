@@ -26,7 +26,7 @@ int process_next_beat_msg(beatled_message_t *server_msg, size_t data_length) {
   beatled_message_next_beat_t *next_beat_msg =
       (beatled_message_next_beat_t *)server_msg;
 
-  printf("%llu\n", next_beat_msg->next_beat_time_ref);
+  // printf("%llu\n", next_beat_msg->next_beat_time_ref);
   uint64_t next_beat_time_ref =
       server_time_to_local_time(ntohll(next_beat_msg->next_beat_time_ref));
   uint32_t tempo_period_us = ntohl(next_beat_msg->tempo_period_us);

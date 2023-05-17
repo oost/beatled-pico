@@ -19,7 +19,11 @@ int prepare_hello_request(void *buffer_payload, size_t buf_len) {
   beatled_message_hello_request_t *msg =
       (beatled_message_hello_request_t *)buffer_payload;
   msg->base.type = BEATLED_MESSAGE_HELLO_REQUEST;
-  // pico_get_unique_board_id_string(msg->board_id, count_of(msg->board_id));
+
+  get_unique_board_id(msg->board_id);
+
+  // pico_get_unique_board_id_string(msg->board_id,
+  // count_of(msg->board_id));
   return 0;
 }
 

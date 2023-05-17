@@ -81,7 +81,7 @@ int transition_state(state_manager_state_t new_state) {
     break;
 
   default:
-    puts("Unknown state...");
+    printf("Unknown state... %d\n", new_state);
   }
 
   return err;

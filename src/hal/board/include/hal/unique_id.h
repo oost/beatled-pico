@@ -9,11 +9,11 @@ extern "C" {
 
 #define BOARD_ID_SIZE_BYTES 8
 
-typedef struct {
-  uint8_t id[BOARD_ID_SIZE_BYTES];
-} board_id_t;
+// typedef struct {
+//   uint8_t id[BOARD_ID_SIZE_BYTES];
+// } board_id_t;
 
-void get_unique_board_id(board_id_t *board_id);
+void get_unique_board_id(uint8_t *board_id);
 
 #ifdef __cplusplus
 }

@@ -124,7 +124,7 @@ int handle_state_change(void *event_data) {
 }
 
 int handle_event(event_t *event) {
-  puts("Handling event");
+  // puts("Handling event");
   int err;
   switch (event->event_type) {
   case event_server_message:
@@ -147,10 +147,10 @@ int handle_event(event_t *event) {
     blink(ERROR_BLINK_SPEED, ERROR_COMMAND);
     err = 1;
   }
-  puts("Event handled.");
+  // puts("Event handled.");
   if (event->data != NULL) {
     // puts("Deleteing event data.");
-    printf("Freeing memory at %x\n", event->data);
+    // printf("Freeing memory at %x\n", event->data);
     free(event->data);
   }
 

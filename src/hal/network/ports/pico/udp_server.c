@@ -20,12 +20,12 @@ void dgram_recv(void *arg, struct udp_pcb *pcb, struct pbuf *p,
 
   size_t data_length = p->tot_len;
   void *server_msg = (void *)malloc(data_length);
-  printf("Allocated memory at %x\n", server_msg);
+  // printf("Allocated memory at %x\n", server_msg);
 
   // Copy message to our buffer and free the pbuf.
   uint16_t copied_length = pbuf_copy_partial(p, server_msg, data_length, 0);
-  printf("Received UDP message of size %d. First byte: %d. Sender: %s\n",
-         data_length, ((char *)server_msg)[0], ipaddr_ntoa(addr));
+  // printf("Received UDP message of size %d. First byte: %d. Sender: %s\n",
+  //        data_length, ((char *)server_msg)[0], ipaddr_ntoa(addr));
 
   pbuf_free(p);
 
@@ -36,7 +36,7 @@ void dgram_recv(void *arg, struct udp_pcb *pcb, struct pbuf *p,
     // printf("The string is: %.*s\n", copied_length, server_msg);
 
     // Let's process the message
-    puts("Queueing message");
+    // puts("Queueing message");
     server_msg_enqueue_error = process_response_(server_msg, data_length);
     if (server_msg_enqueue_error) {
       puts("Error while queueing UDP message on event loop");
@@ -52,7 +52,7 @@ void dgram_recv(void *arg, struct udp_pcb *pcb, struct pbuf *p,
     free(server_msg);
   }
 
-  puts("Exiting UDP handler");
+  // puts("Exiting UDP handler");
 }
 
 // Perform initialisation

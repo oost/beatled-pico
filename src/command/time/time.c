@@ -61,6 +61,10 @@ int process_time_msg(beatled_message_t *server_msg, size_t data_length,
   printf(
       "Got times\n - orig: %llu\n - recv: %llu\n - xmit: %llu\n - dest: %llu\n",
       orig_time, recv_time, xmit_time, dest_time);
+  printf(
+      "Got times\n - orig: %llu\n - recv: %llu\n - xmit: %llu\n - dest: %llu\n",
+      time_resp_msg->orig_time, time_resp_msg->recv_time,
+      time_resp_msg->xmit_time, dest_time);
   printf("Delay %llu\n offset: %lld\n", delay, clock_offset);
 
   set_server_time_offset(clock_offset);

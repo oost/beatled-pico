@@ -16,8 +16,8 @@ port_init()
 set(WIFI_SSID "$ENV{WIFI_SSID}" CACHE INTERNAL "WiFi SSID for examples")
 set(WIFI_PASSWORD "$ENV{WIFI_PASSWORD}" CACHE INTERNAL "WiFi password for examples")
 set(SNTP_SERVER_ADDRESS "raspberrypi1.local")
-# set(SERVER_NAME "raspberrypi1.local")
-set(SERVER_NAME "Oscars-MacBook-Pro.local")
+set(SERVER_NAME "raspberrypi1.local")
+# set(SERVER_NAME "Oscars-MacBook-Pro.local")
 
 option(PICO_AUTOTEST "Run with auto tests"   OFF)
 

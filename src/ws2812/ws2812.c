@@ -54,7 +54,11 @@ void led_update() {
   if (registry.next_beat_time_ref == 0 || registry.tempo_period_us == 0) {
     return;
   }
-  // puts("Led update");
+
+  if (cycle_idx == 0) {
+    puts("Beat - led update");
+  }
+
   static uint32_t colors[2][NUM_PIXELS];
   static unsigned int current_stream = 0;
 

@@ -18,7 +18,7 @@
   "cmake.environment": {
     "PICO_SDK_PATH": "./lib/pico-sdk",
     "PICO_BOARD": "pico_w",
-    // "PICO_TOOLCHAIN_PATH": "/Applications/ArmGNUToolchain/12.2.rel1/arm-none-eabi"
+    "PICO_TOOLCHAIN_PATH": "/Applications/ArmGNUToolchain/12.2.rel1/arm-none-eabi"
   },
   "cmake.buildBeforeRun": true,
   "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
@@ -51,6 +51,8 @@
   },
   "files.associations": {
     "time.h": "c",
-    "network.h": "c"
+    "network.h": "c",
+    "protocol.h": "c",
+    "unique_id.h": "c"
   }
 }
