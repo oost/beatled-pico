@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <time.h>
 
-#include "clock.h"
+#include "clock/clock.h"
 #include "hal/blink.h"
 #include "hal/time.h"
 
@@ -48,7 +48,9 @@ bool clock_is_synced() { return server_time_offset != 0; }
 // uint64_t get_sntp_server_time_ref_us() { return sntp_server_time_ref_us; }
 
 uint64_t server_time_to_local_time(uint64_t server_time) {
-  return server_time - server_time_offset;
+  return (server_time_offset > 0) ? server_time - server_time_offset
+                                  : server_time + (-server_time_offset);
+  // return server_time + server_time_offset;
   // return delayed_by_us(sntp_request_local_time_ref,
   //                      server_time - sntp_server_time_ref_us);
 }

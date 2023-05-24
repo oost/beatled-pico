@@ -1,11 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "constants.h"
+#include "config/constants.h"
 #include "event/event_queue.h"
 #include "hal/process.h"
 #include "process/core0.h"
-#include "state_manager.h"
+#include "state_manager/state_manager.h"
 
 #include "hal/startup.h"
 

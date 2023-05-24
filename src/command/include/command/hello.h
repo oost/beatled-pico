@@ -1,6 +1,8 @@
 #ifndef COMMAND__HELLO__HELLO_H
 #define COMMAND__HELLO__HELLO_H
 
+#include <stddef.h>
+
 #include "beatled/protocol.h"
 
 int send_hello_request();

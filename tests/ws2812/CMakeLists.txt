@@ -14,8 +14,8 @@ if (PICO_PORT)
     pico_set_program_name(pico_ws2812 "pico_ws2812")
     pico_set_program_version(pico_ws2812 "0.1")
 
-    pico_enable_stdio_uart(pico_ws2812 1)
-    pico_enable_stdio_usb(pico_ws2812 0)
+    pico_enable_stdio_uart(pico_ws2812 0)
+    pico_enable_stdio_usb(pico_ws2812 1)
 
     # target_include_directories(pico_ws2812 PRIVATE ${CMAKE_CURRENT_LIST_DIR})
 
@@ -38,11 +38,11 @@ if (PICO_PORT)
     pico_add_extra_outputs(pico_ws2812_parallel)
 
 
-    pico_set_program_name(pico_ws2812_parallel "pico_ws2812")
+    pico_set_program_name(pico_ws2812_parallel "pico_ws2812_p")
     pico_set_program_version(pico_ws2812_parallel "0.1")
 
-    pico_enable_stdio_uart(pico_ws2812_parallel 1)
-    pico_enable_stdio_usb(pico_ws2812_parallel 0)
+    pico_enable_stdio_uart(pico_ws2812_parallel 0)
+    pico_enable_stdio_usb(pico_ws2812_parallel 1)
 
     # target_include_directories(pico_ws2812 PRIVATE ${CMAKE_CURRENT_LIST_DIR})
 
@@ -65,11 +65,11 @@ if (PICO_PORT)
     pico_add_extra_outputs(pico_ws2812_dma)
 
 
-    pico_set_program_name(pico_ws2812_dma "pico_ws2812")
+    pico_set_program_name(pico_ws2812_dma "pico_ws2812_dma")
     pico_set_program_version(pico_ws2812_dma "0.1")
 
-    pico_enable_stdio_uart(pico_ws2812_dma 1)
-    pico_enable_stdio_usb(pico_ws2812_dma 0)
+    pico_enable_stdio_uart(pico_ws2812_dma 0)
+    pico_enable_stdio_usb(pico_ws2812_dma 1)
 
     # target_include_directories(pico_ws2812 PRIVATE ${CMAKE_CURRENT_LIST_DIR})
 

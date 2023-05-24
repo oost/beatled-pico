@@ -1,5 +1,5 @@
-#include "tempo_synced.h"
-#include "command.h"
+#include "state_manager/states/tempo_synced.h"
+#include "command/command.h"
 #include "hal/time.h"
 
 #define TEMPO_ALARM_DELAY_US 10000000

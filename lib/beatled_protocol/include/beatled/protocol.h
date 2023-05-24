@@ -61,7 +61,7 @@ typedef struct {
 // Hello. eCommandType = BEATLED_MESSAGE_HELLO_REQUEST
 typedef struct {
   beatled_message_t base;
-  char board_id[2 * PICO_UNIQUE_BOARD_ID_SIZE_BYTES + 1];
+  uint8_t board_id[2 * PICO_UNIQUE_BOARD_ID_SIZE_BYTES + 1];
 } __attribute__((__packed__)) beatled_message_hello_request_t;
 
 // Hello. eCommandType = BEATLED_MESSAGE_HELLO_RESPONSE

@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-#include "event_queue.h"
+#include "event/event_queue.h"
 
 typedef int (*handle_event_fn)(event_t *);
 

@@ -36,7 +36,7 @@ struct sntp_time {
   uint32_t frac;
 };
 
-#define NTP_SERVER SERVER_NAME
+#define NTP_SERVER BEATLED_SERVER_NAME
 // #define NTP_SERVER SNTP_SERVER_ADDRESS
 #define NTP_MSG_LEN 4
 // #define NTP_PORT 123

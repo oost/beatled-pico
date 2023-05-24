@@ -3,13 +3,13 @@
 
 #include "beatled/protocol.h"
 #include "command/command.h"
+#include "command/next_beat.h"
+#include "command/tempo.h"
+#include "command/time.h"
 #include "command/utils.h"
-#include "constants.h"
+#include "config/constants.h"
 #include "hal/blink.h"
-#include "next_beat/next_beat.h"
-#include "state_manager.h"
-#include "tempo/tempo.h"
-#include "time/time.h"
+#include "state_manager/state_manager.h"
 
 int command_program(beatled_message_t *server_msg, size_t data_length) {
   puts("Program!");

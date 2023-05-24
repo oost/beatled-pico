@@ -5,7 +5,7 @@
 #include "hal/network.h"
 #include "hal/udp.h"
 #include "state_manager/state_manager.h"
-#include "state_manager/states/states.h"
+#include "state_manager/states.h"
 
 int prepare_time_request(void *buffer_payload, size_t buf_len) {
   if (buf_len != sizeof(beatled_message_time_request_t)) {
@@ -56,15 +56,15 @@ int process_time_msg(beatled_message_t *server_msg, size_t data_length,
   uint64_t xmit_time = ntohll(time_resp_msg->xmit_time);
 
   uint64_t delay = (dest_time - orig_time) - (xmit_time - recv_time);
-  int64_t clock_offset =
-      ((signed)(recv_time - orig_time) + (signed)(xmit_time - dest_time)) / 2;
+  int64_t clock_offset = ((int64_t)(recv_time / 2) - (int64_t)(orig_time / 2)) +
+                         ((int64_t)(xmit_time / 2) - (int64_t)(dest_time / 2));
   printf(
       "Got times\n - orig: %llu\n - recv: %llu\n - xmit: %llu\n - dest: %llu\n",
       orig_time, recv_time, xmit_time, dest_time);
-  printf(
-      "Got times\n - orig: %llu\n - recv: %llu\n - xmit: %llu\n - dest: %llu\n",
-      time_resp_msg->orig_time, time_resp_msg->recv_time,
-      time_resp_msg->xmit_time, dest_time);
+  // printf(
+  //     "Got times\n - orig: %llu\n - recv: %llu\n - xmit: %llu\n - dest:
+  //     %llu\n", time_resp_msg->orig_time, time_resp_msg->recv_time,
+  //     time_resp_msg->xmit_time, dest_time);
   printf("Delay %llu\n offset: %lld\n", delay, clock_offset);
 
   set_server_time_offset(clock_offset);

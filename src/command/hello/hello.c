@@ -1,12 +1,12 @@
 #include "hal/unique_id.h"
 
 #include "beatled/protocol.h"
+#include "command/hello.h"
 #include "command/utils.h"
-#include "constants.h"
+#include "config/constants.h"
 #include "hal/blink.h"
 #include "hal/network.h"
 #include "hal/udp.h"
-#include "hello.h"
 #include "state_manager/state_manager.h"
 
 int prepare_hello_request(void *buffer_payload, size_t buf_len) {

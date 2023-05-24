@@ -15,15 +15,15 @@ port_init()
 
 set(WIFI_SSID "$ENV{WIFI_SSID}" CACHE INTERNAL "WiFi SSID for examples")
 set(WIFI_PASSWORD "$ENV{WIFI_PASSWORD}" CACHE INTERNAL "WiFi password for examples")
-set(SNTP_SERVER_ADDRESS "raspberrypi1.local")
-set(SERVER_NAME "raspberrypi1.local")
-# set(SERVER_NAME "Oscars-MacBook-Pro.local")
+set(BEATLED_SERVER_NAME "$ENV{BEATLED_SERVER_NAME}")
 
-option(PICO_AUTOTEST "Run with auto tests"   OFF)
+option(PICO_AUTOTEST "Run with auto tests" OFF)
+option(PICO_PROBE "Debug with Pico probe" OFF)
 
-IF(PICO_AUTOTEST)
-    ADD_DEFINITIONS(-DPICO_AUTOTEST)
-ENDIF(PICO_AUTOTEST)
+
+if(PICO_AUTOTEST)
+  add_definitions(-DPICO_AUTOTEST)
+endif(PICO_AUTOTEST)
 
 
 set(BEATLED_PROTOCOL_PATH "${CMAKE_CURRENT_LIST_DIR}/lib/beatled_protocol")

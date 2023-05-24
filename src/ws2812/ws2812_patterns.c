@@ -28,8 +28,8 @@ static inline uint32_t rgb_u32(uint8_t r, uint8_t g, uint8_t b) {
   return ((uint32_t)(r) << 16) | ((uint32_t)(g) << 24) | (uint32_t)(b) << 8;
 }
 
-void pattern_snakes(uint32_t *stream, size_t len, uint32_t t) {
-  uint8_t pos = t >> 26;
+void pattern_snakes(uint32_t *stream, size_t len, uint8_t t) {
+  uint8_t pos = t >> 2;
 
   for (unsigned int i = 0; i < len; ++i) {
     unsigned int x = (i + (pos >> 1)) % 64;
@@ -46,31 +46,31 @@ void pattern_snakes(uint32_t *stream, size_t len, uint32_t t) {
   }
 }
 
-void pattern_random(uint32_t *stream, size_t len, uint32_t t) {
-  if ((t >> 29) == 0)
+void pattern_random(uint32_t *stream, size_t len, uint8_t t) {
+  if ((t >> 5) == 0)
     return;
   for (int i = 0; i < len; ++i)
     stream[i] = (rand());
 }
 
-void pattern_sparkle(uint32_t *stream, size_t len, uint32_t t) {
-  if ((t >> 29) == 0)
+void pattern_sparkle(uint32_t *stream, size_t len, uint8_t t) {
+  if ((t >> 5) == 0)
     return;
   for (int i = 0; i < len; ++i)
     stream[i] = (rand() % 16 ? 0 : 0xffffffff);
 }
 
-void pattern_greys(uint32_t *stream, size_t len, uint32_t t) {
+void pattern_greys(uint32_t *stream, size_t len, uint8_t t) {
   int max = 100; // let's not draw too much current!
-  uint8_t brightness = t >> 26;
+  uint8_t brightness = t >> 2;
   for (int i = 0; i < len; ++i) {
     stream[i] = (brightness * 0x10101);
   }
 }
 
-void pattern_drops(uint32_t *stream, size_t len, uint32_t t) {
+void pattern_drops(uint32_t *stream, size_t len, uint8_t t) {
   int value;
-  int max = (UINT32_MAX / 256);
+  int max = (UINT8_MAX / 256);
   int pos = t % NUM_PIXELS;
   int step = max / NUM_PIXELS * 3;
   for (int i = 0; i < len; ++i) {
@@ -88,8 +88,8 @@ void pattern_drops(uint32_t *stream, size_t len, uint32_t t) {
   }
 }
 
-void pattern_solid(uint32_t *stream, size_t len, uint32_t t) {
-  uint8_t pos = t >> 24;
+void pattern_solid(uint32_t *stream, size_t len, uint8_t t) {
+  uint8_t pos = t;
   for (int i = 0; i < len; ++i) {
     stream[i] = (pos * 0x10101);
   }
@@ -97,8 +97,8 @@ void pattern_solid(uint32_t *stream, size_t len, uint32_t t) {
 
 int level = 8;
 
-void pattern_fade(uint32_t *stream, size_t len, uint32_t t) {
-  uint8_t value = 255 - (t >> 24);
+void pattern_fade(uint32_t *stream, size_t len, uint8_t t) {
+  uint8_t value = 127 - (t >> 1);
   uint32_t v = value * 0x01010100;
 
   for (int i = 0; i < len; ++i) {
@@ -106,7 +106,7 @@ void pattern_fade(uint32_t *stream, size_t len, uint32_t t) {
   }
 }
 
-void pattern_fade_exp(uint32_t *stream, size_t len, uint32_t t) {
+void pattern_fade_exp(uint32_t *stream, size_t len, uint8_t t) {
   unsigned int shift = 4;
 
   unsigned int max = 16; // let's not draw too much current!
@@ -144,7 +144,7 @@ void get_all_patterns_table(const pattern *pattern_table,
 }
 
 void run_pattern(int pattern_idx, uint32_t *stream, size_t len,
-                 uint32_t beat_pos) {
+                 uint8_t beat_pos) {
   pattern_idx = pattern_idx % num_patterns;
   _pattern_table[pattern_idx].pat(stream, len, beat_pos);
 }

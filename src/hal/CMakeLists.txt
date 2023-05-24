@@ -13,9 +13,9 @@ add_subdirectory(board)
 add_subdirectory(runtime)
 add_subdirectory(registry)
 
-add_library(beatled_hal)
+add_library(beatled_hal INTERFACE)
 
-target_link_libraries(beatled_hal PUBLIC 
+target_link_libraries(beatled_hal INTERFACE 
   beatled_hal_blink
   beatled_hal_time
   beatled_hal_wifi

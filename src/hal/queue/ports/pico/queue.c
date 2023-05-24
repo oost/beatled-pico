@@ -34,7 +34,7 @@ bool hal_queue_pop_message(hal_queue_handle_t queue, void *data) {
     return false;
   }
 
-  puts("Popped a message from queue");
+  // puts("Popped a message from queue");
   return true;
 }
 

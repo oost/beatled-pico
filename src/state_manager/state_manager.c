@@ -4,8 +4,8 @@
 
 #include "event/event_queue.h"
 #include "hal/unique_id.h"
-#include "state_manager.h"
-#include "states/states.h"
+#include "state_manager/state_manager.h"
+#include "state_manager/states.h"
 
 typedef struct state_manager_internal_state {
   state_manager_state_t current_state;

@@ -4,9 +4,9 @@
 #include <stdlib.h>
 
 #include "event/event_queue.h"
-#include "hello/hello.h"
-#include "tempo/tempo.h"
-#include "time/time.h"
+#include "hello.h"
+#include "tempo.h"
+#include "time.h"
 
 int handle_event(event_t *event);
 

@@ -16,16 +16,19 @@
     },
   },
   "cmake.environment": {
-    "PICO_SDK_PATH": "./lib/pico-sdk",
-    "PICO_BOARD": "pico_w",
-    "PICO_TOOLCHAIN_PATH": "/Applications/ArmGNUToolchain/12.2.rel1/arm-none-eabi"
+    "PICO_TOOLCHAIN_PATH": "/Applications/ArmGNUToolchain/12.2.rel1/arm-none-eabi",
+    "BEATLED_SERVER_NAME": "raspberrypi1.local",
+    // "BEATLED_SERVER_NAME": "Oscars-MacBook-Pro.local"
   },
   "cmake.buildBeforeRun": true,
   "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
   "cmake.configureSettings": {
-    "PORT": "pico"
-    // "PORT": "posix",
-    // "CMAKE_TOOLCHAIN_FILE": "/Users/oscarostlund/Programmation/projects/vcpkg/scripts/buildsystems/vcpkg.cmake"
+    // "PORT": "pico",
+    "PORT": "posix",
+    "CMAKE_TOOLCHAIN_FILE": "/Users/oscarostlund/Programmation/projects/vcpkg/scripts/buildsystems/vcpkg.cmake",
+    "PICO_PROBE": "ON",
+    "PICO_SDK_PATH": "./lib/pico-sdk",
+    "PICO_BOARD": "pico_w",
   },
   "editor.tokenColorCustomizations": {
     "textMateRules": [
@@ -53,6 +56,16 @@
     "time.h": "c",
     "network.h": "c",
     "protocol.h": "c",
-    "unique_id.h": "c"
+    "unique_id.h": "c",
+    "clock.h": "c",
+    "blink.h": "c",
+    "autotest.h": "c",
+    "constants.h": "c",
+    "core1.h": "c",
+    "wifi.h": "c",
+    "started.h": "c",
+    "time_synced.h": "c",
+    "chrono": "cpp",
+    "state_manager.h": "c"
   }
 }

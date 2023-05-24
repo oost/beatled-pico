@@ -10,11 +10,10 @@ target_sources(
         states/tempo_synced/tempo_synced.c
 )
 target_compile_definitions(beatled_state_manager INTERFACE
-        WIFI_SSID=\"${WIFI_SSID}\"
-        WIFI_PASSWORD=\"${WIFI_PASSWORD}\"
-        SNTP_SERVER_ADDRESS="${SNTP_SERVER_ADDRESS}"
-        SERVER_NAME="${SERVER_NAME}"
-        )
+    WIFI_SSID=\"${WIFI_SSID}\"
+    WIFI_PASSWORD=\"${WIFI_PASSWORD}\"
+    BEATLED_SERVER_NAME="${BEATLED_SERVER_NAME}"
+)
 
 target_link_libraries(beatled_state_manager INTERFACE
     # hardware_timer
@@ -25,6 +24,7 @@ target_link_libraries(beatled_state_manager INTERFACE
     
     beatled_commands
     beatled_ws2812
+    beatled_config
 )
 
-target_include_directories(beatled_state_manager INTERFACE ${CMAKE_CURRENT_LIST_DIR} ${CMAKE_CURRENT_LIST_DIR}/..)
+target_include_directories(beatled_state_manager INTERFACE ${CMAKE_CURRENT_LIST_DIR}/include)

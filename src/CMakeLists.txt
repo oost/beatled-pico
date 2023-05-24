@@ -10,6 +10,7 @@ add_subdirectory(command)
 add_subdirectory(clock)
 add_subdirectory(event)
 add_subdirectory(process)
+add_subdirectory(config)
 
 
 set(CURRENT_TARGET "pico_w_beatled")
@@ -22,8 +23,7 @@ add_executable(${CURRENT_TARGET}
 target_compile_definitions(${CURRENT_TARGET}  PRIVATE
   WIFI_SSID=\"${WIFI_SSID}\"
   WIFI_PASSWORD=\"${WIFI_PASSWORD}\"
-  SNTP_SERVER_ADDRESS="${SNTP_SERVER_ADDRESS}"
-  SERVER_NAME="${SERVER_NAME}"
+  BEATLED_SERVER_NAME="${BEATLED_SERVER_NAME}"
 )
 
 target_include_directories(${CURRENT_TARGET} PRIVATE
@@ -41,6 +41,7 @@ target_link_libraries(${CURRENT_TARGET}
   beatled_hal
   beatled_process
   beatled_autotest
+  beatled_config
 )
 
 if (PICO_PORT)
@@ -50,9 +51,15 @@ if (PICO_PORT)
   # generate the header file into the source tree as it is included in the RP2040 datasheet
   # pico_generate_pio_header(pico_w_beatled ${CMAKE_CURRENT_LIST_DIR}/ws2812/ws2812.pio OUTPUT_DIR ${CMAKE_CURRENT_LIST_DIR}/generated)
 
+  if (PICO_PROBE)
+    message("Configuring Pico to be used with Pico Probe (UART output)")
 
-  pico_enable_stdio_uart(${CURRENT_TARGET}  1)
-  pico_enable_stdio_usb(${CURRENT_TARGET}  0)
+  else()
+    message("Configuring Pico to be used with USB output")
+  endif()
+  
+  pico_enable_stdio_uart(${CURRENT_TARGET}  PICO_PROBE)
+  pico_enable_stdio_usb(${CURRENT_TARGET}  $<NOT:PICO_PROBE>)
 
   pico_add_extra_outputs(${CURRENT_TARGET} )
 

@@ -1,4 +1,4 @@
-#include "registered.h"
+#include "state_manager/states/registered.h"
 #include "command/command.h"
 
 int enter_registered_state() {

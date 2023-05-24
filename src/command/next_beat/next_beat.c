@@ -1,11 +1,11 @@
 #include <stdlib.h>
 
 #include "beatled/protocol.h"
-#include "clock.h"
+#include "clock/clock.h"
+#include "command/next_beat.h"
 #include "command/utils.h"
 #include "hal/network.h"
 #include "hal/registry.h"
-#include "next_beat.h"
 #include "process/intercore_queue.h"
 #include "state_manager/state_manager.h"
 
@@ -26,18 +26,18 @@ int process_next_beat_msg(beatled_message_t *server_msg, size_t data_length) {
   beatled_message_next_beat_t *next_beat_msg =
       (beatled_message_next_beat_t *)server_msg;
 
-  // printf("%llu\n", next_beat_msg->next_beat_time_ref);
+  // printf("Next beat: %llu\n", ntohll(next_beat_msg->next_beat_time_ref));
   uint64_t next_beat_time_ref =
       server_time_to_local_time(ntohll(next_beat_msg->next_beat_time_ref));
   uint32_t tempo_period_us = ntohl(next_beat_msg->tempo_period_us);
   uint32_t beat_count = ntohl(next_beat_msg->beat_count);
   uint16_t program_id = ntohs(next_beat_msg->program_id);
 
-  printf("Got next beat time ref %llu (%llx), tempo ref %u (%x), program_id %d "
-         "(%x), time to next beat %d\n",
-         next_beat_time_ref, next_beat_time_ref, tempo_period_us,
-         tempo_period_us, program_id, program_id,
-         (signed)(next_beat_time_ref - time_us_64()));
+  printf("Got next beat time ref %llu (in %d us, server: %llu), tempo ref %u, "
+         "program_id %d\n",
+         next_beat_time_ref, (signed)(next_beat_time_ref - time_us_64()),
+         ntohll(next_beat_msg->next_beat_time_ref), tempo_period_us,
+         program_id);
 
   if (next_beat_time_ref < time_us_64()) {
     puts("Next beat is in the past...");
@@ -57,6 +57,15 @@ int process_next_beat_msg(beatled_message_t *server_msg, size_t data_length) {
   registry.program_id = program_id;
   registry.update_timestamp = time_us_64();
   registry_unlock_mutex();
+
+  intercore_message_t msg = {.message_type = 0x01 << intercore_time_ref_update |
+                                             0x01 << intercore_tempo_update |
+                                             0x01 << intercore_program_update};
+
+  if (!hal_queue_add_message(intercore_command_queue, &msg)) {
+    puts("Intercore queue is FULL!!!");
+    return 1;
+  }
 
   return 0;
 }

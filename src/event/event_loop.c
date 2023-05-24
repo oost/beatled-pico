@@ -1,7 +1,7 @@
 #include <stdio.h>
 
-#include "event_loop.h"
-#include "event_queue.h"
+#include "event/event_loop.h"
+#include "event/event_queue.h"
 #include "hal/process.h"
 
 void run_event_loop(handle_event_fn handle_event) {

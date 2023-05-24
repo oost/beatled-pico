@@ -5,4 +5,5 @@ if (POSIX_PORT)
 
   add_subdirectory(fibonacci)
   add_subdirectory(queue)
+  add_subdirectory(clock)
 endif()

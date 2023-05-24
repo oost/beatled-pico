@@ -1,4 +1,4 @@
-#include "tempo.h"
+#include "command/tempo.h"
 #include "beatled/protocol.h"
 #include "clock/clock.h"
 #include "command/utils.h"
@@ -66,10 +66,12 @@ int process_tempo_msg(beatled_message_t *server_msg, size_t data_length) {
   //                                      .registry_update_fields =
   //                                          (0x01 << REGISTRY_UPDATE_TEMPO)};
 
-  // if (!hal_queue_add_message(intercore_command_queue, &registry_update)) {
-  //   puts("Intercore queue is FULL!!!");
-  //   return 1;
-  // }
+  intercore_message_t msg = {.message_type = 0x01 << intercore_tempo_update};
+
+  if (!hal_queue_add_message(intercore_command_queue, &msg)) {
+    puts("Intercore queue is FULL!!!");
+    return 1;
+  }
 
   return 0;
 }

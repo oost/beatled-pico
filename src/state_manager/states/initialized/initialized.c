@@ -3,10 +3,10 @@
 #include "command/command.h"
 #include "hal/process.h"
 #include "hal/time.h"
-#include "initialized.h"
 #include "process/core0.h"
 #include "process/core1.h"
 #include "process/isr_thread.h"
+#include "state_manager/states/initialized.h"
 
 #define HELLO_ALARM_DELAY_US 10000000
 

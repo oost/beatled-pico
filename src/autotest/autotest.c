@@ -4,7 +4,7 @@
 
 #include "autotest.h"
 #include "beatled/protocol.h"
-#include "clock.h"
+#include "clock/clock.h"
 #include "event/event_queue.h"
 #include "hal/network.h"
 

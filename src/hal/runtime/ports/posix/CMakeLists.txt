@@ -22,7 +22,7 @@ add_custom_target(
   DEPENDS ${SHADER_HEADER_FILES}
 )
 
-target_sources(${CURRENT_LIBRARY_NAME} PUBLIC
+target_sources(${CURRENT_LIBRARY_NAME} INTERFACE
   ${CMAKE_CURRENT_LIST_DIR}/startup.cpp
   ${CMAKE_CURRENT_LIST_DIR}/renderer.cpp
   ${CMAKE_CURRENT_LIST_DIR}/mtk_view_delegate.cpp
@@ -31,13 +31,13 @@ target_sources(${CURRENT_LIBRARY_NAME} PUBLIC
   ${CMAKE_CURRENT_LIST_DIR}/led_buffer.cpp
 )
 
-target_link_libraries(${CURRENT_LIBRARY_NAME}
+target_link_libraries(${CURRENT_LIBRARY_NAME} INTERFACE
   METAL_CPP
 )
 
 add_dependencies(${CURRENT_LIBRARY_NAME} ShaderHeaders)
 
-target_include_directories(${CURRENT_LIBRARY_NAME}
-    PUBLIC ${CMAKE_CURRENT_BINARY_DIR}
+target_include_directories(${CURRENT_LIBRARY_NAME} INTERFACE
+    ${CMAKE_CURRENT_BINARY_DIR}
 )
 

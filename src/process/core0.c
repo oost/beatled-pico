@@ -2,12 +2,12 @@
 #include <stdlib.h>
 
 #include "autotest.h"
-#include "command.h"
-#include "constants.h"
-#include "core0.h"
+#include "command/command.h"
+#include "config/constants.h"
 #include "event/event_loop.h"
 #include "hal/blink.h"
 #include "hal/process.h"
+#include "process/core0.h"
 #include "state_manager/state_manager.h"
 
 void *core0_entry(void *data) {

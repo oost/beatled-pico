@@ -1,6 +1,6 @@
 #include <stddef.h>
 
-#include "isr_thread.h"
+#include "process/isr_thread.h"
 
 // TODO: Some of this should probably be in the HAL...
 

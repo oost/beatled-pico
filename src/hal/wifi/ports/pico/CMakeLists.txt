@@ -1,9 +1,9 @@
-target_sources(${CURRENT_LIBRARY_NAME} PUBLIC
+target_sources(${CURRENT_LIBRARY_NAME} INTERFACE
     wifi.c
 )
 
-target_link_libraries(${CURRENT_LIBRARY_NAME}
+target_link_libraries(${CURRENT_LIBRARY_NAME} INTERFACE
     ${PICO_WIFI_LIBRARY}
 )
 
-target_include_directories(${CURRENT_LIBRARY_NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR}/../../..)
+target_include_directories(${CURRENT_LIBRARY_NAME} INTERFACE ${CMAKE_CURRENT_LIST_DIR}/../../..)
