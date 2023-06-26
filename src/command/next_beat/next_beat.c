@@ -30,6 +30,7 @@ int process_next_beat_msg(beatled_message_t *server_msg, size_t data_length) {
   uint64_t next_beat_time_ref =
       server_time_to_local_time(ntohll(next_beat_msg->next_beat_time_ref));
   uint32_t tempo_period_us = ntohl(next_beat_msg->tempo_period_us);
+  uint32_t beat_count = ntohl(next_beat_msg->beat_count);
   uint16_t program_id = ntohs(next_beat_msg->program_id);
 
   printf("Got next beat time ref %llu (%llx), tempo ref %u (%x), program_id %d "
@@ -52,6 +53,7 @@ int process_next_beat_msg(beatled_message_t *server_msg, size_t data_length) {
   registry_lock_mutex();
   registry.next_beat_time_ref = next_beat_time_ref;
   registry.tempo_period_us = tempo_period_us;
+  registry.beat_count = beat_count;
   registry.program_id = program_id;
   registry.update_timestamp = time_us_64();
   registry_unlock_mutex();

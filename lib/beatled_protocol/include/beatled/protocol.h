@@ -94,6 +94,7 @@ typedef struct {
   beatled_message_t base;
   uint64_t next_beat_time_ref;
   uint32_t tempo_period_us;
+  uint32_t beat_count;
   uint16_t program_id;
 } __attribute__((__packed__)) beatled_message_next_beat_t;
 
