@@ -24,10 +24,6 @@ const uint8_t gamma8[] = {
     215, 218, 220, 223, 225, 228, 231, 233, 236, 239, 241, 244, 247, 249, 252,
     255};
 
-static inline uint32_t rgb_u32(uint8_t r, uint8_t g, uint8_t b) {
-  return ((uint32_t)(r) << 16) | ((uint32_t)(g) << 24) | (uint32_t)(b) << 8;
-}
-
 void pattern_snakes(uint32_t *stream, size_t len, uint8_t t) {
   uint8_t pos = t >> 2;
 
@@ -128,10 +124,14 @@ void pattern_fade_exp(uint32_t *stream, size_t len, uint8_t t) {
 }
 
 const pattern _pattern_table[] = {
-    {pattern_snakes, "Snakes!"},   {pattern_random, "Random data"},
-    {pattern_sparkle, "Sparkles"}, {pattern_greys, "Greys"},
-    {pattern_drops, "Drops"},      {pattern_solid, "Solid!"},
-    {pattern_fade, "Fade"},        {pattern_fade_exp, "Fade Exponential"},
+    {pattern_snakes, NULL, "Snakes!"},
+    {pattern_random, NULL, "Random data"},
+    {pattern_sparkle, NULL, "Sparkles"},
+    {pattern_greys, NULL, "Greys"},
+    {pattern_drops, NULL, "Drops"},
+    {pattern_solid, NULL, "Solid!"},
+    {pattern_fade, NULL, "Fade"},
+    {pattern_fade_exp, NULL, "Fade Exponential"},
 };
 
 const size_t num_patterns =
@@ -146,7 +146,7 @@ void get_all_patterns_table(const pattern *pattern_table,
 void run_pattern(int pattern_idx, uint32_t *stream, size_t len,
                  uint8_t beat_pos) {
   pattern_idx = pattern_idx % num_patterns;
-  _pattern_table[pattern_idx].pat(stream, len, beat_pos);
+  _pattern_table[pattern_idx].pattern_fn(stream, len, beat_pos);
 }
 
 const char *pattern_get_name(uint8_t pattern_idx) {
