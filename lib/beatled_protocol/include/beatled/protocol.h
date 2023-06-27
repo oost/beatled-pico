@@ -24,6 +24,7 @@ typedef enum {
   BEATLED_MESSAGE_TIME_RESPONSE,
   BEATLED_MESSAGE_PROGRAM,
   BEATLED_MESSAGE_NEXT_BEAT,
+  BEATLED_MESSAGE_BEAT,
   BEATLED_MESSAGE_LAST_VALUE
 } beatled_message_type_t;
 
@@ -97,6 +98,14 @@ typedef struct {
   uint32_t beat_count;
   uint16_t program_id;
 } __attribute__((__packed__)) beatled_message_next_beat_t;
+
+typedef struct {
+  beatled_message_t base;
+  uint64_t beat_time_ref;
+  uint32_t tempo_period_us;
+  uint32_t beat_count;
+  uint16_t program_id;
+} __attribute__((__packed__)) beatled_message_beat_t;
 
 #ifdef __cplusplus
 } /*extern "C" */
