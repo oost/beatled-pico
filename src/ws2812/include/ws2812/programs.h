@@ -1,4 +1,0 @@
-#ifndef WS2812__PROGRAMS_H
-#define WS2812__PROGRAMS_H
-
-#endif // WS2812__PROGRAMS_H

@@ -16,6 +16,7 @@ typedef struct registry {
   uint64_t update_timestamp;
   uint64_t tempo_time_update_timestamp;
   uint32_t tempo_period_us;
+  uint32_t beat_count;
   uint16_t program_id;
 } registry_t;
 

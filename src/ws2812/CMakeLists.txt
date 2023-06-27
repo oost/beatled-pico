@@ -7,7 +7,11 @@ target_sources(beatled_ws2812 INTERFACE
   ws2812.c
   ws2812_patterns.c
   programs/snake/snake.c
-
+  programs/drops/drops.c
+  programs/fade/fade.c
+  programs/random/random.c
+  programs/greys/greys.c
+  programs/sparkle/sparkle.c
 )
 
 target_link_libraries(beatled_ws2812 INTERFACE

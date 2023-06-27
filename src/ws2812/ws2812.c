@@ -21,6 +21,8 @@ uint64_t _time_ref = 0;
 uint64_t _last_beat_time = 0;
 uint64_t _next_beat_time = 0;
 uint64_t _tempo_period_us = 0;
+uint32_t _beat_count = 0;
+uint32_t _next_beat_count = 0;
 uint8_t _program_id = 0;
 
 void led_init() {
@@ -84,6 +86,8 @@ void update_tempo(intercore_message_t *ic_message) {
       printf("Beat duration is shortened by more than 2, from %llu to %llu\n",
              current_beat_duration, new_beat_duration);
     }
+
+    _next_beat_count = registry.beat_count;
   }
 
   if (ic_message->message_type | (0x01 << intercore_tempo_update)) {
@@ -116,17 +120,24 @@ void led_update() {
   uint8_t beat_frac =
       calculate_beat_fraction(current_time, _last_beat_time, _next_beat_time);
 
-  run_pattern(_program_id, colors[current_stream], NUM_PIXELS, beat_frac);
+  run_pattern(_program_id, colors[current_stream], NUM_PIXELS, beat_frac,
+              _beat_count);
 
   output_strings_dma(colors[current_stream]);
   current_stream ^= 1;
 
+  // We have a beat
   if (prev_beat_frac > beat_frac) {
-    printf("---- BEAT --- %llu, %llu, %llu\n", prev_time, current_time,
-           _last_beat_time);
+    _beat_count++;
+
+    if (_next_beat_count > _beat_count) {
+      _beat_count = _next_beat_count;
+    }
+    printf("---- BEAT --- %llu, %llu, %llu, %u\n", prev_time, current_time,
+           _last_beat_time, _beat_count);
   }
 
-  if (_cycle_idx % 1 == 0) {
+  if (_cycle_idx % 1000 == 0) {
     printf("LED cycle %d, program %d, beat_frac %u / %.3f, current_time "
            "%llu, last time %lli, next beat %llu, tempo: %llu\n",
            _cycle_idx, _program_id, beat_frac, (float)beat_frac / UINT8_MAX,

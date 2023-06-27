@@ -1,5 +1,7 @@
 #include "snake.h"
 
+#include "../utils.h"
+
 static uint8_t position_;
 static uint8_t speed_;
 
@@ -8,7 +10,8 @@ void pattern_snakes_init() {
   speed_ = 1;
 }
 
-void pattern_snakes_new(uint32_t *stream, size_t len, uint8_t t) {
+void pattern_snakes(uint32_t *stream, size_t len, uint8_t t,
+                    uint32_t beat_count) {
   uint8_t intensity = 127 - (t >> 1);
   uint8_t pos = t >> 2;
 
