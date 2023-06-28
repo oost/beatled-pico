@@ -19,6 +19,8 @@ add_executable(${CURRENT_TARGET}
   main.c
 ) 
 
+message("Compiling with WIFI_SSID ${WIFI_SSID} and password ${WIFI_PASSWORD}, BEATLED_SERVER_NAME=${BEATLED_SERVER_NAME} ")
+
 
 target_compile_definitions(${CURRENT_TARGET}  PRIVATE
   WIFI_SSID=\"${WIFI_SSID}\"

@@ -17,6 +17,8 @@ set(WIFI_SSID "$ENV{WIFI_SSID}" CACHE INTERNAL "WiFi SSID for examples")
 set(WIFI_PASSWORD "$ENV{WIFI_PASSWORD}" CACHE INTERNAL "WiFi password for examples")
 set(BEATLED_SERVER_NAME "$ENV{BEATLED_SERVER_NAME}")
 
+message("Compiling with WIFI_SSID ${WIFI_SSID} and password ${WIFI_PASSWORD}")
+
 option(PICO_AUTOTEST "Run with auto tests" OFF)
 option(PICO_PROBE "Debug with Pico probe" OFF)
 
