@@ -16,18 +16,17 @@
     },
   },
   "cmake.environment": {
-    "PICO_TOOLCHAIN_PATH": "/Applications/ArmGNUToolchain/12.2.rel1/arm-none-eabi",
-    "BEATLED_SERVER_NAME": "raspberrypi1.local",
-    // "BEATLED_SERVER_NAME": "My-MacBook-Pro.local",
-    "WIFI_SSID": "Beatled",
-    "WIFI_PASSWORD": "fetedusiecle"
+    // "PICO_TOOLCHAIN_PATH": "/Applications/ArmGNUToolchain/12.2.rel1/arm-none-eabi",
+    "BEATLED_SERVER_NAME": "${env:BEATLED_SERVER_NAME}",
+    "WIFI_SSID": "${env:BEATLED_WIFI_SSID}",
+    "WIFI_PASSWORD": "${env:BEATLED_WIFI_PASSWORD}"
   },
   "cmake.buildBeforeRun": true,
   "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
   "cmake.configureSettings": {
     "PORT": "pico",
     // "PORT": "posix",
-    // "CMAKE_TOOLCHAIN_FILE": "~/coding/external/vcpkg/scripts/buildsystems/vcpkg.cmake",
+    // "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
     "PICO_PROBE": "ON",
     "PICO_SDK_PATH": "./lib/pico-sdk",
     "PICO_BOARD": "pico_w",
