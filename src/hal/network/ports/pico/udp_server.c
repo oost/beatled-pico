@@ -20,7 +20,11 @@ void dgram_recv(void *arg, struct udp_pcb *pcb, struct pbuf *p,
 
   size_t data_length = p->tot_len;
   void *server_msg = (void *)malloc(data_length);
-  // printf("Allocated memory at %x\n", server_msg);
+  if (!server_msg) {
+    printf("Failed to allocate %zu bytes for UDP message\n", data_length);
+    pbuf_free(p);
+    return;
+  }
 
   // Copy message to our buffer and free the pbuf.
   uint16_t copied_length = pbuf_copy_partial(p, server_msg, data_length, 0);

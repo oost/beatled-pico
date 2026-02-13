@@ -38,6 +38,10 @@ hal_alarm_t *hal_add_repeating_timer(int64_t delay_us,
                                      alam_callback_fn callback_fn,
                                      void *user_data) {
   hal_alarm_t *alarm = (hal_alarm_t *)malloc(sizeof(hal_alarm_t));
+  if (!alarm) {
+    puts("Failed to allocate alarm");
+    return NULL;
+  }
   alarm->callback_fn = callback_fn;
   alarm->user_data = user_data;
   alarm->useconds = delay_us;

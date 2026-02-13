@@ -6,6 +6,10 @@
 
 hal_queue_handle_t hal_queue_init(size_t msg_size, int queue_size) {
   hal_queue_t *new_queue = (hal_queue_t *)malloc(sizeof(hal_queue_t));
+  if (!new_queue) {
+    puts("Failed to allocate queue");
+    return NULL;
+  }
   queue_init(new_queue, msg_size, queue_size);
   return new_queue;
 }

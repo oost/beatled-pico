@@ -81,6 +81,10 @@ void *udp_socket_listen(void *data) {
       buffer[recvlen] = 0;
       // printf("Received message: \"%s\"\n", buffer);
       void *server_msg = (void *)malloc(recvlen);
+      if (!server_msg) {
+        puts("Failed to allocate memory for UDP message");
+        continue;
+      }
       memcpy(server_msg, buffer, recvlen);
       if ((params->process_response)(server_msg, recvlen)) {
         puts("Error while queueing UDP message on event loop");
@@ -94,6 +98,10 @@ void *udp_socket_listen(void *data) {
 void start_udp(const char *server_name, uint16_t server_port, uint16_t udp_port,
                process_response_fn process_response) {
   udp_parameters_t *params = malloc(sizeof(udp_parameters_t));
+  if (!params) {
+    perror("Failed to allocate UDP parameters");
+    return;
+  }
   params->udp_port = udp_port;
   params->process_response = process_response;
   params->server_name = server_name;

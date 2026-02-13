@@ -20,6 +20,10 @@ void test_tempo() {
   beatled_message_tempo_response_t *tempo_msg =
       (beatled_message_tempo_response_t *)malloc(
           sizeof(beatled_message_tempo_response_t));
+  if (!tempo_msg) {
+    puts("Failed to allocate tempo message");
+    return;
+  }
 
   tempo_msg->base.type = BEATLED_MESSAGE_TEMPO_RESPONSE;
 

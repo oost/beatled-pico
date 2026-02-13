@@ -70,7 +70,7 @@ void update_tempo(intercore_message_t *ic_message) {
   registry_lock_mutex();
 
   // printf("Message type %d\n", ic_message->message_type);
-  if (ic_message->message_type | (0x01 << intercore_time_ref_update)) {
+  if (ic_message->message_type & (0x01 << intercore_time_ref_update)) {
     printf("Update time ref from %llu to %llu. Shift = %llu\n", _next_beat_time,
            registry.next_beat_time_ref,
            registry.next_beat_time_ref - _next_beat_time);
@@ -90,12 +90,12 @@ void update_tempo(intercore_message_t *ic_message) {
     _next_beat_count = registry.beat_count;
   }
 
-  if (ic_message->message_type | (0x01 << intercore_tempo_update)) {
+  if (ic_message->message_type & (0x01 << intercore_tempo_update)) {
     // puts("Tempo update");
     _tempo_period_us = registry.tempo_period_us;
   }
 
-  if (ic_message->message_type | (0x01 << intercore_program_update)) {
+  if (ic_message->message_type & (0x01 << intercore_program_update)) {
     // puts("Program update");
     _program_id = registry.program_id;
   }

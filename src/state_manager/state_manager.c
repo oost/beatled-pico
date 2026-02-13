@@ -23,8 +23,8 @@ uint16_t transition_matrix[] = {
     0x01 << STATE_INITIALIZED,  // STATE_STARTED
     0x01 << STATE_REGISTERED,   // STATE_INITIALIZED
     0x01 << STATE_TIME_SYNCED,  // STATE_REGISTERED
-    0x01 << STATE_TEMPO_SYNCED, // STATE_TIME_SYNCED
-    0x01 << STATE_TIME_SYNCED   // STATE_TIME_SYNCED
+    0x01 << STATE_TEMPO_SYNCED,                          // STATE_TIME_SYNCED
+    (0x01 << STATE_TIME_SYNCED) | (0x01 << STATE_TEMPO_SYNCED) // STATE_TEMPO_SYNCED
 };
 
 void state_manager_init() {}
@@ -80,6 +80,11 @@ int transition_state(state_manager_state_t new_state) {
     exit_current_state = &exit_time_synced_state;
     break;
 
+  case STATE_TEMPO_SYNCED:
+    enter_tempo_synced_state();
+    exit_current_state = &exit_tempo_synced_state;
+    break;
+
   default:
     printf("Unknown state... %d\n", new_state);
   }
@@ -93,6 +98,10 @@ int state_manager_set_state(state_manager_state_t state) {
 
 bool schedule_state_transition(state_manager_state_t next_state) {
   state_event_t *state_event = (state_event_t *)malloc(sizeof(state_event_t));
+  if (!state_event) {
+    puts("Failed to allocate state event");
+    return false;
+  }
   state_event->next_state = next_state;
   return event_queue_add_message(event_state_transition, state_event,
                                  sizeof(state_event_t));

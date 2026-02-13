@@ -69,7 +69,6 @@ const char *pattern_get_name(uint8_t pattern_idx) {
   if (pattern_idx >= num_patterns) {
     puts("Index out of range idx...");
   }
-  pattern_idx = pattern_idx;
   return _pattern_table[pattern_idx % num_patterns].name;
 }
 
