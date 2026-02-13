@@ -61,7 +61,8 @@ void get_all_patterns_table(const pattern *pattern_table,
 
 void run_pattern(int pattern_idx, uint32_t *stream, size_t len,
                  uint8_t beat_pos, uint32_t beat_count) {
-  pattern_idx = pattern_idx % num_patterns;
+  int n = (int)num_patterns;
+  pattern_idx = ((pattern_idx % n) + n) % n;
   _pattern_table[pattern_idx].pattern_fn(stream, len, beat_pos, beat_count);
 }
 

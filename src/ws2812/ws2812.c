@@ -44,11 +44,13 @@ uint8_t calculate_beat_fraction(uint64_t current_time, uint64_t last_time,
 }
 
 uint8_t scale8(uint64_t value, uint64_t range) {
+  if (range == 0) {
+    return 0;
+  }
   uint8_t result = 0;
   for (int i = 0; i < 8; i++) {
     range = range >> 1;
 
-    // TODO: is it > or >= ???
     if (value >= range) {
       result += 1 << (7 - i);
       value -= range;
@@ -104,7 +106,18 @@ void update_tempo(intercore_message_t *ic_message) {
 }
 
 void led_update() {
-  if (_time_ref == 0 || _tempo_period_us == 0) {
+  // Snapshot shared state under registry lock to prevent torn reads from core0
+  registry_lock_mutex();
+  uint64_t time_ref = _time_ref;
+  uint64_t tempo_period_us = _tempo_period_us;
+  uint64_t last_beat_time = _last_beat_time;
+  uint64_t next_beat_time = _next_beat_time;
+  uint32_t beat_count = _beat_count;
+  uint32_t next_beat_count = _next_beat_count;
+  uint8_t program_id = _program_id;
+  registry_unlock_mutex();
+
+  if (time_ref == 0 || tempo_period_us == 0) {
     return;
   }
 
@@ -115,36 +128,48 @@ void led_update() {
 
   uint64_t current_time = time_us_64();
 
-  advance_next_beat_time(current_time);
+  // Advance next beat time (using local copies)
+  while (next_beat_time < current_time) {
+    puts("Update next beat time");
+    last_beat_time = next_beat_time;
+    next_beat_time += tempo_period_us;
+  }
 
   uint8_t beat_frac =
-      calculate_beat_fraction(current_time, _last_beat_time, _next_beat_time);
+      calculate_beat_fraction(current_time, last_beat_time, next_beat_time);
 
-  run_pattern(_program_id, colors[current_stream], NUM_PIXELS, beat_frac,
-              _beat_count);
+  run_pattern(program_id, colors[current_stream], NUM_PIXELS, beat_frac,
+              beat_count);
 
   output_strings_dma(colors[current_stream]);
   current_stream ^= 1;
 
   // We have a beat
   if (prev_beat_frac > beat_frac) {
-    _beat_count++;
+    beat_count++;
 
-    if (_next_beat_count > _beat_count) {
-      _beat_count = _next_beat_count;
+    if (next_beat_count > beat_count) {
+      beat_count = next_beat_count;
     }
     printf("---- BEAT --- %llu, %llu, %llu, %u\n", prev_time, current_time,
-           _last_beat_time, _beat_count);
+           last_beat_time, beat_count);
   }
 
   if (_cycle_idx % 1000 == 0) {
     printf("LED cycle %d, program %d, beat_frac %u / %.3f, current_time "
            "%llu, last time %lli, next beat %llu, tempo: %llu\n",
-           _cycle_idx, _program_id, beat_frac, (float)beat_frac / UINT8_MAX,
-           current_time, _last_beat_time, _next_beat_time, _tempo_period_us);
+           _cycle_idx, program_id, beat_frac, (float)beat_frac / UINT8_MAX,
+           current_time, last_beat_time, next_beat_time, tempo_period_us);
   }
 
   prev_beat_frac = beat_frac;
   prev_time = current_time;
   _cycle_idx++;
+
+  // Write back modified state under lock
+  registry_lock_mutex();
+  _last_beat_time = last_beat_time;
+  _next_beat_time = next_beat_time;
+  _beat_count = beat_count;
+  registry_unlock_mutex();
 }

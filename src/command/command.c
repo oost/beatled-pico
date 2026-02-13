@@ -50,7 +50,7 @@ int command_error(beatled_message_t *server_msg, size_t data_length) {
 }
 
 int validate_server_message(void *event_data, size_t data_length) {
-  if (!event_data || sizeof(beatled_message_t) >= data_length) {
+  if (!event_data || sizeof(beatled_message_t) > data_length) {
     return 1;
   }
   beatled_message_t *server_msg = (beatled_message_t *)event_data;
@@ -92,7 +92,7 @@ int validate_server_message(void *event_data, size_t data_length) {
 
 int handle_server_message(void *event_data, size_t data_length,
                           uint64_t dest_time) {
-  if (!event_data || sizeof(beatled_message_t) >= data_length) {
+  if (!event_data || sizeof(beatled_message_t) > data_length) {
     return 1;
   }
   beatled_message_t *server_msg = (beatled_message_t *)event_data;
@@ -134,8 +134,7 @@ int handle_server_message(void *event_data, size_t data_length,
 
 int handle_state_change(void *event_data) {
   state_event_t *state_event = (state_event_t *)event_data;
-  state_manager_set_state(state_event->next_state);
-  return 0;
+  return state_manager_set_state(state_event->next_state);
 }
 
 int handle_event(event_t *event) {
