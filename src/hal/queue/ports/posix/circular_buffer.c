@@ -28,6 +28,11 @@ int queue_init(queue_t *q, uint element_size, uint element_count) {
   }
 
   q->data = (uint8_t *)calloc(element_count + 1, element_size);
+  if (!q->data) {
+    printf("Failed to allocate queue buffer (%u x %u bytes)\n", element_count + 1,
+           element_size);
+    return 1;
+  }
   q->element_count = (uint16_t)element_count;
   q->element_size = (uint16_t)element_size;
   q->wptr = 0;

@@ -1,3 +1,5 @@
+#include <stdio.h>
+
 #include "state_manager/states/tempo_synced.h"
 #include "command/command.h"
 #include "hal/time.h"
@@ -19,17 +21,30 @@ void refresh_time_timer_callback(void *data) { send_time_request(); }
 // }
 
 int enter_tempo_synced_state() {
-  // Set alarm to exit tempo state after x amount of time
   tempo_alarm = hal_add_repeating_timer(TEMPO_ALARM_DELAY_US,
                                         &refresh_tempo_timer_callback, NULL);
+  if (!tempo_alarm) {
+    puts("Failed to allocate tempo alarm");
+    return 1;
+  }
 
-  // Set alarm to exit tempo state after x amount of time
   time_alarm = hal_add_repeating_timer(TIME_ALARM_DELAY_US,
                                        &refresh_time_timer_callback, NULL);
+  if (!time_alarm) {
+    puts("Failed to allocate time alarm");
+    hal_cancel_repeating_timer(tempo_alarm);
+    return 1;
+  }
 
-  // Set alarm to exit tempo state after x amount of time
   check_alarm = hal_add_repeating_timer(CHECK_ALARM_DELAY_US,
                                         &refresh_time_timer_callback, NULL);
+  if (!check_alarm) {
+    puts("Failed to allocate check alarm");
+    hal_cancel_repeating_timer(tempo_alarm);
+    hal_cancel_repeating_timer(time_alarm);
+    return 1;
+  }
+
   return 0;
 }
 int exit_tempo_synced_state() {

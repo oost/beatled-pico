@@ -54,6 +54,13 @@ int create_udp_socket(udp_parameters_t *udp_params) {
   device_addr.sin_addr.s_addr = INADDR_ANY;
   device_addr.sin_port = htons(udp_params->udp_port);
 
+  // Set receive timeout (30 seconds)
+  struct timeval tv = {.tv_sec = 30, .tv_usec = 0};
+  if (setsockopt(udp_socket_fd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)) <
+      0) {
+    perror("setsockopt SO_RCVTIMEO failed");
+  }
+
   // Bind the socket with the server address
   if (bind(udp_socket_fd, (const struct sockaddr *)&device_addr,
            sizeof(device_addr)) < 0) {
@@ -76,7 +83,13 @@ void *udp_socket_listen(void *data) {
   for (;;) {
     recvlen = recvfrom(udp_socket_fd, buffer, MAXLINE - 1, 0,
                        (struct sockaddr *)&remaddr, &addrlen);
-    // printf("Received %d bytes\n", recvlen);
+    if (recvlen < 0) {
+      if (errno == EAGAIN || errno == EWOULDBLOCK) {
+        continue; // timeout, keep waiting
+      }
+      printf("UDP recv error: %s\n", strerror(errno));
+      continue;
+    }
     if (recvlen > 0) {
       buffer[recvlen] = 0;
       // printf("Received message: \"%s\"\n", buffer);
@@ -113,6 +126,13 @@ void start_udp(const char *server_name, uint16_t server_port, uint16_t udp_port,
   }
 
   pthread_create(&udp_thread_, NULL, &udp_socket_listen, params);
+}
+
+void shutdown_udp_socket() {
+  if (udp_socket_fd > 0) {
+    close(udp_socket_fd);
+    udp_socket_fd = -1;
+  }
 }
 
 const uint32_t get_ip_address() {
@@ -197,15 +217,25 @@ int sendall(int socket_fd, char *data_buffer, size_t *data_length,
   int total = 0;                // how many bytes we've sent
   int bytesleft = *data_length; // how many we have left to send
   int n;
+  int retries = 0;
+  const int max_retries = 3;
 
   while (total < *data_length) {
     n = sendto(socket_fd, data_buffer + total, bytesleft, 0,
                (const struct sockaddr *)recipient_addr,
                sizeof(*recipient_addr));
     if (n == -1) {
+      if ((errno == EAGAIN || errno == EWOULDBLOCK) &&
+          retries < max_retries) {
+        retries++;
+        printf("UDP Send: retrying (%d/%d)\n", retries, max_retries);
+        usleep(retries * 1000); // 1-3ms backoff
+        continue;
+      }
       printf("UDP Send: %s\n", strerror(errno));
       break;
     }
+    retries = 0;
     total += n;
     bytesleft -= n;
   }
@@ -218,6 +248,10 @@ int sendall(int socket_fd, char *data_buffer, size_t *data_length,
 int send_udp_request(size_t msg_length, prepare_payload_fn prepare_payload) {
   int err = 0;
   pbuf *buffer = (pbuf *)malloc(sizeof(pbuf));
+  if (!buffer) {
+    printf("Failed to allocate UDP send buffer\n");
+    return 1;
+  }
 
   buffer->payload = malloc(msg_length);
   if (!buffer->payload) {

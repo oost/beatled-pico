@@ -15,6 +15,7 @@ typedef int (*process_response_fn)(void *buffer_payload, size_t size);
 
 void start_udp(const char *server_name, uint16_t server_port, uint16_t udp_port,
                process_response_fn process_response);
+void shutdown_udp_socket();
 
 // Perform initialisation
 

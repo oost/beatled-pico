@@ -33,12 +33,25 @@ state_manager_state_t state_manager_get_state() {
   return internal_state.current_state;
 }
 
+static const size_t transition_matrix_size =
+    sizeof(transition_matrix) / sizeof(transition_matrix[0]);
+
 int transition_state(state_manager_state_t new_state) {
   state_manager_state_t old_state = internal_state.current_state;
 
+  if (new_state >= transition_matrix_size ||
+      old_state >= transition_matrix_size) {
+    printf("Invalid state: old=%d new=%d (max=%zu)\n", old_state, new_state,
+           transition_matrix_size - 1);
+    return 2;
+  }
+
   if (old_state == new_state) {
-    printf("Transitioning to the same state (%d)... Noop\n", old_state);
-    return 1;
+    if (new_state != STATE_TEMPO_SYNCED) {
+      printf("Transitioning to the same state (%d)... Noop\n", old_state);
+      return 1;
+    }
+    printf("Re-entering state %d (re-sync)\n", old_state);
   }
 
   int err = 0;

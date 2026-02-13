@@ -45,8 +45,8 @@ int process_next_beat_msg(beatled_message_t *server_msg, size_t data_length) {
 
   if (state_manager_get_state() != STATE_TEMPO_SYNCED) {
     if (!schedule_state_transition(STATE_TEMPO_SYNCED)) {
-      puts("- Can't schedule transition to initialized state. Fatal error.");
-      exit(1);
+      puts("- Can't schedule transition to tempo synced state.");
+      return 1;
     }
   }
 

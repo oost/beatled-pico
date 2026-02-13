@@ -56,6 +56,7 @@ int process_tempo_msg(beatled_message_t *server_msg, size_t data_length) {
 
   registry_lock_mutex();
   registry.tempo_period_us = tempo_period_us;
+  registry.program_id = program_id;
   registry.update_timestamp = time_us_64();
   registry_unlock_mutex();
 
@@ -66,7 +67,8 @@ int process_tempo_msg(beatled_message_t *server_msg, size_t data_length) {
   //                                      .registry_update_fields =
   //                                          (0x01 << REGISTRY_UPDATE_TEMPO)};
 
-  intercore_message_t msg = {.message_type = 0x01 << intercore_tempo_update};
+  intercore_message_t msg = {.message_type = 0x01 << intercore_tempo_update |
+                                             0x01 << intercore_program_update};
 
   if (!hal_queue_add_message(intercore_command_queue, &msg)) {
     puts("Intercore queue is FULL!!!");

@@ -43,10 +43,17 @@ void resolve_server_address(const char *remote_server_name,
 void resolve_server_address_blocking(const char *remote_server_name,
                                      uint16_t remote_server_port) {
   resolve_server_address(remote_server_name, remote_server_port);
-  while (!server_address_resolved) {
+  uint32_t attempts = 0;
+  const uint32_t max_attempts = 1500; // 30 seconds at 20ms intervals
+  while (!server_address_resolved && attempts < max_attempts) {
     sleep_ms(20);
+    attempts++;
   }
-  puts("Server address resolved.");
+  if (!server_address_resolved) {
+    printf("DNS resolution timeout for %s after 30s\n", remote_server_name);
+  } else {
+    puts("Server address resolved.");
+  }
 }
 
 const uint32_t get_ip_address() {

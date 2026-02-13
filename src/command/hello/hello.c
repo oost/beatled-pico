@@ -46,8 +46,8 @@ int process_hello_msg(beatled_message_t *server_msg, size_t data_length) {
   blink(MESSAGE_BLINK_SPEED, MESSAGE_HELLO);
 
   if (!schedule_state_transition(STATE_REGISTERED)) {
-    puts("- Can't schedule transition to registered state. Fatal error.");
-    exit(1);
+    puts("- Can't schedule transition to registered state.");
+    return 1;
   }
 
   return 0;

@@ -9,6 +9,9 @@
 #include "command/utils.h"
 #include "config/constants.h"
 #include "hal/blink.h"
+#include "hal/network.h"
+#include "hal/registry.h"
+#include "process/intercore_queue.h"
 #include "state_manager/state_manager.h"
 
 int command_program(beatled_message_t *server_msg, size_t data_length) {
@@ -19,7 +22,19 @@ int command_program(beatled_message_t *server_msg, size_t data_length) {
   beatled_message_program_t *program_msg =
       (beatled_message_program_t *)server_msg;
 
-  // led_update_pattern_idx(program_msg->program_id);
+  uint16_t program_id = ntohs(program_msg->program_id);
+  printf("Setting program to %u\n", program_id);
+
+  registry_lock_mutex();
+  registry.program_id = program_id;
+  registry_unlock_mutex();
+
+  intercore_message_t msg = {.message_type = 0x01 << intercore_program_update};
+  if (!hal_queue_add_message(intercore_command_queue, &msg)) {
+    puts("Intercore queue is FULL!!!");
+    return 1;
+  }
+
   return 0;
 }
 
@@ -35,7 +50,7 @@ int command_error(beatled_message_t *server_msg, size_t data_length) {
 }
 
 int validate_server_message(void *event_data, size_t data_length) {
-  if (sizeof(beatled_message_t) >= data_length) {
+  if (!event_data || sizeof(beatled_message_t) >= data_length) {
     return 1;
   }
   beatled_message_t *server_msg = (beatled_message_t *)event_data;
@@ -77,7 +92,7 @@ int validate_server_message(void *event_data, size_t data_length) {
 
 int handle_server_message(void *event_data, size_t data_length,
                           uint64_t dest_time) {
-  if (sizeof(beatled_message_t) >= data_length) {
+  if (!event_data || sizeof(beatled_message_t) >= data_length) {
     return 1;
   }
   beatled_message_t *server_msg = (beatled_message_t *)event_data;

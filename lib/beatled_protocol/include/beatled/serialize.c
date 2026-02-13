@@ -9,7 +9,7 @@ static inline int deserialize_message(beatled_message_t *msg_data,
   if (data_length < 1) {
     return 1;
   }
-  beatled_message_type_t message_type = msg_data.type;
+  beatled_message_type_t message_type = msg_data->type;
 
   deserialize_fn = (message_type < process_fn_map_length)
                        ? message_map[message_type]

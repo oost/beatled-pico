@@ -70,8 +70,8 @@ int process_time_msg(beatled_message_t *server_msg, size_t data_length,
   set_server_time_offset(clock_offset);
 
   if (!schedule_state_transition(STATE_TIME_SYNCED)) {
-    puts("- Can't schedule transition to time synced state. Fatal error.");
-    exit(1);
+    puts("- Can't schedule transition to time synced state.");
+    return 1;
   }
 
   return 0;

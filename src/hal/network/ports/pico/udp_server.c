@@ -92,6 +92,15 @@ int init_udp_socket(uint16_t udp_port) {
   return 0;
 }
 
+void shutdown_udp_socket() {
+  cyw43_arch_lwip_begin();
+  if (server_udp_pcb) {
+    udp_remove(server_udp_pcb);
+    server_udp_pcb = NULL;
+  }
+  cyw43_arch_lwip_end();
+}
+
 void start_udp(const char *server_name, uint16_t server_port, uint16_t udp_port,
                process_response_fn process_response) {
   process_response_ = process_response;
