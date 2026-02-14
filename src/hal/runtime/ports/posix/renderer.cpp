@@ -5,20 +5,25 @@
 #include "renderer.h"
 #include "shader_types.h"
 #include "shaders/triangle.metal.h"
+#include "status_buffer.h"
 
 const int Renderer::kMaxFramesInFlight = 3;
 
 Renderer::Renderer(MTL::Device *pDevice)
-    : _pDevice(pDevice->retain()), _angle(0.f), _frame(0) {
+    : _pDevice(pDevice->retain()), _angle(0.f), _frame(0),
+      _pOverlayRenderer(nullptr), _overlayUpdateCounter(0) {
   _pCommandQueue = _pDevice->newCommandQueue();
   buildShaders();
   buildDepthStencilStates();
   buildBuffers();
 
+  _pOverlayRenderer = new OverlayRenderer(_pDevice, _pShaderLibrary);
+
   _semaphore = dispatch_semaphore_create(Renderer::kMaxFramesInFlight);
 }
 
 Renderer::~Renderer() {
+  delete _pOverlayRenderer;
   _pShaderLibrary->release();
   _pDepthStencilState->release();
   _pVertexDataBuffer->release();
@@ -272,6 +277,13 @@ void Renderer::draw(MTK::View *pView) {
   pEnc->drawIndexedPrimitives(MTL::PrimitiveType::PrimitiveTypeTriangle, 6 * 6,
                               MTL::IndexType::IndexTypeUInt16, _pIndexBuffer, 0,
                               kNumInstances);
+
+  // Draw status overlay
+  if (++_overlayUpdateCounter % 30 == 0) {
+    StatusBuffer::Ptr statusBuf = StatusBuffer::load_instance();
+    _pOverlayRenderer->updateTexture(statusBuf->data());
+  }
+  _pOverlayRenderer->draw(pEnc);
 
   pEnc->endEncoding();
   pCmd->presentDrawable(pView->currentDrawable());

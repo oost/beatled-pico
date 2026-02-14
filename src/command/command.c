@@ -15,7 +15,6 @@
 #include "state_manager/state_manager.h"
 
 int command_program(beatled_message_t *server_msg, size_t data_length) {
-  puts("Program!");
   if (!check_size(data_length, sizeof(beatled_message_program_t))) {
     return 1;
   }
@@ -23,7 +22,7 @@ int command_program(beatled_message_t *server_msg, size_t data_length) {
       (beatled_message_program_t *)server_msg;
 
   uint16_t program_id = ntohs(program_msg->program_id);
-  printf("Setting program to %u\n", program_id);
+  printf("[CMD] Program change: id=%u\n", program_id);
 
   registry_lock_mutex();
   registry.program_id = program_id;
@@ -39,13 +38,12 @@ int command_program(beatled_message_t *server_msg, size_t data_length) {
 }
 
 int command_error(beatled_message_t *server_msg, size_t data_length) {
-  puts("Error");
   if (!check_size(data_length, sizeof(beatled_message_error_t))) {
     return 1;
   }
   beatled_message_error_t *error_msg = (beatled_message_error_t *)server_msg;
 
-  printf("Communication error %u\n", error_msg->error_code);
+  printf("[CMD] Server error: code=%u\n", error_msg->error_code);
   return 0;
 }
 
@@ -82,7 +80,7 @@ int validate_server_message(void *event_data, size_t data_length) {
     break;
 
   default:
-    printf("Unknown command type %d...\n", server_msg->type);
+    printf("[CMD] Unknown command type %d\n", server_msg->type);
     blink(ERROR_BLINK_SPEED, ERROR_COMMAND);
     err = 1;
   }
@@ -100,6 +98,7 @@ int handle_server_message(void *event_data, size_t data_length,
   int err = 0;
   switch (server_msg->type) {
   case BEATLED_MESSAGE_HELLO_RESPONSE:
+    printf("[MSG] Received HELLO_RESPONSE\n");
     err = process_hello_msg(server_msg, data_length);
     break;
 
@@ -108,10 +107,12 @@ int handle_server_message(void *event_data, size_t data_length,
     break;
 
   case BEATLED_MESSAGE_TEMPO_RESPONSE:
+    printf("[MSG] Received TEMPO_RESPONSE\n");
     err = process_tempo_msg(server_msg, data_length);
     break;
 
   case BEATLED_MESSAGE_TIME_RESPONSE:
+    printf("[MSG] Received TIME_RESPONSE\n");
     err = process_time_msg(server_msg, data_length, dest_time);
     break;
 
@@ -124,7 +125,7 @@ int handle_server_message(void *event_data, size_t data_length,
     break;
 
   default:
-    printf("Unknown message type %d...\n", server_msg->type);
+    printf("[MSG] Unknown message type %d\n", server_msg->type);
     blink(ERROR_BLINK_SPEED, ERROR_COMMAND);
     err = 1;
   }
@@ -151,13 +152,13 @@ int handle_event(event_t *event) {
     break;
 
   case event_error:
-    puts("Error event command...");
+    puts("[EVENT] Error event");
     blink(ERROR_BLINK_SPEED, ERROR_COMMAND);
     err = 1;
     break;
 
   default:
-    printf("Unknown event type %d...\n", event->event_type);
+    printf("[EVENT] Unknown event type %d\n", event->event_type);
     blink(ERROR_BLINK_SPEED, ERROR_COMMAND);
     err = 1;
   }

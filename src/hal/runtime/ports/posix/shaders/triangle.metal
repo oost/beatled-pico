@@ -53,3 +53,31 @@ half4 fragment fragmentMain(v2f in [[stage_in]]) {
   float ndotl = saturate(dot(n, l));
   return half4(in.color * 0.1 + in.color * ndotl, 1.0);
 }
+
+// --- Status overlay ---
+
+struct OverlayVertex {
+  float2 position;
+  float2 texcoord;
+};
+
+struct OverlayV2F {
+  float4 position [[position]];
+  float2 texcoord;
+};
+
+vertex OverlayV2F overlayVertexMain(
+    device const OverlayVertex *vertices [[buffer(0)]],
+    uint vid [[vertex_id]]) {
+  OverlayV2F out;
+  out.position = float4(vertices[vid].position, 0.0, 1.0);
+  out.texcoord = vertices[vid].texcoord;
+  return out;
+}
+
+fragment half4 overlayFragmentMain(
+    OverlayV2F in [[stage_in]],
+    texture2d<half> overlayTexture [[texture(0)]]) {
+  constexpr sampler s(min_filter::linear, mag_filter::linear);
+  return overlayTexture.sample(s, in.texcoord);
+}

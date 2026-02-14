@@ -29,10 +29,14 @@ target_sources(${CURRENT_LIBRARY_NAME} INTERFACE
   ${CMAKE_CURRENT_LIST_DIR}/app_delegate.cpp
   ${CMAKE_CURRENT_LIST_DIR}/math.cpp
   ${CMAKE_CURRENT_LIST_DIR}/led_buffer.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/status_buffer.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/overlay_renderer.cpp
 )
 
 target_link_libraries(${CURRENT_LIBRARY_NAME} INTERFACE
   METAL_CPP
+  "-framework CoreGraphics"
+  "-framework CoreText"
 )
 
 add_dependencies(${CURRENT_LIBRARY_NAME} ShaderHeaders)

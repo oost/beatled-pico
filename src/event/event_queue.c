@@ -7,7 +7,7 @@
 #include "hal/queue.h"
 #include "hal/time.h"
 
-#define MAX_QUEUE_COUNT 20
+#define MAX_QUEUE_COUNT 64
 
 // static queue_t event_queue;
 

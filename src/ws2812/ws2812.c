@@ -12,6 +12,9 @@
 #include "hal/ws2812.h"
 #include "process/intercore_queue.h"
 #include "state_manager/state_manager.h"
+#ifdef POSIX_PORT
+#include "hal/startup.h"
+#endif
 #include "ws2812/ws2812.h"
 #include "ws2812_config.h"
 #include "ws2812_patterns.h"
@@ -73,9 +76,9 @@ void update_tempo(intercore_message_t *ic_message) {
 
   // printf("Message type %d\n", ic_message->message_type);
   if (ic_message->message_type & (0x01 << intercore_time_ref_update)) {
-    printf("Update time ref from %llu to %llu. Shift = %llu\n", _next_beat_time,
-           registry.next_beat_time_ref,
-           registry.next_beat_time_ref - _next_beat_time);
+    printf("[TEMPO] Time ref update: %llu -> %llu (shift=%lld)\n",
+           _next_beat_time, registry.next_beat_time_ref,
+           (int64_t)(registry.next_beat_time_ref - _next_beat_time));
 
     uint64_t current_beat_duration = _next_beat_time - _last_beat_time;
     _time_ref = registry.next_beat_time_ref;
@@ -85,7 +88,7 @@ void update_tempo(intercore_message_t *ic_message) {
     uint64_t new_beat_duration = _next_beat_time - _last_beat_time;
 
     if (new_beat_duration < (current_beat_duration >> 1)) {
-      printf("Beat duration is shortened by more than 2, from %llu to %llu\n",
+      printf("[TEMPO] Beat duration shortened >2x: %llu -> %llu\n",
              current_beat_duration, new_beat_duration);
     }
 
@@ -93,13 +96,14 @@ void update_tempo(intercore_message_t *ic_message) {
   }
 
   if (ic_message->message_type & (0x01 << intercore_tempo_update)) {
-    // puts("Tempo update");
     _tempo_period_us = registry.tempo_period_us;
+    printf("[TEMPO] Period=%llu us (%.1f BPM)\n", _tempo_period_us,
+           _tempo_period_us > 0 ? 60000000.0 / _tempo_period_us : 0.0);
   }
 
   if (ic_message->message_type & (0x01 << intercore_program_update)) {
-    // puts("Program update");
     _program_id = registry.program_id;
+    printf("[CMD] Program update: id=%u\n", _program_id);
   }
 
   registry_unlock_mutex();
@@ -115,6 +119,7 @@ void led_update() {
   uint32_t beat_count = _beat_count;
   uint32_t next_beat_count = _next_beat_count;
   uint8_t program_id = _program_id;
+  int64_t time_offset = (int64_t)registry.time_offset;
   registry_unlock_mutex();
 
   if (time_ref == 0 || tempo_period_us == 0) {
@@ -151,15 +156,20 @@ void led_update() {
     if (next_beat_count > beat_count) {
       beat_count = next_beat_count;
     }
-    printf("---- BEAT --- %llu, %llu, %llu, %u\n", prev_time, current_time,
-           last_beat_time, beat_count);
+    printf("[BEAT] count=%u prev=%llu curr=%llu last_beat=%llu\n", beat_count,
+           prev_time, current_time, last_beat_time);
   }
 
   if (_cycle_idx % 1000 == 0) {
-    printf("LED cycle %d, program %d, beat_frac %u / %.3f, current_time "
-           "%llu, last time %lli, next beat %llu, tempo: %llu\n",
-           _cycle_idx, program_id, beat_frac, (float)beat_frac / UINT8_MAX,
-           current_time, last_beat_time, next_beat_time, tempo_period_us);
+    printf("[LED] cycle=%u program=%u beat_frac=%.3f tempo=%llu us (%.1f BPM) "
+           "beat=%u\n",
+           _cycle_idx, program_id, (float)beat_frac / UINT8_MAX, tempo_period_us,
+           tempo_period_us > 0 ? 60000000.0 / tempo_period_us : 0.0, beat_count);
+#ifdef POSIX_PORT
+    push_status_update(state_manager_get_state(),
+                       state_manager_get_state() >= STATE_REGISTERED, program_id,
+                       (uint32_t)tempo_period_us, beat_count, time_offset);
+#endif
   }
 
   prev_beat_frac = beat_frac;

@@ -4,6 +4,8 @@
 #include <Metal/Metal.hpp>
 #include <MetalKit/MetalKit.hpp>
 
+#include "overlay_renderer.h"
+
 static constexpr size_t kNumInstances = 16;
 static constexpr size_t kMaxFramesInFlight = 3;
 
@@ -33,6 +35,9 @@ private:
   int _frame;
   dispatch_semaphore_t _semaphore;
   static const int kMaxFramesInFlight;
+
+  OverlayRenderer *_pOverlayRenderer;
+  int _overlayUpdateCounter;
 };
 
 #endif // SRC__RUNTIME__SIMULATOR__RENDERER__H_

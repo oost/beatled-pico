@@ -6,6 +6,11 @@
 #include "hal/unique_id.h"
 #include "state_manager/state_manager.h"
 #include "state_manager/states.h"
+#ifdef POSIX_PORT
+extern void push_status_update(uint8_t state, bool connected,
+                               uint16_t program_id, uint32_t tempo_period_us,
+                               uint32_t beat_count, int64_t time_offset);
+#endif
 
 typedef struct state_manager_internal_state {
   state_manager_state_t current_state;
@@ -27,6 +32,25 @@ uint16_t transition_matrix[] = {
     (0x01 << STATE_TIME_SYNCED) | (0x01 << STATE_TEMPO_SYNCED) // STATE_TEMPO_SYNCED
 };
 
+const char *state_name(state_manager_state_t s) {
+  switch (s) {
+  case STATE_UNKNOWN:
+    return "UNKNOWN";
+  case STATE_STARTED:
+    return "STARTED";
+  case STATE_INITIALIZED:
+    return "INITIALIZED";
+  case STATE_REGISTERED:
+    return "REGISTERED";
+  case STATE_TIME_SYNCED:
+    return "TIME_SYNCED";
+  case STATE_TEMPO_SYNCED:
+    return "TEMPO_SYNCED";
+  default:
+    return "???";
+  }
+}
+
 void state_manager_init() {}
 
 state_manager_state_t state_manager_get_state() {
@@ -41,28 +65,31 @@ int transition_state(state_manager_state_t new_state) {
 
   if (new_state >= transition_matrix_size ||
       old_state >= transition_matrix_size) {
-    printf("Invalid state: old=%d new=%d (max=%zu)\n", old_state, new_state,
+    printf("[STATE] Invalid state: old=%s new=%s (max=%zu)\n",
+           state_name(old_state), state_name(new_state),
            transition_matrix_size - 1);
     return 2;
   }
 
   if (old_state == new_state) {
     if (new_state != STATE_TEMPO_SYNCED) {
-      printf("Transitioning to the same state (%d)... Noop\n", old_state);
+      printf("[STATE] Transitioning to the same state (%s)... Noop\n",
+             state_name(old_state));
       return 1;
     }
-    printf("Re-entering state %d (re-sync)\n", old_state);
+    printf("[STATE] Re-entering state %s (re-sync)\n", state_name(old_state));
   }
 
   int err = 0;
 
   if (((transition_matrix[internal_state.current_state] &
         (0x01 << new_state)) == 0)) {
-    printf("Transition not allowed from %d to %d\n", old_state, new_state);
+    printf("[STATE] Transition not allowed from %s to %s\n",
+           state_name(old_state), state_name(new_state));
     return 2;
   }
 
-  printf("Transitioning from %d to %d\n", old_state, new_state);
+  printf("[STATE] %s -> %s\n", state_name(old_state), state_name(new_state));
 
   if (exit_current_state) {
     err = exit_current_state();
@@ -72,6 +99,10 @@ int transition_state(state_manager_state_t new_state) {
   }
 
   internal_state.current_state = new_state;
+
+#ifdef POSIX_PORT
+  push_status_update(new_state, new_state >= STATE_REGISTERED, 0, 0, 0, 0);
+#endif
 
   switch (new_state) {
   case STATE_STARTED:
@@ -99,7 +130,7 @@ int transition_state(state_manager_state_t new_state) {
     break;
 
   default:
-    printf("Unknown state... %d\n", new_state);
+    printf("[STATE] Unknown state: %s (%d)\n", state_name(new_state), new_state);
   }
 
   return err;

@@ -24,9 +24,9 @@
   "cmake.buildBeforeRun": true,
   "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
   "cmake.configureSettings": {
-    "PORT": "pico",
-    // "PORT": "posix",
-    // "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
+    // "PORT": "pico",
+    "PORT": "posix",
+    "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
     "PICO_PROBE": "ON",
     "PICO_SDK_PATH": "./lib/pico-sdk",
     "PICO_BOARD": "pico_w",

@@ -16,8 +16,11 @@ port_init()
 set(WIFI_SSID "$ENV{WIFI_SSID}" CACHE INTERNAL "WiFi SSID for examples")
 set(WIFI_PASSWORD "$ENV{WIFI_PASSWORD}" CACHE INTERNAL "WiFi password for examples")
 set(BEATLED_SERVER_NAME "$ENV{BEATLED_SERVER_NAME}")
+if(POSIX_PORT AND "${BEATLED_SERVER_NAME}" STREQUAL "")
+  set(BEATLED_SERVER_NAME "localhost")
+endif()
 
-message("Compiling with WIFI_SSID ${WIFI_SSID} and password ${WIFI_PASSWORD}")
+message("Compiling with WIFI_SSID ${WIFI_SSID} and password ${WIFI_PASSWORD}, BEATLED_SERVER_NAME=${BEATLED_SERVER_NAME}")
 
 option(PICO_AUTOTEST "Run with auto tests" OFF)
 option(PICO_PROBE "Debug with Pico probe" OFF)
