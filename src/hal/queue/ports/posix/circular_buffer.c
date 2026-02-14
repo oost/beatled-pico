@@ -13,24 +13,24 @@
 
 int queue_init(queue_t *q, uint element_size, uint element_count) {
   if (pthread_mutex_init(&(q->lock), NULL) != 0) {
-    printf("\n mutex init has failed\n");
+    puts("[ERR] Queue mutex init failed");
     return 1;
   }
 
   if (pthread_cond_init(&(q->in_cond), NULL) != 0) {
-    printf("\n cond init has failed\n");
+    puts("[ERR] Queue condition init failed");
     return 1;
   }
 
   if (pthread_cond_init(&(q->out_cond), NULL) != 0) {
-    printf("\n cond init has failed\n");
+    puts("[ERR] Queue condition init failed");
     return 1;
   }
 
   q->data = (uint8_t *)calloc(element_count + 1, element_size);
   if (!q->data) {
-    printf("Failed to allocate queue buffer (%u x %u bytes)\n", element_count + 1,
-           element_size);
+    printf("[ERR] Failed to allocate queue buffer (%u x %u bytes)\n",
+           element_count + 1, element_size);
     return 1;
   }
   q->element_count = (uint16_t)element_count;

@@ -28,9 +28,7 @@ void *timer_thread_loop(void *data) {
     //   pthread_cancel(pthread_self());
 
     alarm->callback_fn(alarm->user_data);
-    printf("Sleeping %llu microsecs\n", alarm->useconds);
     usleep(alarm->useconds);
-    puts("slept");
   }
 }
 
@@ -39,7 +37,7 @@ hal_alarm_t *hal_add_repeating_timer(int64_t delay_us,
                                      void *user_data) {
   hal_alarm_t *alarm = (hal_alarm_t *)malloc(sizeof(hal_alarm_t));
   if (!alarm) {
-    puts("Failed to allocate alarm");
+    puts("[ERR] Failed to allocate alarm");
     return NULL;
   }
   alarm->callback_fn = callback_fn;
@@ -49,7 +47,7 @@ hal_alarm_t *hal_add_repeating_timer(int64_t delay_us,
 
   int id = pthread_create(&alarm->thread_id, NULL, timer_thread_loop, alarm);
   if (id) {
-    printf("ERROR; return code from pthread_create() is %d\n", id);
+    printf("[ERR] Failed to create alarm thread: %d\n", id);
     exit(EXIT_FAILURE);
   }
 
