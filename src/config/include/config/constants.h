@@ -35,10 +35,14 @@
 #define UDP_SERVER_PORT 9090
 #define UDP_PORT 8765
 
-// Verbose logging for [LED] and [TEMPO] debug prints.
-// Define to 1 to enable, 0 to disable.
+// Verbose logging for [LED], [TEMPO], [QUEUE] debug prints.
+// On by default for POSIX development builds, off on Pico.
 #ifndef BEATLED_VERBOSE_LOG
+#ifdef POSIX_PORT
+#define BEATLED_VERBOSE_LOG 1
+#else
 #define BEATLED_VERBOSE_LOG 0
+#endif
 #endif
 
 // On POSIX builds, fatal errors abort the program so they're caught

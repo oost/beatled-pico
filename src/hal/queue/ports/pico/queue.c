@@ -13,7 +13,7 @@ hal_queue_handle_t hal_queue_init(size_t msg_size, int queue_size) {
   hal_queue_handle_t new_queue =
       (hal_queue_handle_t)malloc(sizeof(hal_queue_t));
   if (!new_queue) {
-    puts("Failed to allocate queue");
+    puts("[ERR] Failed to allocate queue");
     return NULL;
   }
   queue_init(&(new_queue->impl), msg_size, queue_size);
@@ -22,7 +22,7 @@ hal_queue_handle_t hal_queue_init(size_t msg_size, int queue_size) {
 
 bool hal_queue_add_message(hal_queue_handle_t queue, void *data) {
   if (!queue_try_add(&(queue->impl), data)) {
-    puts("Queued is FULL!!!");
+    puts("[ERR] Queue full");
     return false;
   }
   // puts("Queued message");

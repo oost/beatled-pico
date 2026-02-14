@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#include "config/constants.h"
 #include "hal/registry.h"
 
 pthread_mutex_t lock;
@@ -11,8 +12,7 @@ registry_t registry;
 
 void registry_init() {
   if (pthread_mutex_init(&lock, NULL) != 0) {
-    printf("\n mutex init has failed\n");
-    // return 1;
+    BEATLED_FATAL("Mutex init failed");
   }
 }
 

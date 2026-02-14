@@ -70,7 +70,7 @@ uint8_t scale8(uint64_t value, uint64_t range) {
 void advance_next_beat_time(uint64_t current_time) {
   while (_next_beat_time < current_time) {
 #if BEATLED_VERBOSE_LOG
-    puts("Update next beat time");
+    puts("[LED] Advancing next beat time");
 #endif
     _last_beat_time = _next_beat_time;
     _next_beat_time += _tempo_period_us;
@@ -151,7 +151,7 @@ void led_update() {
   // Advance next beat time (using local copies)
   while (next_beat_time < current_time) {
 #if BEATLED_VERBOSE_LOG
-    puts("Update next beat time");
+    puts("[LED] Advancing next beat time");
 #endif
     last_beat_time = next_beat_time;
     next_beat_time += tempo_period_us;

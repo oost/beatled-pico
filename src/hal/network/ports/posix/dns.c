@@ -27,7 +27,7 @@ int resolve_server_address(const char *server_name,
 
   s = getaddrinfo(server_name, NULL, &hints, &result);
   if (s != 0) {
-    fprintf(stderr, "getaddrinfo: %s (servername: %s)\n", gai_strerror(s),
+    fprintf(stderr, "[ERR] getaddrinfo: %s (server: %s)\n", gai_strerror(s),
             server_name);
     return 1;
   }
@@ -39,7 +39,7 @@ int resolve_server_address(const char *server_name,
 
   char ipstr[INET6_ADDRSTRLEN];
   // struct sockaddr_in sa; // pretend this is loaded with something
-  printf("Resolved %s:\n", server_name);
+  printf("[NET] Resolved %s\n", server_name);
   for (rp = result; rp != NULL; rp = rp->ai_next) {
     if (rp->ai_family != AF_INET) {
       // Shouldnt ever be the case...
@@ -55,7 +55,7 @@ int resolve_server_address(const char *server_name,
 
     // convert the IP to a string and print it:
     inet_ntop(rp->ai_family, addr, ipstr, sizeof ipstr);
-    printf("  %s: %s\n", ipver, ipstr);
+    printf("[NET]   %s: %s\n", ipver, ipstr);
     break;
   }
 

@@ -3,13 +3,13 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#include "config/constants.h"
 #include "hal/time.h"
-
 struct hal_alarm {
   pthread_t thread_id;
   bool (*timer_delegate)(pthread_t, unsigned int, unsigned int);
   uint64_t useconds;
-  alam_callback_fn callback_fn;
+  alarm_callback_fn callback_fn;
   void *user_data;
 };
 
@@ -33,12 +33,11 @@ void *timer_thread_loop(void *data) {
 }
 
 hal_alarm_t *hal_add_repeating_timer(int64_t delay_us,
-                                     alam_callback_fn callback_fn,
+                                     alarm_callback_fn callback_fn,
                                      void *user_data) {
   hal_alarm_t *alarm = (hal_alarm_t *)malloc(sizeof(hal_alarm_t));
   if (!alarm) {
-    puts("[ERR] Failed to allocate alarm");
-    return NULL;
+    BEATLED_FATAL("[ERR] Failed to allocate alarm");
   }
   alarm->callback_fn = callback_fn;
   alarm->user_data = user_data;
@@ -47,7 +46,7 @@ hal_alarm_t *hal_add_repeating_timer(int64_t delay_us,
 
   int id = pthread_create(&alarm->thread_id, NULL, timer_thread_loop, alarm);
   if (id) {
-    printf("[ERR] Failed to create alarm thread: %d\n", id);
+    printf("ERROR; return code from pthread_create() is %d\n", id);
     exit(EXIT_FAILURE);
   }
 

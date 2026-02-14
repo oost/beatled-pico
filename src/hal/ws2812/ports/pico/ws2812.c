@@ -37,5 +37,5 @@ void ws2812_init(uint16_t num_pixel, uint8_t ws2812_pin, uint32_t frequency,
   ws2812_program_init(pio, sm, offset, ws2812_pin, frequency, is_rgbw);
   dma_init(pio, sm, num_pixel);
 
-  printf("Initialized WS2812 driver\n");
+  puts("[INIT] WS2812 driver initialized");
 }

@@ -80,11 +80,11 @@ TEST_CASE("State machine transitions", "[state_manager]") {
     REQUIRE(result == 2);
   }
 
-  SECTION("Self-transition for non-TEMPO_SYNCED is a noop") {
+  SECTION("Self-transition for non-TEMPO_SYNCED is rejected") {
     state_manager_set_state(STATE_STARTED);
 
     int result = state_manager_set_state(STATE_STARTED);
-    REQUIRE(result == 0);
+    REQUIRE(result == 1);
   }
 
   SECTION("Self-transition for TEMPO_SYNCED is allowed (re-sync)") {

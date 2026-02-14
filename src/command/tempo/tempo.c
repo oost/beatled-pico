@@ -51,8 +51,10 @@ int process_tempo_msg(beatled_message_t *server_msg, size_t data_length) {
          beat_time_ref, tempo_period_us, 1000000.0 * 60 / tempo_period_us);
 #endif
 
-  if (!schedule_state_transition(STATE_TEMPO_SYNCED)) {
-    BEATLED_FATAL("Failed to schedule transition to tempo synced state");
+  if (current_state != STATE_TEMPO_SYNCED) {
+    if (!schedule_state_transition(STATE_TEMPO_SYNCED)) {
+      BEATLED_FATAL("Failed to schedule transition to tempo synced state");
+    }
   }
 
   registry_lock_mutex();
@@ -72,8 +74,7 @@ int process_tempo_msg(beatled_message_t *server_msg, size_t data_length) {
                                              0x01 << intercore_program_update};
 
   if (!hal_queue_add_message(intercore_command_queue, &msg)) {
-    BEATLED_FATAL("Intercore queue full");
-    return 1;
+    puts("[ERR] Intercore queue full, skipping notification");
   }
 
   return 0;

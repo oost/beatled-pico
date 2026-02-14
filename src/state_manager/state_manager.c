@@ -81,7 +81,7 @@ int transition_state(state_manager_state_t new_state) {
       // example when receiving a "next beat" command while already in the tempo
       // synced state, which issues a transition to the same state as a way to
       // re-sync the tempo.
-      return 0;
+      return 1;
     }
     printf("[STATE] Re-entering state %s (re-sync)\n", state_name(old_state));
   }
