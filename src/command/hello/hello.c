@@ -44,6 +44,10 @@ int process_hello_msg(beatled_message_t *server_msg, size_t data_length) {
   printf("[CMD] Registered with client_id=%d\n", client_id);
   blink(MESSAGE_BLINK_SPEED, MESSAGE_HELLO);
 
+  if (state_manager_get_state() >= STATE_REGISTERED) {
+    return 0;
+  }
+
   if (!schedule_state_transition(STATE_REGISTERED)) {
     BEATLED_FATAL("Failed to schedule transition to REGISTERED");
     return 1;

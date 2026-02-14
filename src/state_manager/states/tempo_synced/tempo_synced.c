@@ -7,23 +7,35 @@
 
 #define TEMPO_ALARM_DELAY_US 10000000
 #define TIME_ALARM_DELAY_US 100000000
-// #define CHECK_ALARM_DELAY_US 60000000
+#define HELLO_ALARM_DELAY_US 10000000
 
-hal_alarm_t *tempo_alarm = NULL;
-hal_alarm_t *time_alarm = NULL;
-// hal_alarm_t *check_alarm;
+static hal_alarm_t *tempo_alarm = NULL;
+static hal_alarm_t *time_alarm = NULL;
+static hal_alarm_t *hello_alarm = NULL;
 
-void refresh_tempo_timer_callback(void *data) { send_tempo_request(); }
+static void refresh_tempo_timer_callback(void *data) { send_tempo_request(); }
 
-void refresh_time_timer_callback(void *data) { send_time_request(); }
+static void refresh_time_timer_callback(void *data) { send_time_request(); }
 
-// void check_sync_timer_callback(void *data) {
-//   send_time_request();
-//   send_tempo_request();
-// }
+static void refresh_hello_timer_callback(void *data) { send_hello_request(); }
+
+void cancel_synced_timers() {
+  if (tempo_alarm) {
+    hal_cancel_repeating_timer(tempo_alarm);
+    tempo_alarm = NULL;
+  }
+  if (time_alarm) {
+    hal_cancel_repeating_timer(time_alarm);
+    time_alarm = NULL;
+  }
+  if (hello_alarm) {
+    hal_cancel_repeating_timer(hello_alarm);
+    hello_alarm = NULL;
+  }
+}
 
 int enter_tempo_synced_state() {
-  if (tempo_alarm || time_alarm /* || check_alarm */) {
+  if (tempo_alarm || time_alarm || hello_alarm) {
     BEATLED_FATAL(
         "[ERR] Alarms already active when entering tempo synced state");
     return 1;
@@ -40,24 +52,22 @@ int enter_tempo_synced_state() {
                                        &refresh_time_timer_callback, NULL);
   if (!time_alarm) {
     puts("[ERR] Failed to allocate time alarm");
-    hal_cancel_repeating_timer(tempo_alarm);
+    cancel_synced_timers();
     return 1;
   }
 
-  // check_alarm = hal_add_repeating_timer(CHECK_ALARM_DELAY_US,
-  //                                       &check_sync_timer_callback, NULL);
-  // if (!check_alarm) {
-  //   puts("[ERR] Failed to allocate check alarm");
-  //   hal_cancel_repeating_timer(tempo_alarm);
-  //   hal_cancel_repeating_timer(time_alarm);
-  //   return 1;
-  // }
+  hello_alarm = hal_add_repeating_timer(HELLO_ALARM_DELAY_US,
+                                        &refresh_hello_timer_callback, NULL);
+  if (!hello_alarm) {
+    puts("[ERR] Failed to allocate hello alarm");
+    cancel_synced_timers();
+    return 1;
+  }
 
   return 0;
 }
+
 int exit_tempo_synced_state() {
-  // hal_cancel_repeating_timer(check_alarm);
-  hal_cancel_repeating_timer(tempo_alarm);
-  hal_cancel_repeating_timer(time_alarm);
+  cancel_synced_timers();
   return 0;
 }

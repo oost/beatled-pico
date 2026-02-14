@@ -66,9 +66,12 @@ static void process_pending_events() {
 
 // Reset the state machine to UNKNOWN and clear all state.
 static void reset_machine() {
+  if (exit_current_state) {
+    exit_current_state();
+    exit_current_state = NULL;
+  }
   internal_state.current_state = STATE_UNKNOWN;
   internal_state.last_tempo_sync_time = 0;
-  exit_current_state = NULL;
   set_server_time_offset(0);
   stub_reset_counters();
 }
@@ -222,7 +225,7 @@ TEST_CASE("Full lifecycle: UNKNOWN to TEMPO_SYNCED via server messages",
   process_pending_events();
   REQUIRE(state_manager_get_state() == STATE_TEMPO_SYNCED);
   // enter_tempo_synced_state created 3 repeating timers
-  REQUIRE(stub_timer_create_count == 4); // 1 hello + 3 sync timers
+  REQUIRE(stub_timer_create_count == 4); // 1 hello (INITIALIZED) + 3 (TEMPO_SYNCED)
 }
 
 TEST_CASE("State entry handlers perform correct setup", "[integration]") {

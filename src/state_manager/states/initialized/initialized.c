@@ -10,9 +10,9 @@
 
 #define HELLO_ALARM_DELAY_US 10000000
 
-hal_alarm_t *hello_alarm;
+static hal_alarm_t *hello_alarm;
 
-void hello_timer_callback(void *data) { send_hello_request(); }
+static void hello_timer_callback(void *data) { send_hello_request(); }
 
 int enter_initialized_state() {
   puts("[INIT] Starting core 1");
@@ -28,5 +28,6 @@ int enter_initialized_state() {
 }
 int exit_initialized_state() {
   hal_cancel_repeating_timer(hello_alarm);
+  hello_alarm = NULL;
   return 0;
 }
