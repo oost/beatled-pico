@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "config/constants.h"
 #include "event/event_queue.h"
 #include "hal/unique_id.h"
 #include "state_manager/state_manager.h"
@@ -28,8 +29,9 @@ uint16_t transition_matrix[] = {
     0x01 << STATE_INITIALIZED,  // STATE_STARTED
     0x01 << STATE_REGISTERED,   // STATE_INITIALIZED
     0x01 << STATE_TIME_SYNCED,  // STATE_REGISTERED
-    0x01 << STATE_TEMPO_SYNCED,                          // STATE_TIME_SYNCED
-    (0x01 << STATE_TIME_SYNCED) | (0x01 << STATE_TEMPO_SYNCED) // STATE_TEMPO_SYNCED
+    0x01 << STATE_TEMPO_SYNCED, // STATE_TIME_SYNCED
+    (0x01 << STATE_TIME_SYNCED) |
+        (0x01 << STATE_TEMPO_SYNCED) // STATE_TEMPO_SYNCED
 };
 
 const char *state_name(state_manager_state_t s) {
@@ -75,7 +77,11 @@ int transition_state(state_manager_state_t new_state) {
     if (new_state != STATE_TEMPO_SYNCED) {
       printf("[STATE] Transitioning to the same state (%s)... Noop\n",
              state_name(old_state));
-      return 1;
+      // Should this be an error? For now, just ignore it. It can happen for
+      // example when receiving a "next beat" command while already in the tempo
+      // synced state, which issues a transition to the same state as a way to
+      // re-sync the tempo.
+      return 0;
     }
     printf("[STATE] Re-entering state %s (re-sync)\n", state_name(old_state));
   }
@@ -130,7 +136,8 @@ int transition_state(state_manager_state_t new_state) {
     break;
 
   default:
-    printf("[STATE] Unknown state: %s (%d)\n", state_name(new_state), new_state);
+    printf("[STATE] Unknown state: %s (%d)\n", state_name(new_state),
+           new_state);
   }
 
   return err;
@@ -143,7 +150,7 @@ int state_manager_set_state(state_manager_state_t state) {
 bool schedule_state_transition(state_manager_state_t next_state) {
   state_event_t *state_event = (state_event_t *)malloc(sizeof(state_event_t));
   if (!state_event) {
-    puts("[ERR] Failed to allocate state event");
+    BEATLED_FATAL("Failed to allocate state event");
     return false;
   }
   state_event->next_state = next_state;

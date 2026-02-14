@@ -47,8 +47,7 @@ int enter_started_state() {
             &add_payload_to_event_queue);
 
   if (!schedule_state_transition(STATE_INITIALIZED)) {
-    puts("[ERR] Failed to schedule transition to INITIALIZED");
-    exit(1);
+    BEATLED_FATAL("Failed to schedule transition to INITIALIZED");
   }
 
   return 0;

@@ -5,6 +5,7 @@ add_executable(test_state_manager
 )
 target_include_directories(test_state_manager PRIVATE
   ${CMAKE_SOURCE_DIR}/src/state_manager/include
+  ${CMAKE_SOURCE_DIR}/src/config/include
 )
 target_link_libraries(test_state_manager PRIVATE
   Catch2::Catch2WithMain

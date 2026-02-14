@@ -30,7 +30,7 @@ int command_program(beatled_message_t *server_msg, size_t data_length) {
 
   intercore_message_t msg = {.message_type = 0x01 << intercore_program_update};
   if (!hal_queue_add_message(intercore_command_queue, &msg)) {
-    puts("[ERR] Intercore queue full");
+    BEATLED_FATAL("Intercore queue full");
     return 1;
   }
 

@@ -1,6 +1,7 @@
 #include <stdlib.h>
 
 #include "beatled/protocol.h"
+#include "config/constants.h"
 #include "clock/clock.h"
 #include "command/next_beat.h"
 #include "command/utils.h"
@@ -33,21 +34,19 @@ int process_next_beat_msg(beatled_message_t *server_msg, size_t data_length) {
   uint32_t beat_count = ntohl(next_beat_msg->beat_count);
   uint16_t program_id = ntohs(next_beat_msg->program_id);
 
-  // #if BEATLED_VERBOSE_LOG
-  printf("Got next beat time ref %llu (in %d us, server: %llu), tempo ref %u, "
-         "program_id %d\n",
+#if BEATLED_VERBOSE_LOG
+  printf("[CMD] Next beat: ref=%llu (in %d us), tempo=%u, program=%d\n",
          next_beat_time_ref, (signed)(next_beat_time_ref - time_us_64()),
-         ntohll(next_beat_msg->next_beat_time_ref), tempo_period_us,
-         program_id);
+         tempo_period_us, program_id);
 
   if (next_beat_time_ref < time_us_64()) {
-    puts("Next beat is in the past...");
+    puts("[CMD] Next beat is in the past");
   }
-  // #endif
+#endif
 
   if (state_manager_get_state() != STATE_TEMPO_SYNCED) {
     if (!schedule_state_transition(STATE_TEMPO_SYNCED)) {
-      puts("- Can't schedule transition to tempo synced state.");
+      BEATLED_FATAL("Failed to schedule transition to tempo synced state");
       return 1;
     }
   }
@@ -65,7 +64,7 @@ int process_next_beat_msg(beatled_message_t *server_msg, size_t data_length) {
                                              0x01 << intercore_program_update};
 
   if (!hal_queue_add_message(intercore_command_queue, &msg)) {
-    puts("Intercore queue is FULL!!!");
+    BEATLED_FATAL("Intercore queue full");
     return 1;
   }
 

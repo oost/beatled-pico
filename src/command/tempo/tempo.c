@@ -1,5 +1,6 @@
 #include "command/tempo.h"
 #include "beatled/protocol.h"
+#include "config/constants.h"
 #include "clock/clock.h"
 #include "command/utils.h"
 #include "hal/network.h"
@@ -10,7 +11,7 @@
 
 int prepare_tempo_request(void *buffer_payload, size_t buf_len) {
   if (buf_len != sizeof(beatled_message_tempo_request_t)) {
-    printf("Error sizes don't match %zu, %zu", buf_len,
+    printf("[ERR] Tempo request size mismatch: %zu vs %zu\n", buf_len,
            sizeof(beatled_message_tempo_request_t));
     return 1;
   }
@@ -46,13 +47,12 @@ int process_tempo_msg(beatled_message_t *server_msg, size_t data_length) {
 
   uint64_t beat_local_time_ref = server_time_to_local_time(beat_time_ref);
 #if BEATLED_VERBOSE_LOG
-  printf("Updated beat ref to %llu (%llx)\n", beat_time_ref, beat_time_ref);
-  printf("Updated tempo period to %u (%x), equivalent tempo %f\n",
-         tempo_period_us, tempo_period_us, 1000000.0 * 60 / tempo_period_us);
+  printf("[CMD] Tempo update: ref=%llu, period=%u us (%.1f BPM)\n",
+         beat_time_ref, tempo_period_us, 1000000.0 * 60 / tempo_period_us);
 #endif
 
   if (!schedule_state_transition(STATE_TEMPO_SYNCED)) {
-    puts("- Can't schedule transition to tempo synced state. Fatal error.");
+    BEATLED_FATAL("Failed to schedule transition to tempo synced state");
   }
 
   registry_lock_mutex();
@@ -72,7 +72,7 @@ int process_tempo_msg(beatled_message_t *server_msg, size_t data_length) {
                                              0x01 << intercore_program_update};
 
   if (!hal_queue_add_message(intercore_command_queue, &msg)) {
-    puts("Intercore queue is FULL!!!");
+    BEATLED_FATAL("Intercore queue full");
     return 1;
   }
 

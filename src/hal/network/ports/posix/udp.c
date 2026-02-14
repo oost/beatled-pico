@@ -13,6 +13,8 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include "config/constants.h"
+
 #include "dns.h"
 #include "hal/udp.h"
 
@@ -103,7 +105,7 @@ void *udp_socket_listen(void *data) {
       }
       memcpy(server_msg, buffer, recvlen);
       if ((params->process_response)(server_msg, recvlen)) {
-        puts("[ERR] Failed to queue UDP message on event loop");
+        BEATLED_FATAL("Failed to queue UDP message on event loop");
       }
     }
   }
@@ -282,7 +284,9 @@ int send_udp_request(size_t msg_length, prepare_payload_fn prepare_payload) {
   const struct sockaddr_in *recipient_addr =
       (const struct sockaddr_in *)&server_addr;
   inet_ntop(AF_INET, &(recipient_addr->sin_addr), ip4, INET_ADDRSTRLEN);
+#if BEATLED_VERBOSE_LOG
   printf("[NET] Sent UDP request to %s:%d\n", ip4, ntohs(recipient_addr->sin_port));
+#endif
 
   free(buffer->payload);
   free(buffer);
