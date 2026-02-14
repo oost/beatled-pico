@@ -114,8 +114,11 @@ void update_tempo(intercore_message_t *ic_message) {
   }
 
   if (ic_message->message_type & (0x01 << intercore_program_update)) {
-    _program_id = registry.program_id;
-    printf("[LED] Program update: id=%u\n", _program_id);
+    uint8_t new_program_id = registry.program_id;
+    if (new_program_id != _program_id) {
+      _program_id = new_program_id;
+      printf("[LED] Program update: id=%u\n", _program_id);
+    }
   }
 
   registry_unlock_mutex();
