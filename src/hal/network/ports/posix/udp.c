@@ -80,7 +80,7 @@ void *udp_socket_listen(void *data) {
   struct sockaddr_in remaddr;          /* remote address */
   socklen_t addrlen = sizeof(remaddr); /* length of addresses */
 
-  printf("Waiting on port %d\n", params->udp_port);
+  printf("[NET] Listening on port %d\n", params->udp_port);
   while (udp_running_) {
     recvlen = recvfrom(udp_socket_fd, buffer, MAXLINE - 1, 0,
                        (struct sockaddr *)&remaddr, &addrlen);
@@ -90,7 +90,7 @@ void *udp_socket_listen(void *data) {
       }
       if (!udp_running_)
         break;
-      printf("UDP recv error: %s\n", strerror(errno));
+      printf("[NET] UDP recv error: %s\n", strerror(errno));
       continue;
     }
     if (recvlen > 0) {
@@ -98,12 +98,12 @@ void *udp_socket_listen(void *data) {
       // printf("Received message: \"%s\"\n", buffer);
       void *server_msg = (void *)malloc(recvlen);
       if (!server_msg) {
-        puts("Failed to allocate memory for UDP message");
+        puts("[ERR] Failed to allocate UDP message buffer");
         continue;
       }
       memcpy(server_msg, buffer, recvlen);
       if ((params->process_response)(server_msg, recvlen)) {
-        puts("Error while queueing UDP message on event loop");
+        puts("[ERR] Failed to queue UDP message on event loop");
       }
     }
   }
@@ -234,11 +234,11 @@ int sendall(int socket_fd, char *data_buffer, size_t *data_length,
       if ((errno == EAGAIN || errno == EWOULDBLOCK) &&
           retries < max_retries) {
         retries++;
-        printf("UDP Send: retrying (%d/%d)\n", retries, max_retries);
+        printf("[NET] UDP send retry (%d/%d)\n", retries, max_retries);
         usleep(retries * 1000); // 1-3ms backoff
         continue;
       }
-      printf("UDP Send: %s\n", strerror(errno));
+      printf("[ERR] UDP send failed: %s\n", strerror(errno));
       break;
     }
     retries = 0;
@@ -255,13 +255,13 @@ int send_udp_request(size_t msg_length, prepare_payload_fn prepare_payload) {
   int err = 0;
   pbuf *buffer = (pbuf *)malloc(sizeof(pbuf));
   if (!buffer) {
-    printf("Failed to allocate UDP send buffer\n");
+    puts("[ERR] Failed to allocate UDP send buffer");
     return 1;
   }
 
   buffer->payload = malloc(msg_length);
   if (!buffer->payload) {
-    printf("failed to create puffer\n");
+    puts("[ERR] Failed to allocate UDP payload buffer");
     err = 1;
   } else {
 
@@ -269,12 +269,12 @@ int send_udp_request(size_t msg_length, prepare_payload_fn prepare_payload) {
     memset(req, 0, msg_length);
 
     if (prepare_payload(buffer->payload, msg_length) != 0) {
-      printf("Error preparing payload");
+      puts("[ERR] Failed to prepare UDP payload");
       err = 1;
     }
 
     if (sendall(udp_socket_fd, buffer->payload, &msg_length, &server_addr)) {
-      printf("Error sending message\n");
+      puts("[ERR] Failed to send UDP message");
     }
   }
 
@@ -282,7 +282,7 @@ int send_udp_request(size_t msg_length, prepare_payload_fn prepare_payload) {
   const struct sockaddr_in *recipient_addr =
       (const struct sockaddr_in *)&server_addr;
   inet_ntop(AF_INET, &(recipient_addr->sin_addr), ip4, INET_ADDRSTRLEN);
-  printf("Sent UDP request to %s:%d\n", ip4, ntohs(recipient_addr->sin_port));
+  printf("[NET] Sent UDP request to %s:%d\n", ip4, ntohs(recipient_addr->sin_port));
 
   free(buffer->payload);
   free(buffer);

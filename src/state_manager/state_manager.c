@@ -95,7 +95,7 @@ int transition_state(state_manager_state_t new_state) {
     err = exit_current_state();
     exit_current_state = NULL;
   } else if (old_state) {
-    puts("Something is wrong...");
+    puts("[STATE] No exit handler for previous state");
   }
 
   internal_state.current_state = new_state;
@@ -143,7 +143,7 @@ int state_manager_set_state(state_manager_state_t state) {
 bool schedule_state_transition(state_manager_state_t next_state) {
   state_event_t *state_event = (state_event_t *)malloc(sizeof(state_event_t));
   if (!state_event) {
-    puts("Failed to allocate state event");
+    puts("[ERR] Failed to allocate state event");
     return false;
   }
   state_event->next_state = next_state;

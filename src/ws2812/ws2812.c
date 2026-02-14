@@ -31,7 +31,7 @@ uint8_t _program_id = 0;
 
 void led_init() {
   ws2812_init(NUM_PIXELS, WS2812_PIN, 800000, IS_RGBW);
-  printf("Initialized LED manager\n");
+  puts("[INIT] LED manager initialized");
 }
 
 void led_set_random_pattern() {
@@ -69,7 +69,9 @@ uint8_t scale8(uint64_t value, uint64_t range) {
 
 void advance_next_beat_time(uint64_t current_time) {
   while (_next_beat_time < current_time) {
+#if BEATLED_VERBOSE_LOG
     puts("Update next beat time");
+#endif
     _last_beat_time = _next_beat_time;
     _next_beat_time += _tempo_period_us;
   }
@@ -94,8 +96,10 @@ void update_tempo(intercore_message_t *ic_message) {
     uint64_t new_beat_duration = _next_beat_time - _last_beat_time;
 
     if (new_beat_duration < (current_beat_duration >> 1)) {
+#if BEATLED_VERBOSE_LOG
       printf("[TEMPO] Beat duration shortened >2x: %llu -> %llu\n",
              current_beat_duration, new_beat_duration);
+#endif
     }
 
     _next_beat_count = registry.beat_count;
@@ -111,7 +115,7 @@ void update_tempo(intercore_message_t *ic_message) {
 
   if (ic_message->message_type & (0x01 << intercore_program_update)) {
     _program_id = registry.program_id;
-    printf("[CMD] Program update: id=%u\n", _program_id);
+    printf("[LED] Program update: id=%u\n", _program_id);
   }
 
   registry_unlock_mutex();
@@ -143,7 +147,9 @@ void led_update() {
 
   // Advance next beat time (using local copies)
   while (next_beat_time < current_time) {
+#if BEATLED_VERBOSE_LOG
     puts("Update next beat time");
+#endif
     last_beat_time = next_beat_time;
     next_beat_time += tempo_period_us;
   }
@@ -164,8 +170,10 @@ void led_update() {
     if (next_beat_count > beat_count) {
       beat_count = next_beat_count;
     }
+#if BEATLED_VERBOSE_LOG
     printf("[BEAT] count=%u prev=%llu curr=%llu last_beat=%llu\n", beat_count,
            prev_time, current_time, last_beat_time);
+#endif
   }
 
   if (_cycle_idx % 1000 == 0) {

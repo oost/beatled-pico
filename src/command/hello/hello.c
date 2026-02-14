@@ -11,7 +11,7 @@
 
 int prepare_hello_request(void *buffer_payload, size_t buf_len) {
   if (buf_len != sizeof(beatled_message_hello_request_t)) {
-    printf("Error sizes don't match %zu, %zu", buf_len,
+    printf("[ERR] Hello request size mismatch: got=%zu expected=%zu\n", buf_len,
            sizeof(beatled_message_hello_request_t));
     return 1;
   }
@@ -28,13 +28,12 @@ int prepare_hello_request(void *buffer_payload, size_t buf_len) {
 }
 
 int send_hello_request() {
-  puts("Sending hello request");
+  puts("[NET] Sending hello request");
   return send_udp_request(sizeof(beatled_message_hello_request_t),
                           prepare_hello_request);
 }
 
 int process_hello_msg(beatled_message_t *server_msg, size_t data_length) {
-  puts("Hello!");
   if (!check_size(data_length, sizeof(beatled_message_hello_response_t))) {
     return 1;
   }
@@ -42,11 +41,11 @@ int process_hello_msg(beatled_message_t *server_msg, size_t data_length) {
   beatled_message_hello_response_t *hello_msg =
       (beatled_message_hello_response_t *)server_msg;
   uint16_t client_id = ntohs(hello_msg->client_id);
-  printf("Registered with client id: %d\n", client_id);
+  printf("[CMD] Registered with client_id=%d\n", client_id);
   blink(MESSAGE_BLINK_SPEED, MESSAGE_HELLO);
 
   if (!schedule_state_transition(STATE_REGISTERED)) {
-    puts("- Can't schedule transition to registered state.");
+    puts("[ERR] Failed to schedule transition to REGISTERED");
     return 1;
   }
 

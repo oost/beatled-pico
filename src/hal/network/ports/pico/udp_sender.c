@@ -12,8 +12,7 @@ void *udp_buffer_alloc(size_t msg_length) {
   struct pbuf *msg_pbuf = pbuf_alloc(PBUF_TRANSPORT, msg_length, PBUF_RAM);
 
   if (!msg_pbuf) {
-    printf("failed to create pbuf\n");
-
+    puts("[ERR] Failed to allocate pbuf");
     return NULL;
   }
   return msg_pbuf->payload;
@@ -34,7 +33,7 @@ int send_udp_request(size_t msg_length, prepare_payload_fn prepare_payload) {
 
   struct pbuf *buffer = pbuf_alloc(PBUF_TRANSPORT, msg_length, PBUF_RAM);
   if (!buffer) {
-    printf("failed to create pbuf\n");
+    puts("[ERR] Failed to allocate pbuf");
     err = 1;
   } else {
 
@@ -42,22 +41,19 @@ int send_udp_request(size_t msg_length, prepare_payload_fn prepare_payload) {
     memset(req, 0, msg_length);
 
     if (prepare_payload(buffer->payload, msg_length) != 0) {
-      printf("Error preparing payload");
+      puts("[ERR] Failed to prepare UDP payload");
       err = 1;
     }
 
     if (udp_sendto(server_udp_pcb, buffer, &server_address, server_port) !=
         ERR_OK) {
-      printf("Error sending message to %s:%u ...\n",
+      printf("[ERR] Failed to send UDP message to %s:%u\n",
              ipaddr_ntoa(&server_address), server_port);
       err = 1;
     }
 
-    printf("Sent message to %s:%u ... Command %x .. len %u\n",
-           ipaddr_ntoa(&server_address), server_port, req[0], msg_length);
-    printf("The string is ");
-    print_buffer_as_hex(req, msg_length);
-    printf("\n");
+    printf("[NET] Sent UDP request to %s:%u len=%u\n",
+           ipaddr_ntoa(&server_address), server_port, msg_length);
     pbuf_free(buffer);
   }
   cyw43_arch_lwip_end();

@@ -25,14 +25,14 @@ int enter_tempo_synced_state() {
   tempo_alarm = hal_add_repeating_timer(TEMPO_ALARM_DELAY_US,
                                         &refresh_tempo_timer_callback, NULL);
   if (!tempo_alarm) {
-    puts("Failed to allocate tempo alarm");
+    puts("[ERR] Failed to allocate tempo alarm");
     return 1;
   }
 
   time_alarm = hal_add_repeating_timer(TIME_ALARM_DELAY_US,
                                        &refresh_time_timer_callback, NULL);
   if (!time_alarm) {
-    puts("Failed to allocate time alarm");
+    puts("[ERR] Failed to allocate time alarm");
     hal_cancel_repeating_timer(tempo_alarm);
     return 1;
   }
@@ -40,7 +40,7 @@ int enter_tempo_synced_state() {
   check_alarm = hal_add_repeating_timer(CHECK_ALARM_DELAY_US,
                                         &check_sync_timer_callback, NULL);
   if (!check_alarm) {
-    puts("Failed to allocate check alarm");
+    puts("[ERR] Failed to allocate check alarm");
     hal_cancel_repeating_timer(tempo_alarm);
     hal_cancel_repeating_timer(time_alarm);
     return 1;

@@ -15,11 +15,10 @@ hal_alarm_t *hello_alarm;
 void hello_timer_callback(void *data) { send_hello_request(); }
 
 int enter_initialized_state() {
-  // Launch core 1
-  puts("Starting core 1");
+  puts("[INIT] Starting core 1");
   start_core1(&core1_entry);
 
-  puts("Starting ISR Thread");
+  puts("[INIT] Starting ISR thread");
   start_isr_thread(&isr_thread_entry);
 
   hello_alarm = hal_add_repeating_timer(HELLO_ALARM_DELAY_US,

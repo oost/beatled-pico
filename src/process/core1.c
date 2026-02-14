@@ -15,14 +15,13 @@ void *core1_entry(void *data) {
 }
 
 void core1_init() {
-  puts("- Starting WS2812 Manager");
   led_init();
-  printf("Initializing core 1\n");
+  puts("[INIT] Core 1 initialized");
 }
 
 void core1_loop() {
   intercore_message_t ic_message;
-  printf("Starting core 1 loop\n");
+  puts("[INIT] Core 1 LED loop started");
 
   uint32_t idx = 0;
   while (1) {

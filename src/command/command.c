@@ -30,7 +30,7 @@ int command_program(beatled_message_t *server_msg, size_t data_length) {
 
   intercore_message_t msg = {.message_type = 0x01 << intercore_program_update};
   if (!hal_queue_add_message(intercore_command_queue, &msg)) {
-    puts("Intercore queue is FULL!!!");
+    puts("[ERR] Intercore queue full");
     return 1;
   }
 
@@ -98,7 +98,9 @@ int handle_server_message(void *event_data, size_t data_length,
   int err = 0;
   switch (server_msg->type) {
   case BEATLED_MESSAGE_HELLO_RESPONSE:
+#if BEATLED_VERBOSE_LOG
     printf("[MSG] Received HELLO_RESPONSE\n");
+#endif
     err = process_hello_msg(server_msg, data_length);
     break;
 
@@ -107,12 +109,16 @@ int handle_server_message(void *event_data, size_t data_length,
     break;
 
   case BEATLED_MESSAGE_TEMPO_RESPONSE:
+#if BEATLED_VERBOSE_LOG
     printf("[MSG] Received TEMPO_RESPONSE\n");
+#endif
     err = process_tempo_msg(server_msg, data_length);
     break;
 
   case BEATLED_MESSAGE_TIME_RESPONSE:
+#if BEATLED_VERBOSE_LOG
     printf("[MSG] Received TIME_RESPONSE\n");
+#endif
     err = process_time_msg(server_msg, data_length, dest_time);
     break;
 
@@ -152,13 +158,13 @@ int handle_event(event_t *event) {
     break;
 
   case event_error:
-    puts("[EVENT] Error event");
+    puts("[ERR] Error event received");
     blink(ERROR_BLINK_SPEED, ERROR_COMMAND);
     err = 1;
     break;
 
   default:
-    printf("[EVENT] Unknown event type %d\n", event->event_type);
+    printf("[ERR] Unknown event type %d\n", event->event_type);
     blink(ERROR_BLINK_SPEED, ERROR_COMMAND);
     err = 1;
   }

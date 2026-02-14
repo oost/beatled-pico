@@ -7,7 +7,7 @@
 
 static bool check_size(size_t data_length, size_t expected_length) {
   if (data_length != expected_length) {
-    printf("Sizes don't match. Got %zu vs. %zu expected\n", data_length,
+    printf("[ERR] Message size mismatch: got=%zu expected=%zu\n", data_length,
            expected_length);
     return false;
   }

@@ -26,7 +26,6 @@ int send_tempo_request() {
 }
 
 int process_tempo_msg(beatled_message_t *server_msg, size_t data_length) {
-  puts("Tempo!");
   if (!check_size(data_length, sizeof(beatled_message_tempo_response_t))) {
     return 1;
   }
@@ -46,9 +45,11 @@ int process_tempo_msg(beatled_message_t *server_msg, size_t data_length) {
   uint16_t program_id = ntohs(tempo_msg->program_id);
 
   uint64_t beat_local_time_ref = server_time_to_local_time(beat_time_ref);
+#if BEATLED_VERBOSE_LOG
   printf("Updated beat ref to %llu (%llx)\n", beat_time_ref, beat_time_ref);
   printf("Updated tempo period to %u (%x), equivalent tempo %f\n",
          tempo_period_us, tempo_period_us, 1000000.0 * 60 / tempo_period_us);
+#endif
 
   if (!schedule_state_transition(STATE_TEMPO_SYNCED)) {
     puts("- Can't schedule transition to tempo synced state. Fatal error.");

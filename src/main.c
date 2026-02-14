@@ -11,9 +11,8 @@
 
 void start_beatled() {
 
-  puts("Starting beatled.");
-
-  puts("- Starting State Manager");
+  puts("[INIT] Starting beatled");
+  puts("[INIT] Starting state manager");
   state_manager_init();
 
   if (state_manager_set_state(STATE_STARTED) != 0) {

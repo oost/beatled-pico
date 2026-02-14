@@ -11,7 +11,6 @@ struct hal_alarm {
 };
 
 bool repeating_timer_callback(struct repeating_timer *t) {
-  printf("Repeat at %lld\n", time_us_64());
   hal_alarm_t *cb_data = (hal_alarm_t *)t->user_data;
   (cb_data->callback_fn)(cb_data->user_data);
   return true;

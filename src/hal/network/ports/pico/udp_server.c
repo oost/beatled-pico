@@ -21,7 +21,7 @@ void dgram_recv(void *arg, struct udp_pcb *pcb, struct pbuf *p,
   size_t data_length = p->tot_len;
   void *server_msg = (void *)malloc(data_length);
   if (!server_msg) {
-    printf("Failed to allocate %zu bytes for UDP message\n", data_length);
+    printf("[ERR] Failed to allocate %zu bytes for UDP message\n", data_length);
     pbuf_free(p);
     return;
   }
@@ -43,16 +43,16 @@ void dgram_recv(void *arg, struct udp_pcb *pcb, struct pbuf *p,
     // puts("Queueing message");
     server_msg_enqueue_error = process_response_(server_msg, data_length);
     if (server_msg_enqueue_error) {
-      puts("Error while queueing UDP message on event loop");
+      puts("[ERR] Failed to queue UDP message on event loop");
     }
   } else {
-    puts(" **** Error with msg...");
+    puts("[ERR] UDP message copy failed");
   }
 
   if (server_msg_enqueue_error) {
     // We didn't manage to enqueue the message so we are still the owner. Let's
     // free it...
-    printf("Something went wrong... Freeing memory at %x\n", server_msg);
+    printf("[ERR] Failed to enqueue UDP message, freeing buffer\n");
     free(server_msg);
   }
 
@@ -65,7 +65,7 @@ int init_udp_socket(uint16_t udp_port) {
 
   server_udp_pcb = udp_new_ip_type(IPADDR_TYPE_ANY);
   if (!server_udp_pcb) {
-    printf("Failed to create bsp pcb\n");
+    puts("[ERR] Failed to create UDP PCB");
     cyw43_arch_lwip_end();
 
     return 1;
@@ -73,7 +73,7 @@ int init_udp_socket(uint16_t udp_port) {
 
   // Bind to endpoint  IP_ADDR_BROADCAST IP_ANY_TYPE
   if (udp_bind(server_udp_pcb, IP_ANY_TYPE, udp_port)) {
-    printf("Failed to bind pcb\n");
+    puts("[ERR] Failed to bind UDP PCB");
     udp_remove(server_udp_pcb);
     cyw43_arch_lwip_end();
 
@@ -85,7 +85,7 @@ int init_udp_socket(uint16_t udp_port) {
 
   // Add callback
   udp_recv(server_udp_pcb, dgram_recv, NULL);
-  printf("Set up UDP callback on %s:%d\n",
+  printf("[NET] Listening on %s:%d\n",
          ipaddr_ntoa(&server_udp_pcb->local_ip), udp_port);
   cyw43_arch_lwip_end();
 

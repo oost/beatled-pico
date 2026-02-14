@@ -33,6 +33,7 @@ int process_next_beat_msg(beatled_message_t *server_msg, size_t data_length) {
   uint32_t beat_count = ntohl(next_beat_msg->beat_count);
   uint16_t program_id = ntohs(next_beat_msg->program_id);
 
+  // #if BEATLED_VERBOSE_LOG
   printf("Got next beat time ref %llu (in %d us, server: %llu), tempo ref %u, "
          "program_id %d\n",
          next_beat_time_ref, (signed)(next_beat_time_ref - time_us_64()),
@@ -42,6 +43,7 @@ int process_next_beat_msg(beatled_message_t *server_msg, size_t data_length) {
   if (next_beat_time_ref < time_us_64()) {
     puts("Next beat is in the past...");
   }
+  // #endif
 
   if (state_manager_get_state() != STATE_TEMPO_SYNCED) {
     if (!schedule_state_transition(STATE_TEMPO_SYNCED)) {

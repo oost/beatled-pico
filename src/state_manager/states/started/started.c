@@ -20,36 +20,34 @@ int enter_started_state() {
   // board_id_handle_t board_id_ptr = get_unique_board_id();
   // printf("Starting on pico board %s\n", state_manager_get_unique_board_id());
 
-  puts("- Initializing registry");
+  puts("[INIT] Initializing registry");
   registry_init();
 
-  puts("- Initializing event queue");
+  puts("[INIT] Initializing event queue");
   event_queue_init();
 
-  puts("- Initializing intercore queue");
+  puts("[INIT] Initializing intercore queue");
   intercore_command_queue =
       hal_queue_init(sizeof(intercore_message_t), MAX_INTERCORE_QUEUE_COUNT);
 
-  puts("- Starting STDIO");
+  puts("[INIT] Initializing STDIO");
   hal_stdio_init();
 
-  puts("- Starting Wifi");
+  puts("[INIT] Initializing WiFi");
   wifi_init();
   wifi_check(WIFI_SSID, WIFI_PASSWORD);
 
-  puts("- Starting IP stack");
+  puts("[INIT] Initializing IP stack");
   udp_print_all_ip_addresses();
-  // get_ip_address();
-  // resolve_server_address_blocking(BEATLED_SERVER_NAME);
 
   sleep_ms(500);
 
-  puts("- Starting Beat Server");
+  puts("[INIT] Starting UDP listener");
   start_udp(BEATLED_SERVER_NAME, UDP_SERVER_PORT, UDP_PORT,
             &add_payload_to_event_queue);
 
   if (!schedule_state_transition(STATE_INITIALIZED)) {
-    puts("- Can't schedule transition to initialized state. Fatal error.");
+    puts("[ERR] Failed to schedule transition to INITIALIZED");
     exit(1);
   }
 

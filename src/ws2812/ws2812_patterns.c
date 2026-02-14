@@ -68,7 +68,7 @@ void run_pattern(int pattern_idx, uint32_t *stream, size_t len,
 
 const char *pattern_get_name(uint8_t pattern_idx) {
   if (pattern_idx >= num_patterns) {
-    puts("Index out of range idx...");
+    puts("[ERR] Pattern index out of range");
   }
   return _pattern_table[pattern_idx % num_patterns].name;
 }

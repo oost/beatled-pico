@@ -17,16 +17,16 @@ void *core0_entry(void *data) {
 }
 
 void core0_init() {
-  puts("Initializing core 0");
+  puts("[INIT] Core 0 initialized");
 
 #ifdef PICO_AUTOTEST
-  puts("**** Running with autotest *********");
+  puts("[INIT] Running with autotest");
   init_test();
 #endif // PICO_AUTOTEST
 }
 
 void core0_loop() {
-  printf("Starting core 0 loop\n");
+  puts("[INIT] Core 0 event loop started");
   blink(MESSAGE_BLINK_SPEED, MESSAGE_WELCOME);
 
   event_t event;

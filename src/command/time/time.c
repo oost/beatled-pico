@@ -17,13 +17,10 @@ int prepare_time_request(void *buffer_payload, size_t buf_len) {
   beatled_message_time_request_t *msg = buffer_payload;
   msg->base.type = BEATLED_MESSAGE_TIME_REQUEST;
   uint64_t orig_time = time_us_64();
-  printf("Sending time request. \n - orig_time: %llu / %llx\n", orig_time,
-         orig_time);
-
   msg->orig_time = htonll(orig_time);
-
-  printf("Sending time request. \n - orig_time: %llu / %llx\n", msg->orig_time,
-         msg->orig_time);
+#if BEATLED_VERBOSE_LOG
+  printf("Sending time request. orig_time: %llu\n", orig_time);
+#endif
 
   return 0;
 }
@@ -35,7 +32,6 @@ int send_time_request() {
 
 int validate_time_msg(beatled_message_t *server_msg, size_t data_length,
                       uint64_t dest_time) {
-  puts("Time!");
   if (!check_size(data_length, sizeof(beatled_message_time_response_t))) {
     return 1;
   }
@@ -44,7 +40,6 @@ int validate_time_msg(beatled_message_t *server_msg, size_t data_length,
 
 int process_time_msg(beatled_message_t *server_msg, size_t data_length,
                      uint64_t dest_time) {
-  puts("Time!");
   if (!check_size(data_length, sizeof(beatled_message_time_response_t))) {
     return 1;
   }
@@ -58,14 +53,11 @@ int process_time_msg(beatled_message_t *server_msg, size_t data_length,
   uint64_t delay = (dest_time - orig_time) - (xmit_time - recv_time);
   int64_t clock_offset = ((int64_t)(recv_time / 2) - (int64_t)(orig_time / 2)) +
                          ((int64_t)(xmit_time / 2) - (int64_t)(dest_time / 2));
-  printf(
-      "Got times\n - orig: %llu\n - recv: %llu\n - xmit: %llu\n - dest: %llu\n",
-      orig_time, recv_time, xmit_time, dest_time);
-  // printf(
-  //     "Got times\n - orig: %llu\n - recv: %llu\n - xmit: %llu\n - dest:
-  //     %llu\n", time_resp_msg->orig_time, time_resp_msg->recv_time,
-  //     time_resp_msg->xmit_time, dest_time);
-  printf("Delay %llu\n offset: %lld\n", delay, clock_offset);
+#if BEATLED_VERBOSE_LOG
+  printf("Got times orig=%llu recv=%llu xmit=%llu dest=%llu\n",
+         orig_time, recv_time, xmit_time, dest_time);
+  printf("Delay %llu offset: %lld\n", delay, clock_offset);
+#endif
 
   set_server_time_offset(clock_offset);
 
