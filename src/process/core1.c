@@ -26,7 +26,7 @@ void core1_loop() {
 
   uint32_t idx = 0;
   while (1) {
-    if (hal_queue_pop_message(intercore_command_queue, &ic_message)) {
+    while (hal_queue_pop_message(intercore_command_queue, &ic_message)) {
       update_tempo(&ic_message);
     }
 

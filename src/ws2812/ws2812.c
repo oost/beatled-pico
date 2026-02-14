@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "config/constants.h"
 #include "hal/registry.h"
 #include "hal/ws2812.h"
 #include "process/intercore_queue.h"
@@ -50,6 +51,9 @@ uint8_t scale8(uint64_t value, uint64_t range) {
   if (range == 0) {
     return 0;
   }
+  if (value >= range) {
+    return 255;
+  }
   uint8_t result = 0;
   for (int i = 0; i < 8; i++) {
     range = range >> 1;
@@ -76,9 +80,11 @@ void update_tempo(intercore_message_t *ic_message) {
 
   // printf("Message type %d\n", ic_message->message_type);
   if (ic_message->message_type & (0x01 << intercore_time_ref_update)) {
+#if BEATLED_VERBOSE_LOG
     printf("[TEMPO] Time ref update: %llu -> %llu (shift=%lld)\n",
            _next_beat_time, registry.next_beat_time_ref,
            (int64_t)(registry.next_beat_time_ref - _next_beat_time));
+#endif
 
     uint64_t current_beat_duration = _next_beat_time - _last_beat_time;
     _time_ref = registry.next_beat_time_ref;
@@ -97,8 +103,10 @@ void update_tempo(intercore_message_t *ic_message) {
 
   if (ic_message->message_type & (0x01 << intercore_tempo_update)) {
     _tempo_period_us = registry.tempo_period_us;
+#if BEATLED_VERBOSE_LOG
     printf("[TEMPO] Period=%llu us (%.1f BPM)\n", _tempo_period_us,
            _tempo_period_us > 0 ? 60000000.0 / _tempo_period_us : 0.0);
+#endif
   }
 
   if (ic_message->message_type & (0x01 << intercore_program_update)) {
@@ -161,10 +169,12 @@ void led_update() {
   }
 
   if (_cycle_idx % 1000 == 0) {
+#if BEATLED_VERBOSE_LOG
     printf("[LED] cycle=%u program=%u beat_frac=%.3f tempo=%llu us (%.1f BPM) "
            "beat=%u\n",
            _cycle_idx, program_id, (float)beat_frac / UINT8_MAX, tempo_period_us,
            tempo_period_us > 0 ? 60000000.0 / tempo_period_us : 0.0, beat_count);
+#endif
 #ifdef POSIX_PORT
     push_status_update(state_manager_get_state(),
                        state_manager_get_state() >= STATE_REGISTERED, program_id,

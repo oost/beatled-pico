@@ -41,6 +41,9 @@ int queue_init(queue_t *q, uint element_size, uint element_count) {
 }
 
 void queue_free(queue_t *q) {
+  pthread_mutex_destroy(&q->lock);
+  pthread_cond_destroy(&q->in_cond);
+  pthread_cond_destroy(&q->out_cond);
   free(q->data);
   free(q);
 }

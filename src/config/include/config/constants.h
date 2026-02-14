@@ -35,4 +35,10 @@
 #define UDP_SERVER_PORT 9090
 #define UDP_PORT 8765
 
+// Verbose logging for [LED] and [TEMPO] debug prints.
+// Define to 1 to enable, 0 to disable.
+#ifndef BEATLED_VERBOSE_LOG
+#define BEATLED_VERBOSE_LOG 0
+#endif
+
 #endif // BEATLED_CONSTANTS_H

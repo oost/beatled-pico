@@ -16,9 +16,10 @@ void refresh_tempo_timer_callback(void *data) { send_tempo_request(); }
 
 void refresh_time_timer_callback(void *data) { send_time_request(); }
 
-// void refresh_time_timer_callback(void *data) {
-//   // If not synced go back to
-// }
+void check_sync_timer_callback(void *data) {
+  send_time_request();
+  send_tempo_request();
+}
 
 int enter_tempo_synced_state() {
   tempo_alarm = hal_add_repeating_timer(TEMPO_ALARM_DELAY_US,
@@ -37,7 +38,7 @@ int enter_tempo_synced_state() {
   }
 
   check_alarm = hal_add_repeating_timer(CHECK_ALARM_DELAY_US,
-                                        &refresh_time_timer_callback, NULL);
+                                        &check_sync_timer_callback, NULL);
   if (!check_alarm) {
     puts("Failed to allocate check alarm");
     hal_cancel_repeating_timer(tempo_alarm);

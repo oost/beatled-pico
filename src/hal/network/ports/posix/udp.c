@@ -19,6 +19,7 @@
 #define MAXLINE 1024
 
 pthread_t udp_thread_;
+static volatile int udp_running_ = 0;
 
 int udp_socket_fd;
 struct sockaddr_in server_addr;
@@ -80,13 +81,15 @@ void *udp_socket_listen(void *data) {
   socklen_t addrlen = sizeof(remaddr); /* length of addresses */
 
   printf("Waiting on port %d\n", params->udp_port);
-  for (;;) {
+  while (udp_running_) {
     recvlen = recvfrom(udp_socket_fd, buffer, MAXLINE - 1, 0,
                        (struct sockaddr *)&remaddr, &addrlen);
     if (recvlen < 0) {
       if (errno == EAGAIN || errno == EWOULDBLOCK) {
         continue; // timeout, keep waiting
       }
+      if (!udp_running_)
+        break;
       printf("UDP recv error: %s\n", strerror(errno));
       continue;
     }
@@ -125,14 +128,17 @@ void start_udp(const char *server_name, uint16_t server_port, uint16_t udp_port,
     return;
   }
 
+  udp_running_ = 1;
   pthread_create(&udp_thread_, NULL, &udp_socket_listen, params);
 }
 
 void shutdown_udp_socket() {
+  udp_running_ = 0;
   if (udp_socket_fd > 0) {
     close(udp_socket_fd);
     udp_socket_fd = -1;
   }
+  pthread_join(udp_thread_, NULL);
 }
 
 const uint32_t get_ip_address() {
