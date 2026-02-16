@@ -6,12 +6,14 @@ add_executable(test_state_manager
 target_include_directories(test_state_manager PRIVATE
   ${CMAKE_SOURCE_DIR}/src/state_manager/include
   ${CMAKE_SOURCE_DIR}/src/config/include
+  ${CMAKE_SOURCE_DIR}/src/hal/registry/include
 )
 target_link_libraries(test_state_manager PRIVATE
   Catch2::Catch2WithMain
   beatled_event
   beatled_hal_board
   beatled_hal_time
+  beatled_hal_registry
 )
 if(NOT VCPKG_TARGET_TRIPLET)
   catch_discover_tests(test_state_manager)

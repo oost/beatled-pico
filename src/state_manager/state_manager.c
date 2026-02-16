@@ -4,6 +4,7 @@
 
 #include "config/constants.h"
 #include "event/event_queue.h"
+#include "hal/registry.h"
 #include "hal/unique_id.h"
 #include "state_manager/state_manager.h"
 #include "state_manager/states.h"
@@ -107,7 +108,16 @@ int transition_state(state_manager_state_t new_state) {
   internal_state.current_state = new_state;
 
 #ifdef POSIX_PORT
-  push_status_update(new_state, new_state >= STATE_REGISTERED, 0, 0, 0, 0);
+  // Read current registry values to preserve tempo/program info in HUD
+  registry_lock_mutex();
+  uint16_t program_id = registry.program_id;
+  uint32_t tempo_period_us = registry.tempo_period_us;
+  uint32_t beat_count = registry.beat_count;
+  int64_t time_offset = (int64_t)registry.time_offset;
+  registry_unlock_mutex();
+
+  push_status_update(new_state, new_state >= STATE_REGISTERED, program_id,
+                     tempo_period_us, beat_count, time_offset);
 #endif
 
   switch (new_state) {

@@ -39,6 +39,7 @@ target_include_directories(test_integration PRIVATE
     ${CMAKE_SOURCE_DIR}/src/hal/wifi/include
     ${CMAKE_SOURCE_DIR}/src/hal/process/include
     ${CMAKE_SOURCE_DIR}/src/hal/time/include
+    ${CMAKE_SOURCE_DIR}/src/hal/registry/include
 )
 target_link_libraries(test_integration PRIVATE
     Catch2::Catch2WithMain
