@@ -168,6 +168,12 @@ void led_update() {
   uint8_t beat_frac =
       calculate_beat_fraction(current_time, last_beat_time, next_beat_time);
 
+#if BEATLED_VERBOSE_LOG
+  printf("[BEATFRAC] beat_frac=%u (current_time=%llu last_beat_time=%llu "
+         "next_beat_time=%llu)\n",
+         beat_frac, current_time, last_beat_time, next_beat_time);
+#endif
+
   run_pattern(program_id, colors[current_stream], NUM_PIXELS, beat_frac,
               beat_count);
 
@@ -191,18 +197,20 @@ void led_update() {
   if (_cycle_idx % 10 == 0) {
 #ifdef POSIX_PORT
     push_status_update(state_manager_get_state(),
-                       state_manager_get_state() >= STATE_REGISTERED, program_id,
-                       (uint32_t)tempo_period_us, beat_count, time_offset);
+                       state_manager_get_state() >= STATE_REGISTERED,
+                       program_id, (uint32_t)tempo_period_us, beat_count,
+                       time_offset);
 #endif
   }
 
   // Verbose logging every 1000 cycles (~10 seconds)
   if (_cycle_idx % 1000 == 0) {
 #if BEATLED_VERBOSE_LOG
-    printf("[LED] cycle=%u program=%u beat_frac=%.3f tempo=%llu us (%.1f BPM) "
-           "beat=%u\n",
-           _cycle_idx, program_id, (float)beat_frac / UINT8_MAX, tempo_period_us,
-           tempo_period_us > 0 ? 60000000.0 / tempo_period_us : 0.0, beat_count);
+    printf(
+        "[LED] cycle=%u program=%u beat_frac=%.3f tempo=%llu us (%.1f BPM) "
+        "beat=%u\n",
+        _cycle_idx, program_id, (float)beat_frac / UINT8_MAX, tempo_period_us,
+        tempo_period_us > 0 ? 60000000.0 / tempo_period_us : 0.0, beat_count);
 #endif
   }
 

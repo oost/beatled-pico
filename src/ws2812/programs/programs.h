@@ -6,6 +6,7 @@
 #include "greys/greys.h"
 #include "random/random.h"
 #include "snake/snake.h"
+#include "solid/solid.h"
 #include "sparkle/sparkle.h"
 
 #endif // WS2812__PROGRAMS_H

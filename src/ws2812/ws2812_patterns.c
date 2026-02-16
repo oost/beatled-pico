@@ -7,14 +7,6 @@
 #include "ws2812_config.h"
 #include "ws2812_patterns.h"
 
-void pattern_solid(uint32_t *stream, size_t len, uint8_t t,
-                   uint32_t beat_count) {
-  uint8_t pos = t;
-  for (int i = 0; i < len; ++i) {
-    stream[i] = (pos * 0x10101);
-  }
-}
-
 int level = 8;
 
 void pattern_fade_exp(uint32_t *stream, size_t len, uint8_t t,

@@ -3,7 +3,7 @@ add_library(beatled_ws2812 INTERFACE)
 
 # generate the header file into the source tree as it is included in the RP2040 datasheet
 
-target_sources(beatled_ws2812 INTERFACE 
+target_sources(beatled_ws2812 INTERFACE
   ws2812.c
   ws2812_patterns.c
   programs/snake/snake.c
@@ -11,6 +11,7 @@ target_sources(beatled_ws2812 INTERFACE
   programs/fade/fade.c
   programs/random/random.c
   programs/greys/greys.c
+  programs/solid/solid.c
   programs/sparkle/sparkle.c
 )
 
