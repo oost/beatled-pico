@@ -7,9 +7,11 @@ void pattern_solid(uint32_t *stream, size_t len, uint8_t t,
   uint8_t pos = t;
 
   // Pack brightness into all RGB channels for white/grey color
-  // Multiplying by 0x10101 sets R=pos, G=pos, B=pos
+  // Format: 0xGGRRBB00 (Green=bits 31-24, Red=bits 23-16, Blue=bits 15-8)
+  // Multiplying by 0x01010100 sets G=pos, R=pos, B=pos
+  // Result: pos * 0x01010100 = 0x(pos)(pos)(pos)00 = white/grey
   // This creates a simple linear fade synchronized to beat position
   for (int i = 0; i < len; ++i) {
-    stream[i] = (pos * 0x10101);
+    stream[i] = (pos * 0x01010100);
   }
 }
