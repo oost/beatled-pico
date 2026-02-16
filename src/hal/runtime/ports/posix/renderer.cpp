@@ -278,8 +278,8 @@ void Renderer::draw(MTK::View *pView) {
                               MTL::IndexType::IndexTypeUInt16, _pIndexBuffer, 0,
                               kNumInstances);
 
-  // Draw status overlay
-  if (++_overlayUpdateCounter % 30 == 0) {
+  // Draw status overlay (update every 6 frames for ~10Hz refresh at 60 FPS)
+  if (++_overlayUpdateCounter % 6 == 0) {
     StatusBuffer::Ptr statusBuf = StatusBuffer::load_instance();
     _pOverlayRenderer->updateTexture(statusBuf->data());
   }

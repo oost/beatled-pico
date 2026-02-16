@@ -107,6 +107,14 @@ void update_tempo(intercore_message_t *ic_message) {
 
   if (ic_message->message_type & (0x01 << intercore_tempo_update)) {
     _tempo_period_us = registry.tempo_period_us;
+
+    // Initialize time_ref on first tempo update if not set yet
+    if (_time_ref == 0 && _tempo_period_us > 0) {
+      _time_ref = time_us_64();
+      _last_beat_time = _time_ref;
+      _next_beat_time = _time_ref + _tempo_period_us;
+    }
+
 #if BEATLED_VERBOSE_LOG
     printf("[TEMPO] Period=%llu us (%.1f BPM)\n", _tempo_period_us,
            _tempo_period_us > 0 ? 60000000.0 / _tempo_period_us : 0.0);
@@ -179,17 +187,22 @@ void led_update() {
 #endif
   }
 
+  // Update status ~10x per second (every 10 LED cycles at 100Hz)
+  if (_cycle_idx % 10 == 0) {
+#ifdef POSIX_PORT
+    push_status_update(state_manager_get_state(),
+                       state_manager_get_state() >= STATE_REGISTERED, program_id,
+                       (uint32_t)tempo_period_us, beat_count, time_offset);
+#endif
+  }
+
+  // Verbose logging every 1000 cycles (~10 seconds)
   if (_cycle_idx % 1000 == 0) {
 #if BEATLED_VERBOSE_LOG
     printf("[LED] cycle=%u program=%u beat_frac=%.3f tempo=%llu us (%.1f BPM) "
            "beat=%u\n",
            _cycle_idx, program_id, (float)beat_frac / UINT8_MAX, tempo_period_us,
            tempo_period_us > 0 ? 60000000.0 / tempo_period_us : 0.0, beat_count);
-#endif
-#ifdef POSIX_PORT
-    push_status_update(state_manager_get_state(),
-                       state_manager_get_state() >= STATE_REGISTERED, program_id,
-                       (uint32_t)tempo_period_us, beat_count, time_offset);
 #endif
   }
 
