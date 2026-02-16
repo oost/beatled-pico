@@ -27,6 +27,44 @@ static inline uint32_t rgb_u32(uint8_t r, uint8_t g, uint8_t b) {
   return ((uint32_t)(r) << 16) | ((uint32_t)(g) << 24) | (uint32_t)(b) << 8;
 }
 
+// Beat intensity curve functions for musical synchronization
+// All functions take t (0-255 beat position) and return intensity (0-255)
+
+// Linear decay: 255 at beat start → 0 at beat end
+static inline uint8_t beat_intensity_linear(uint8_t t) {
+  return 255 - t;
+}
+
+// Quadratic decay: Sharp peak at beat, smooth tail
+// Formula: intensity = (1 - (t/255)²) * 255
+static inline uint8_t beat_intensity_quadratic(uint8_t t) {
+  uint16_t normalized = t;  // 0-255
+  uint16_t squared = (normalized * normalized) >> 8;  // (t²/255)
+  return 255 - (uint8_t)squared;
+}
+
+// Exponential-like decay using 4th power (more dramatic)
+// Formula: intensity = (1 - (t/255)⁴) * 255
+static inline uint8_t beat_intensity_exp4(uint8_t t) {
+  uint32_t n = t;
+  uint32_t n2 = (n * n) >> 8;      // t²/255
+  uint32_t n4 = (n2 * n2) >> 8;    // t⁴/255²
+  return 255 - (uint8_t)n4;
+}
+
+// Pulse: Strong flash at beat start, fades quickly in first 25%
+static inline uint8_t beat_pulse(uint8_t t) {
+  if (t < 64) {  // First quarter of beat
+    return 255 - (t << 2);  // Fade from 255→0 over first 64 values
+  }
+  return 0;  // Off for rest of beat
+}
+
+// Strobe: Hard flash at beat start only
+static inline uint8_t beat_strobe(uint8_t t) {
+  return (t < 16) ? 255 : 0;  // Flash for first ~6% of beat
+}
+
 static inline uint32_t convert_hsv_to_rgb(uint8_t hue, uint8_t saturation,
                                           uint8_t value) {
   uint8_t red, green, blue;
