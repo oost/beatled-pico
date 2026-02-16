@@ -4,6 +4,7 @@
 #include <simd/simd.h>
 
 #include "overlay_renderer.h"
+#include "../../../../ws2812/ws2812_patterns.h"
 
 struct OverlayVertex {
   simd::float2 position;
@@ -204,7 +205,8 @@ void OverlayRenderer::updateTexture(const StatusData &status) {
                status.connected ? greenColor : textColor);
 
   // Program
-  snprintf(buf, sizeof(buf), "Program: %u", status.program_id);
+  const char *program_name = pattern_get_name(status.program_id);
+  snprintf(buf, sizeof(buf), "Program: %s", program_name);
   drawTextLine(ctx, buf, x, startY - lineHeight * 3, fontSize, textColor);
 
   // Tempo
