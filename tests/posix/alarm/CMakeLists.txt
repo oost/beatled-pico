@@ -6,6 +6,7 @@ target_include_directories(test_alarm PRIVATE
 target_link_libraries(test_alarm PRIVATE
   Catch2::Catch2WithMain
   beatled_hal_time
+  $<$<BOOL:${USE_FREERTOS}>:freertos_test_hooks>
 )
 if(NOT VCPKG_TARGET_TRIPLET)
   catch_discover_tests(test_alarm)

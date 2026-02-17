@@ -6,12 +6,11 @@
 
 #include "overlay_renderer.h"
 
-static constexpr size_t kNumInstances = 16;
 static constexpr size_t kMaxFramesInFlight = 3;
 
 class Renderer {
 public:
-  Renderer(MTL::Device *pDevice);
+  Renderer(MTL::Device *pDevice, size_t numInstances);
   ~Renderer();
   void buildShaders();
   void buildDepthStencilStates();
@@ -31,6 +30,7 @@ private:
   MTL::Buffer *_pInstanceDataBuffer[kMaxFramesInFlight];
   MTL::Buffer *_pCameraDataBuffer[kMaxFramesInFlight];
   MTL::Buffer *_pIndexBuffer;
+  size_t _numInstances;
   float _angle;
   int _frame;
   dispatch_semaphore_t _semaphore;

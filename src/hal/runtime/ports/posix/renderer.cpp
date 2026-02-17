@@ -9,9 +9,9 @@
 
 const int Renderer::kMaxFramesInFlight = 3;
 
-Renderer::Renderer(MTL::Device *pDevice)
-    : _pDevice(pDevice->retain()), _angle(0.f), _frame(0),
-      _pOverlayRenderer(nullptr), _overlayUpdateCounter(0) {
+Renderer::Renderer(MTL::Device *pDevice, size_t numInstances)
+    : _pDevice(pDevice->retain()), _numInstances(numInstances), _angle(0.f),
+      _frame(0), _pOverlayRenderer(nullptr), _overlayUpdateCounter(0) {
   _pCommandQueue = _pDevice->newCommandQueue();
   buildShaders();
   buildDepthStencilStates();
@@ -141,7 +141,7 @@ void Renderer::buildBuffers() {
   _pIndexBuffer->didModifyRange(NS::Range::Make(0, _pIndexBuffer->length()));
 
   const size_t instanceDataSize =
-      kMaxFramesInFlight * kNumInstances * sizeof(shader_types::InstanceData);
+      kMaxFramesInFlight * _numInstances * sizeof(shader_types::InstanceData);
   for (size_t i = 0; i < kMaxFramesInFlight; ++i) {
     _pInstanceDataBuffer[i] =
         _pDevice->newBuffer(instanceDataSize, MTL::ResourceStorageModeManaged);
@@ -183,8 +183,8 @@ MTL::Buffer *Renderer::getInstanceDataBuffers() {
   size_t iz = 0;
   float radius = 1.5;
   LEDColor c;
-  for (size_t i = 0; i < kNumInstances; ++i) {
-    float rot_angle = 2 * M_PI * (float)i / (float)kNumInstances;
+  for (size_t i = 0; i < _numInstances; ++i) {
+    float rot_angle = 2 * M_PI * (float)i / (float)_numInstances;
 
     float4x4 scale = math::makeScale((float3){scl, scl, scl});
     float4x4 zrot = math::makeZRotate(_angle * sinf((float)ix));
@@ -202,7 +202,7 @@ MTL::Buffer *Renderer::getInstanceDataBuffers() {
     pInstanceData[i].instanceNormalTransform =
         math::discardTranslation(pInstanceData[i].instanceTransform);
 
-    float iDivNumInstances = i / (float)kNumInstances;
+    float iDivNumInstances = i / (float)_numInstances;
     float r = iDivNumInstances;
     float g = 1.0f - r;
     float b = sinf(M_PI * 2.0f * iDivNumInstances);
@@ -276,7 +276,7 @@ void Renderer::draw(MTK::View *pView) {
 
   pEnc->drawIndexedPrimitives(MTL::PrimitiveType::PrimitiveTypeTriangle, 6 * 6,
                               MTL::IndexType::IndexTypeUInt16, _pIndexBuffer, 0,
-                              kNumInstances);
+                              _numInstances);
 
   // Draw status overlay (update every 6 frames for ~10Hz refresh at 60 FPS)
   if (++_overlayUpdateCounter % 6 == 0) {

@@ -1,5 +1,6 @@
 target_sources(${CURRENT_LIBRARY_NAME} INTERFACE
     udp.c
+    udp_socket.c
     dns.c
 )
 

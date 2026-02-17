@@ -8,6 +8,7 @@ target_link_libraries(test_event_queue PRIVATE
   beatled_event
   beatled_hal_time
   beatled_hal_board
+  $<$<BOOL:${USE_FREERTOS}>:freertos_test_hooks>
 )
 if(NOT VCPKG_TARGET_TRIPLET)
   catch_discover_tests(test_event_queue)

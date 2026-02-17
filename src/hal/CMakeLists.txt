@@ -1,4 +1,8 @@
-set(PICO_WIFI_LIBRARY pico_cyw43_arch_lwip_threadsafe_background)
+if(FREERTOS_PORT)
+  set(PICO_WIFI_LIBRARY pico_cyw43_arch_lwip_sys_freertos)
+else()
+  set(PICO_WIFI_LIBRARY pico_cyw43_arch_lwip_threadsafe_background)
+endif()
 
 add_subdirectory(utils)
 

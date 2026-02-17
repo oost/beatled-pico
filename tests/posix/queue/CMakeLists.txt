@@ -7,6 +7,7 @@ target_include_directories(test_queue PRIVATE
 target_link_libraries(test_queue PRIVATE
   Catch2::Catch2WithMain
   beatled_hal_queue
+  $<$<BOOL:${USE_FREERTOS}>:freertos_test_hooks>
 )
 if(NOT VCPKG_TARGET_TRIPLET)
   catch_discover_tests(test_queue)

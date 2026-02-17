@@ -48,6 +48,7 @@ target_link_libraries(test_integration PRIVATE
     beatled_hal_board
     beatled_hal_registry
     beatled_hal_utils
+    $<$<BOOL:${USE_FREERTOS}>:freertos_test_hooks>
 )
 if(NOT VCPKG_TARGET_TRIPLET)
     catch_discover_tests(test_integration)

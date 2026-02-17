@@ -3,6 +3,12 @@ if (POSIX_PORT)
   find_package(Catch2 3 REQUIRED)
   include(Catch)
 
+  # FreeRTOS tests need vApplicationStackOverflowHook
+  if(USE_FREERTOS)
+    add_library(freertos_test_hooks STATIC freertos_test_hooks.c)
+    target_link_libraries(freertos_test_hooks PUBLIC FreeRTOS-Kernel)
+  endif()
+
   add_subdirectory(fibonacci)
   add_subdirectory(queue)
   add_subdirectory(clock)

@@ -21,11 +21,23 @@
 // Common settings used in most of the pico_w examples
 // (see https://www.nongnu.org/lwip/2_1_x/group__lwip__opts.html for details)
 
-// allow override in some examples
+// OS integration mode
 #ifndef NO_SYS
+#ifdef FREERTOS_PORT
+#define NO_SYS 0
+#else
 #define NO_SYS 1
 #endif
-// allow override in some examples
+#endif
+
+#ifdef FREERTOS_PORT
+#define LWIP_TCPIP_CORE_LOCKING 1
+#define SYS_LIGHTWEIGHT_PROT 1
+#define LWIP_NETCONN 1
+#else
+#define LWIP_NETCONN 0
+#endif
+
 #ifndef LWIP_SOCKET
 #define LWIP_SOCKET 0
 #endif
@@ -51,7 +63,6 @@
 #define LWIP_NETIF_STATUS_CALLBACK 1
 #define LWIP_NETIF_LINK_CALLBACK 1
 #define LWIP_NETIF_HOSTNAME 1
-#define LWIP_NETCONN 0
 #define MEM_STATS 0
 #define SYS_STATS 0
 #define MEMP_STATS 0

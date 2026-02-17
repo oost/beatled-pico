@@ -14,6 +14,7 @@ target_link_libraries(test_state_manager PRIVATE
   beatled_hal_board
   beatled_hal_time
   beatled_hal_registry
+  $<$<BOOL:${USE_FREERTOS}>:freertos_test_hooks>
 )
 if(NOT VCPKG_TARGET_TRIPLET)
   catch_discover_tests(test_state_manager)

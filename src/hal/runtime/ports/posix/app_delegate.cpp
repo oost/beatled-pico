@@ -1,5 +1,7 @@
 #include "app_delegate.h"
 
+#include "../../../../ws2812/ws2812_config.h"
+
 MyAppDelegate::~MyAppDelegate() {
   _pMtkView->release();
   _pWindow->release();
@@ -83,7 +85,7 @@ void MyAppDelegate::applicationDidFinishLaunching(
       MTL::PixelFormat::PixelFormatDepth16Unorm);
   _pMtkView->setClearDepth(1.0f);
 
-  _pViewDelegate = new MyMTKViewDelegate(_pDevice);
+  _pViewDelegate = new MyMTKViewDelegate(_pDevice, NUM_PIXELS);
   _pMtkView->setDelegate(_pViewDelegate);
 
   _pWindow->setContentView(_pMtkView);
