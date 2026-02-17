@@ -25,6 +25,12 @@ message("Compiling with WIFI_SSID ${WIFI_SSID} and password ${WIFI_PASSWORD}, BE
 option(PICO_AUTOTEST "Run with auto tests" OFF)
 option(PICO_PROBE "Debug with Pico probe" OFF)
 
+if(NOT DEFINED NUM_PIXELS)
+  message(FATAL_ERROR "NUM_PIXELS must be set. Example: cmake -DNUM_PIXELS=30 ..")
+endif()
+add_definitions(-DNUM_PIXELS=${NUM_PIXELS})
+message("Compiling with NUM_PIXELS=${NUM_PIXELS}")
+
 
 if(PICO_AUTOTEST)
   add_definitions(-DPICO_AUTOTEST)
