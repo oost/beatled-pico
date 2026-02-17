@@ -18,7 +18,6 @@
 #include "ws2812.pio.h"
 
 #define FRAC_BITS 4
-#define NUM_PIXELS 16
 #define WS2812_PIN_BASE 2
 
 // horrible temporary hack to avoid changing pattern code
