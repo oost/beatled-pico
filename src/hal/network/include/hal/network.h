@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-#ifdef PICO_PORT
+#if defined(PICO_PORT) || defined(ESP32_PORT)
 #include <lwip/def.h>
 
 #if defined(__BYTE_ORDER) && __BYTE_ORDER == __BIG_ENDIAN ||                   \

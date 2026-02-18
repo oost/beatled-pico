@@ -46,13 +46,21 @@
 #endif
 
 // On POSIX builds, fatal errors abort the program so they're caught
-// immediately during development. On Pico, just log and continue.
+// immediately during development. On ESP32, abort() triggers a core dump
+// and reboot. On Pico, just log and continue.
 #ifdef POSIX_PORT
 #include <stdlib.h>
 #define BEATLED_FATAL(msg)                                                     \
   do {                                                                         \
     puts("[FATAL] " msg);                                                      \
     exit(1);                                                                   \
+  } while (0)
+#elif defined(ESP32_PORT)
+#include <stdlib.h>
+#define BEATLED_FATAL(msg)                                                     \
+  do {                                                                         \
+    puts("[FATAL] " msg);                                                      \
+    abort();                                                                   \
   } while (0)
 #else
 #define BEATLED_FATAL(msg) puts("[ERR] " msg)

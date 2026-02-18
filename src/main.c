@@ -24,8 +24,10 @@ void start_beatled() {
   join_cores();
 }
 
+#ifndef ESP32_PORT
 int main(void) {
   startup(&start_beatled);
 
   return 0;
 }
+#endif
