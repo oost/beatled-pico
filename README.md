@@ -24,11 +24,20 @@ cd beatled-pico
 git submodule update --init
 ```
 
+Copy the env template and fill in your values:
+
+```bash
+cp .env.pico.template .env.pico   # Pico W / POSIX
+cp .env.esp32.template .env.esp32 # ESP32
+```
+
 ### macOS (posix port)
 
 ```bash
+source .env.pico
 cmake -DPORT=posix \
   -DCMAKE_TOOLCHAIN_FILE="$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake" \
+  -DNUM_PIXELS=$NUM_PIXELS -DWS2812_PIN=$WS2812_PIN \
   -B build
 cmake --build build
 ./build/src/pico_w_beatled.app/Contents/MacOS/pico_w_beatled
@@ -37,7 +46,10 @@ cmake --build build
 ### Pico W
 
 ```bash
-cmake -DPORT=pico -DPICO_BOARD=pico_w -B build-pico
+source .env.pico
+cmake -DPORT=pico -DPICO_BOARD=pico_w \
+  -DNUM_PIXELS=$NUM_PIXELS -DWS2812_PIN=$WS2812_PIN \
+  -B build-pico
 cmake --build build-pico
 cp build-pico/src/pico_w_beatled.uf2 /Volumes/RPI-RP2/
 ```
@@ -45,10 +57,16 @@ cp build-pico/src/pico_w_beatled.uf2 /Volumes/RPI-RP2/
 ### ESP32
 
 ```bash
+# uses scripts/beatled.sh from the beatled repo (reads .env.esp32)
+scripts/beatled.sh flash-esp32
+
+# or manually:
+source .env.esp32
 cd esp32
-WIFI_SSID=MyNet WIFI_PASSWORD=MyPass BEATLED_SERVER_NAME=192.168.1.100 \
-  idf.py set-target esp32s3 && idf.py build
-idf.py flash monitor -p /dev/ttyUSB0
+WIFI_SSID="$WIFI_SSID" WIFI_PASSWORD="$WIFI_PASSWORD" \
+  BEATLED_SERVER_NAME="$BEATLED_SERVER_NAME" \
+  NUM_PIXELS="$NUM_PIXELS" WS2812_PIN="$WS2812_PIN" \
+  idf.py set-target $ESP32_TARGET && idf.py build flash monitor -p $ESP32_PORT
 ```
 
 ## Tests

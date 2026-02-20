@@ -31,6 +31,12 @@ endif()
 add_definitions(-DNUM_PIXELS=${NUM_PIXELS})
 message("Compiling with NUM_PIXELS=${NUM_PIXELS}")
 
+set(WS2812_PIN "$ENV{WS2812_PIN}")
+if(NOT WS2812_PIN)
+  set(WS2812_PIN 0)
+endif()
+add_definitions(-DWS2812_PIN=${WS2812_PIN})
+message("Compiling with WS2812_PIN=${WS2812_PIN}")
 
 if(PICO_AUTOTEST)
   add_definitions(-DPICO_AUTOTEST)

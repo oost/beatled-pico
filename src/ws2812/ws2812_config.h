@@ -9,11 +9,9 @@
 
 #ifdef PICO_DEFAULT_WS2812_PIN
 #define WS2812_PIN PICO_DEFAULT_WS2812_PIN
-#else
-// default to pin 2 if the board doesn't have a default WS2812 pin defined
-// #define WS2812_PIN 2
+#elif !defined(WS2812_PIN)
+// default pin — override via cmake -DWS2812_PIN=N or WS2812_PIN env var
 #define WS2812_PIN 0
-
 #endif
 
 #endif // WS2812_CONFIG_H
