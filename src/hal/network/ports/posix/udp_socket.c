@@ -89,7 +89,7 @@ int sendall(int socket_fd, char *data_buffer, size_t *data_length,
   return n == -1 ? -1 : 0; // return -1 on failure, 0 on success
 }
 
-const uint32_t get_ip_address() {
+uint32_t get_ip_address() {
   unsigned char ip_address[15];
   int fd;
   struct ifreq ifr;

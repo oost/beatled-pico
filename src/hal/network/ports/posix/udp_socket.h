@@ -24,7 +24,7 @@ extern struct sockaddr_in server_addr;
 int create_udp_socket(udp_parameters_t *udp_params);
 int sendall(int socket_fd, char *data_buffer, size_t *data_length,
             const struct sockaddr_in *recipient_addr);
-const uint32_t get_ip_address();
+uint32_t get_ip_address();
 void udp_print_all_ip_addresses();
 int send_udp_request(size_t msg_length, prepare_payload_fn prepare_payload);
 

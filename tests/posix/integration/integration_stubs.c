@@ -109,11 +109,11 @@ void start_udp(const char *server_name, uint16_t server_port, uint16_t udp_port,
 
 void shutdown_udp_socket() {}
 void udp_print_all_ip_addresses() {}
-const uint32_t get_ip_address() { return 0; }
+uint32_t get_ip_address() { return 0; }
 
 /* ── WiFi stubs ──────────────────────────────────────────────────── */
-void wifi_init() {}
-void wifi_deinit() {}
+void hal_wifi_init() {}
+void hal_wifi_deinit() {}
 void wifi_check(const char *ssid, const char *pw) {
   (void)ssid;
   (void)pw;
