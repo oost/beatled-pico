@@ -1,23 +1,16 @@
 #include <arpa/inet.h>
-#include <ifaddrs.h>
-#include <net/if.h>
 #include <netdb.h>
 #include <netinet/in.h>
-#include <pthread.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
-#include <sys/ioctl.h>
 #include <sys/socket.h>
-#include <sys/types.h>
-#include <unistd.h>
 
 #include "dns.h"
 
 int resolve_server_address(const char *server_name,
                            struct sockaddr_in *server_addr) {
   struct addrinfo *result, *rp;
-  int sfd, s;
+  int s;
 
   struct addrinfo hints = {0};
   hints.ai_family = AF_INET;
@@ -27,7 +20,7 @@ int resolve_server_address(const char *server_name,
 
   s = getaddrinfo(server_name, NULL, &hints, &result);
   if (s != 0) {
-    fprintf(stderr, "[ERR] getaddrinfo: %s (server: %s)\n", gai_strerror(s),
+    fprintf(stderr, "[ERR] getaddrinfo error %d (server: %s)\n", s,
             server_name);
     return 1;
   }

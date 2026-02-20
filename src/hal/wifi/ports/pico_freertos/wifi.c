@@ -22,7 +22,7 @@ void wifi_check(const char *wifi_ssid, const char *wifi_password) {
   }
 }
 
-void wifi_init() {
+void hal_wifi_init() {
   if (cyw43_arch_init()) {
     puts("[ERR] WiFi init failed");
     return;
@@ -30,4 +30,4 @@ void wifi_init() {
   cyw43_arch_enable_sta_mode();
 }
 
-void wifi_deinit() { cyw43_arch_deinit(); }
+void hal_wifi_deinit() { cyw43_arch_deinit(); }

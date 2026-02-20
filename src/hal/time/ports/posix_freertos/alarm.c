@@ -1,8 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#ifdef ESP_PLATFORM
+#include "freertos/FreeRTOS.h"
+#include "freertos/timers.h"
+#else
 #include "FreeRTOS.h"
 #include "timers.h"
+#endif
 
 #include "config/constants.h"
 #include "hal/time.h"

@@ -1,4 +1,5 @@
 
+#include <inttypes.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -35,8 +36,8 @@ void test_tempo() {
 
   uint32_t tempo_period_us = 60 * 1000000UL / tempo;
   tempo_msg->tempo_period_us = htonl(tempo_period_us);
-  printf("[TEST] Tempo period: %u (%x)\n", tempo_period_us, tempo_period_us);
-  printf("[TEST] Tempo period big endian: %u (%x)\n",
+  printf("[TEST] Tempo period: %" PRIu32 " (%"PRIx32")\n", tempo_period_us, tempo_period_us);
+  printf("[TEST] Tempo period big endian: %" PRIu32 " (%"PRIx32")\n",
          tempo_msg->tempo_period_us, tempo_msg->tempo_period_us);
 
   size_t data_length = sizeof(beatled_message_tempo_response_t);

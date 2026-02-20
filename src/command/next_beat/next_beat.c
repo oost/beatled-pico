@@ -1,3 +1,4 @@
+#include <inttypes.h>
 #include <stdlib.h>
 
 #include "beatled/protocol.h"
@@ -35,7 +36,7 @@ int process_next_beat_msg(beatled_message_t *server_msg, size_t data_length) {
   uint16_t program_id = ntohs(next_beat_msg->program_id);
 
 #if BEATLED_VERBOSE_LOG
-  printf("[CMD] Next beat: ref=%llu (in %d us), tempo=%u, program=%d\n",
+  printf("[CMD] Next beat: ref=%llu (in %d us), tempo=%"PRIu32", program=%d\n",
          next_beat_time_ref, (signed)(next_beat_time_ref - time_us_64()),
          tempo_period_us, program_id);
 

@@ -47,7 +47,7 @@ const size_t num_patterns =
 
 void get_all_patterns_table(const pattern *pattern_table,
                             size_t *pattern_count) {
-  pattern_table = _pattern_table;
+  (void)pattern_table;
   *pattern_count = num_patterns;
 }
 

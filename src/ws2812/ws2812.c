@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
+#include <inttypes.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -188,7 +189,7 @@ void led_update() {
       beat_count = next_beat_count;
     }
 #if BEATLED_VERBOSE_LOG
-    printf("[BEAT] count=%u prev=%llu curr=%llu last_beat=%llu\n", beat_count,
+    printf("[BEAT] count=%"PRIu32" prev=%llu curr=%llu last_beat=%llu\n", beat_count,
            prev_time, current_time, last_beat_time);
 #endif
   }
@@ -207,8 +208,8 @@ void led_update() {
   if (_cycle_idx % 1000 == 0) {
 #if BEATLED_VERBOSE_LOG
     printf(
-        "[LED] cycle=%u program=%u beat_frac=%.3f tempo=%llu us (%.1f BPM) "
-        "beat=%u\n",
+        "[LED] cycle=%"PRIu32" program=%u beat_frac=%.3f tempo=%llu us (%.1f BPM) "
+        "beat=%"PRIu32"\n",
         _cycle_idx, program_id, (float)beat_frac / UINT8_MAX, tempo_period_us,
         tempo_period_us > 0 ? 60000000.0 / tempo_period_us : 0.0, beat_count);
 #endif

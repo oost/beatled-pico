@@ -41,7 +41,7 @@ static void event_handler(void *arg, esp_event_base_t event_base,
   }
 }
 
-void wifi_init() {
+void hal_wifi_init() {
   if (wifi_initialized)
     return;
 
@@ -68,7 +68,7 @@ void wifi_init() {
   wifi_initialized = true;
 }
 
-void wifi_deinit() {
+void hal_wifi_deinit() {
   if (!wifi_initialized)
     return;
   esp_wifi_stop();

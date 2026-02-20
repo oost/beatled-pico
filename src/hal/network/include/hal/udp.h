@@ -19,7 +19,7 @@ void shutdown_udp_socket();
 
 // Perform initialisation
 
-const uint32_t get_ip_address();
+uint32_t get_ip_address();
 void udp_print_all_ip_addresses();
 
 int send_udp_request(size_t msg_length, prepare_payload_fn prepare_payload);

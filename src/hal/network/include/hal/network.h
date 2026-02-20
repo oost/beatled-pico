@@ -17,7 +17,7 @@ extern "C" {
 #elif defined(__BYTE_ORDER) && __BYTE_ORDER == __LITTLE_ENDIAN ||              \
     defined(__LITTLE_ENDIAN__) || defined(__ARMEL__) ||                        \
     defined(__THUMBEL__) || defined(__AARCH64EL__) || defined(_MIPSEL) ||      \
-    defined(__MIPSEL) || defined(__MIPSEL__)
+    defined(__MIPSEL) || defined(__MIPSEL__) || defined(__riscv)
 #define pico_htonll(x) ((((uint64_t)htonl(x)) << 32) + htonl((x) >> 32))
 #define pico_ntohll(x) pico_htonll(x)
 #else

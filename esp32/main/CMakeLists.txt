@@ -58,7 +58,6 @@ idf_component_register(
         "${ROOT}/autotest/autotest.c"
 
         # Protocol library
-        "${LIB}/beatled_protocol/include/beatled/serialize.c"
         "${LIB}/beatled_protocol/include/beatled/protocol.c"
 
     INCLUDE_DIRS
@@ -76,6 +75,7 @@ idf_component_register(
         "${ROOT}/hal/utils/include"
 
         # Application headers
+        "${ROOT}/autotest"
         "${ROOT}/config/include"
         "${ROOT}/ws2812/include"
         "${ROOT}/state_manager/include"
@@ -92,6 +92,7 @@ idf_component_register(
 
     REQUIRES
         driver
+        esp_driver_gpio
         esp_wifi
         esp_timer
         esp_netif
@@ -105,12 +106,16 @@ set(WIFI_SSID "$ENV{WIFI_SSID}" CACHE STRING "WiFi SSID")
 set(WIFI_PASSWORD "$ENV{WIFI_PASSWORD}" CACHE STRING "WiFi password")
 set(BEATLED_SERVER_NAME "$ENV{BEATLED_SERVER_NAME}" CACHE STRING "Server hostname")
 set(NUM_PIXELS "$ENV{NUM_PIXELS}" CACHE STRING "Number of LED pixels")
+set(BEATLED_VERBOSE_LOG "$ENV{BEATLED_VERBOSE_LOG}" CACHE STRING "Enable verbose logging")
 
 if(NOT NUM_PIXELS)
     set(NUM_PIXELS 30)
 endif()
 if(NOT BEATLED_SERVER_NAME)
     set(BEATLED_SERVER_NAME "localhost")
+endif()
+if(NOT BEATLED_VERBOSE_LOG)
+    set(BEATLED_VERBOSE_LOG 0)
 endif()
 
 target_compile_definitions(${COMPONENT_LIB} PUBLIC
@@ -120,4 +125,5 @@ target_compile_definitions(${COMPONENT_LIB} PUBLIC
     WIFI_PASSWORD=\"${WIFI_PASSWORD}\"
     BEATLED_SERVER_NAME="${BEATLED_SERVER_NAME}"
     NUM_PIXELS=${NUM_PIXELS}
+    BEATLED_VERBOSE_LOG=${BEATLED_VERBOSE_LOG}
 )

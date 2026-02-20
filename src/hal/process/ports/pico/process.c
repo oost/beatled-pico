@@ -6,7 +6,7 @@
 
 core_loop_fn core_loop_;
 
-void core1_boot() { core_loop_(); }
+void core1_boot() { core_loop_(NULL); }
 
 void start_core1(core_loop_fn core_loop) {
   // Launch core 1

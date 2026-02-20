@@ -1,3 +1,4 @@
+#include <inttypes.h>
 #include "command/tempo.h"
 #include "beatled/protocol.h"
 #include "config/constants.h"
@@ -47,7 +48,7 @@ int process_tempo_msg(beatled_message_t *server_msg, size_t data_length) {
 
   uint64_t beat_local_time_ref = server_time_to_local_time(beat_time_ref);
 #if BEATLED_VERBOSE_LOG
-  printf("[CMD] Tempo update: ref=%llu, period=%u us (%.1f BPM)\n",
+  printf("[CMD] Tempo update: ref=%llu, period=%"PRIu32" us (%.1f BPM)\n",
          beat_time_ref, tempo_period_us, 1000000.0 * 60 / tempo_period_us);
 #endif
 

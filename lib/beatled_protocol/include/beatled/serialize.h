@@ -29,7 +29,7 @@ static inline bool check_size(size_t data_length, size_t expected_length) {
   return true;
 }
 
-static inline deserialize_message(beatled_message_t *server_msg,
+static inline int deserialize_message(beatled_message_t *server_msg,
                                   size_t data_length,
                                   process_message_fn_t *process_fn_map,
                                   size_t process_fn_map_length);

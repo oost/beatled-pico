@@ -34,7 +34,7 @@ int enter_started_state() {
   hal_stdio_init();
 
   puts("[INIT] Initializing WiFi");
-  wifi_init();
+  hal_wifi_init();
   wifi_check(WIFI_SSID, WIFI_PASSWORD);
 
   puts("[INIT] Initializing IP stack");

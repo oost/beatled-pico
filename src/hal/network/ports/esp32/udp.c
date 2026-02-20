@@ -24,9 +24,9 @@ static volatile int udp_running_ = 0;
 static int udp_socket_fd;
 static struct sockaddr_in server_addr;
 
-typedef struct pbuf {
+typedef struct udp_buf {
   void *payload;
-} pbuf;
+} udp_buf_t;
 
 typedef struct udp_parameters {
   const char *server_name;
@@ -72,7 +72,7 @@ static int sendall(int socket_fd, char *data_buffer, size_t *data_length,
                    const struct sockaddr_in *recipient_addr) {
   int total = 0;
   int bytesleft = *data_length;
-  int n;
+  int n = -1;
   int retries = 0;
   const int max_retries = 3;
 
@@ -170,7 +170,7 @@ void shutdown_udp_socket() {
   }
 }
 
-const uint32_t get_ip_address() {
+uint32_t get_ip_address() {
   esp_netif_t *netif = esp_netif_get_handle_from_ifkey("WIFI_STA_DEF");
   if (netif) {
     esp_netif_ip_info_t ip_info;
@@ -185,7 +185,7 @@ const uint32_t get_ip_address() {
 
 void udp_print_all_ip_addresses() {
   esp_netif_t *netif = NULL;
-  while ((netif = esp_netif_next(netif)) != NULL) {
+  while ((netif = esp_netif_next_unsafe(netif)) != NULL) {
     esp_netif_ip_info_t ip_info;
     if (esp_netif_get_ip_info(netif, &ip_info) == ESP_OK) {
       const char *desc = esp_netif_get_desc(netif);
@@ -197,7 +197,7 @@ void udp_print_all_ip_addresses() {
 
 int send_udp_request(size_t msg_length, prepare_payload_fn prepare_payload) {
   int err = 0;
-  pbuf *buffer = (pbuf *)pvPortMalloc(sizeof(pbuf));
+  udp_buf_t *buffer = (udp_buf_t *)pvPortMalloc(sizeof(udp_buf_t));
   if (!buffer) {
     puts("[ERR] Failed to allocate UDP send buffer");
     return 1;
