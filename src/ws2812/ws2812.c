@@ -8,6 +8,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "config/constants.h"
 #include "hal/registry.h"
@@ -16,10 +17,35 @@
 #include "state_manager/state_manager.h"
 #ifdef POSIX_PORT
 #include "hal/startup.h"
+#else
+#include "pico/time.h"
 #endif
+#include "programs/utils.h"
 #include "ws2812/ws2812.h"
 #include "ws2812_config.h"
 #include "ws2812_patterns.h"
+
+#define LED_SELF_TEST_STEP_MS 400
+
+static void led_self_test_fill(uint32_t *colors, uint32_t value) {
+  for (size_t p = 0; p < NUM_PIXELS; p++) colors[p] = value;
+  output_strings_dma(colors);
+  sleep_ms(LED_SELF_TEST_STEP_MS);
+}
+
+static void led_self_test(void) {
+  uint32_t colors[NUM_PIXELS];
+
+  // Each step holds for LED_SELF_TEST_STEP_MS so a 60 fps eye sees it. R/G/B
+  // sequence proves the data line is up and the wire ordering is right
+  // (WS2812 is GRB on the wire, but rgb_u32 already handles that).
+  puts("[INIT] LED self-test: R, G, B, white, off");
+  led_self_test_fill(colors, rgb_u32(180, 0, 0));
+  led_self_test_fill(colors, rgb_u32(0, 180, 0));
+  led_self_test_fill(colors, rgb_u32(0, 0, 180));
+  led_self_test_fill(colors, rgb_u32(120, 120, 120));
+  led_self_test_fill(colors, 0);
+}
 
 uint32_t _cycle_idx = 0;
 uint64_t _time_ref = 0;
@@ -33,6 +59,7 @@ uint8_t _program_id = 0;
 void led_init() {
   ws2812_init(NUM_PIXELS, WS2812_PIN, 800000, IS_RGBW);
   puts("[INIT] LED manager initialized");
+  led_self_test();
 }
 
 void led_set_random_pattern() {

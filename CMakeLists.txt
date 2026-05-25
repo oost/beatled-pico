@@ -22,6 +22,20 @@ endif()
 
 message("Compiling with WIFI_SSID ${WIFI_SSID} and password ${WIFI_PASSWORD}, BEATLED_SERVER_NAME=${BEATLED_SERVER_NAME}")
 
+# Generate generated/beatled_version.h on every build so the embedded
+# git hash always matches whatever was just compiled.
+set(BEATLED_VERSION_HEADER ${CMAKE_BINARY_DIR}/generated/beatled_version.h)
+file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/generated)
+add_custom_target(beatled_version_header ALL
+  COMMAND ${CMAKE_COMMAND}
+    -DBEATLED_SRC_DIR=${CMAKE_CURRENT_LIST_DIR}
+    -DOUT=${BEATLED_VERSION_HEADER}
+    -P ${CMAKE_CURRENT_LIST_DIR}/cmake/gen_version.cmake
+  BYPRODUCTS ${BEATLED_VERSION_HEADER}
+  COMMENT "Generating beatled_version.h"
+)
+include_directories(${CMAKE_BINARY_DIR}/generated)
+
 option(PICO_AUTOTEST "Run with auto tests" OFF)
 option(PICO_PROBE "Debug with Pico probe" OFF)
 

@@ -15,9 +15,10 @@ add_subdirectory(config)
 
 set(CURRENT_TARGET "pico_w_beatled")
 
-add_executable(${CURRENT_TARGET} 
+add_executable(${CURRENT_TARGET}
   main.c
-) 
+)
+add_dependencies(${CURRENT_TARGET} beatled_version_header)
 
 message("Compiling with WIFI_SSID ${WIFI_SSID} and password ${WIFI_PASSWORD}, BEATLED_SERVER_NAME=${BEATLED_SERVER_NAME} ")
 

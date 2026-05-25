@@ -1,5 +1,6 @@
 #include <lwip/dns.h>
 #include <lwip/pbuf.h>
+#include <lwip/tcpip.h>
 #include <pico/cyw43_arch.h>
 #include <pico/unique_id.h>
 
@@ -45,21 +46,25 @@ void dgram_recv(void *arg, struct udp_pcb *pcb, struct pbuf *p,
 }
 
 int init_udp_socket(uint16_t udp_port) {
+  LOCK_TCPIP_CORE();
   server_udp_pcb = udp_new_ip_type(IPADDR_TYPE_ANY);
   if (!server_udp_pcb) {
+    UNLOCK_TCPIP_CORE();
     puts("[ERR] Failed to create UDP PCB");
     return 1;
   }
 
   if (udp_bind(server_udp_pcb, IP_ANY_TYPE, udp_port)) {
-    puts("[ERR] Failed to bind UDP PCB");
     udp_remove(server_udp_pcb);
+    UNLOCK_TCPIP_CORE();
+    puts("[ERR] Failed to bind UDP PCB");
     return 1;
   }
 
   ip_set_option(server_udp_pcb, IP_SOF_BROADCAST_RECV);
-
   udp_recv(server_udp_pcb, dgram_recv, NULL);
+  UNLOCK_TCPIP_CORE();
+
   printf("[NET] Listening on %s:%d\n",
          ipaddr_ntoa(&server_udp_pcb->local_ip), udp_port);
 
@@ -68,7 +73,9 @@ int init_udp_socket(uint16_t udp_port) {
 
 void shutdown_udp_socket() {
   if (server_udp_pcb) {
+    LOCK_TCPIP_CORE();
     udp_remove(server_udp_pcb);
+    UNLOCK_TCPIP_CORE();
     server_udp_pcb = NULL;
   }
 }

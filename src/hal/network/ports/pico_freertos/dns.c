@@ -1,5 +1,6 @@
 #include <lwip/dns.h>
 #include <lwip/pbuf.h>
+#include <lwip/tcpip.h>
 #include <pico/cyw43_arch.h>
 #include <pico/unique_id.h>
 
@@ -28,8 +29,10 @@ void resolve_server_address(const char *remote_server_name,
   err_t err;
   server_port = remote_server_port;
 
+  LOCK_TCPIP_CORE();
   err = dns_gethostbyname(remote_server_name, &server_address, server_dns_found,
                           NULL);
+  UNLOCK_TCPIP_CORE();
 
   if (err == ERR_INPROGRESS) {
     return;

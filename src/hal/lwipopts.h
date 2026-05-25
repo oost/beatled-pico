@@ -34,6 +34,18 @@
 #define LWIP_TCPIP_CORE_LOCKING 1
 #define SYS_LIGHTWEIGHT_PROT 1
 #define LWIP_NETCONN 1
+// FreeRTOS sys_arch maps lwIP mailboxes to FreeRTOS queues and the
+// TCPIP thread to an xTaskCreate, so each *_MBOX_SIZE and the thread
+// stacksize must be > 0 or startup asserts.
+#define TCPIP_MBOX_SIZE 8
+#define DEFAULT_RAW_RECVMBOX_SIZE 8
+#define DEFAULT_UDP_RECVMBOX_SIZE 8
+#define DEFAULT_TCP_RECVMBOX_SIZE 8
+#define DEFAULT_ACCEPTMBOX_SIZE 8
+#define TCPIP_THREAD_STACKSIZE 1024
+#define TCPIP_THREAD_PRIO 3
+#define DEFAULT_THREAD_STACKSIZE 1024
+#define DEFAULT_THREAD_PRIO 2
 #else
 #define LWIP_NETCONN 0
 #endif
