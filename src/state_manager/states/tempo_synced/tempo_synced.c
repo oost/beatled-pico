@@ -6,7 +6,10 @@
 #include "state_manager/states/tempo_synced.h"
 
 #define TEMPO_ALARM_DELAY_US 10000000
-#define TIME_ALARM_DELAY_US 100000000
+// Was 100s; with the new median offset filter each sample is cheap and the
+// 8-sample ring needs ~30-40s to fill, so a 5s refresh keeps the offset both
+// fresh enough to track drift and well-averaged.
+#define TIME_ALARM_DELAY_US 5000000
 #define HELLO_ALARM_DELAY_US 10000000
 
 static hal_alarm_t *tempo_alarm = NULL;

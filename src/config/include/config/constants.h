@@ -18,7 +18,12 @@
 #define LED_CORE_SLEEP_MS 10
 #define CONTROL_CORE_SLEEP_MS 20
 
-#define MAX_INTERCORE_QUEUE_COUNT 64
+// Headroom for the LED loop blocking on output_strings_dma. Each NEXT_BEAT
+// now queues a single message (protocol v2 dropped the redundant tempo /
+// program bits from the per-beat update), so 128 covers ~minutes of producer
+// activity even if the consumer blocks pathologically long. Producers still
+// drop-newest on overflow, but at the new rates that case should be rare.
+#define MAX_INTERCORE_QUEUE_COUNT 128
 
 // LED messages
 #define ERROR_BLINK_SPEED 100

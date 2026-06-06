@@ -14,6 +14,11 @@
 #include "process/intercore_queue.h"
 #include "state_manager/state_manager.h"
 
+// Track the last-seen PROGRAM sequence number to drop late duplicates.
+// Unlike NEXT_BEAT we don't count gaps — PROGRAM repeats every 1s anyway.
+static uint16_t last_program_seq = 0;
+static bool have_seen_program = false;
+
 int command_program(beatled_message_t *server_msg, size_t data_length) {
   if (!check_size(data_length, sizeof(beatled_message_program_t))) {
     return 1;
@@ -22,11 +27,28 @@ int command_program(beatled_message_t *server_msg, size_t data_length) {
       (beatled_message_program_t *)server_msg;
 
   uint16_t program_id = ntohs(program_msg->program_id);
-  printf("[CMD] Program change: id=%u\n", program_id);
+  uint16_t seq = ntohs(program_msg->seq);
+
+  if (have_seen_program) {
+    int16_t delta = (int16_t)(seq - last_program_seq);
+    if (delta < 0) {
+      // Older than what we've applied — ignore.
+      return 0;
+    }
+  }
+  last_program_seq = seq;
+  have_seen_program = true;
+
+  printf("[CMD] Program push: id=%u seq=%u\n", program_id, seq);
 
   registry_lock_mutex();
+  bool changed = registry.program_id != program_id;
   registry.program_id = program_id;
   registry_unlock_mutex();
+
+  if (!changed) {
+    return 0;
+  }
 
   intercore_message_t msg = {.message_type = 0x01 << intercore_program_update};
   if (!hal_queue_add_message(intercore_command_queue, &msg)) {
@@ -148,7 +170,14 @@ int handle_event(event_t *event) {
   int err;
   switch (event->event_type) {
   case event_server_message:
-    // err = validate_server_message(event->data, event->data_length);
+    err = validate_server_message(event->data, event->data_length);
+    if (err) {
+      // Malformed or unsolicited packet — drop without dispatching to the
+      // message handlers, which assume exact-size payloads.
+      printf("[ERR] Dropping invalid server message (len=%zu)\n",
+             event->data_length);
+      break;
+    }
     err = handle_server_message(event->data, event->data_length, event->time);
     break;
 

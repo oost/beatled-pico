@@ -25,27 +25,36 @@
 #include "ws2812_config.h"
 #include "ws2812_patterns.h"
 
-#define LED_SELF_TEST_STEP_MS 400
+#ifdef PICO_PORT
+#define LED_SELF_TEST_STEP_MS 1200
 
-static void led_self_test_fill(uint32_t *colors, uint32_t value) {
+static void led_self_test_fill(uint32_t *colors, uint32_t value,
+                               const char *label) {
   for (size_t p = 0; p < NUM_PIXELS; p++) colors[p] = value;
   output_strings_dma(colors);
+  printf("[INIT] LED self-test: %s\n", label);
   sleep_ms(LED_SELF_TEST_STEP_MS);
 }
 
 static void led_self_test(void) {
   uint32_t colors[NUM_PIXELS];
 
-  // Each step holds for LED_SELF_TEST_STEP_MS so a 60 fps eye sees it. R/G/B
-  // sequence proves the data line is up and the wire ordering is right
-  // (WS2812 is GRB on the wire, but rgb_u32 already handles that).
-  puts("[INIT] LED self-test: R, G, B, white, off");
-  led_self_test_fill(colors, rgb_u32(180, 0, 0));
-  led_self_test_fill(colors, rgb_u32(0, 180, 0));
-  led_self_test_fill(colors, rgb_u32(0, 0, 180));
-  led_self_test_fill(colors, rgb_u32(120, 120, 120));
-  led_self_test_fill(colors, 0);
+  // Hold each colour ~1.2s so it's impossible to miss even glancing at
+  // the strip. The R/G/B/W sweep also tells you whether the channel
+  // ordering / data line is healthy.
+  puts("[INIT] LED self-test: starting (~6s of full-brightness colours)");
+  led_self_test_fill(colors, rgb_u32(255, 0, 0), "RED");
+  led_self_test_fill(colors, rgb_u32(0, 255, 0), "GREEN");
+  led_self_test_fill(colors, rgb_u32(0, 0, 255), "BLUE");
+  led_self_test_fill(colors, rgb_u32(255, 255, 255), "WHITE");
+  led_self_test_fill(colors, 0, "off");
+  puts("[INIT] LED self-test: done");
 }
+#else
+static void led_self_test(void) {
+  // No real strip on the POSIX simulator; skip the visible flash sequence.
+}
+#endif
 
 uint32_t _cycle_idx = 0;
 uint64_t _time_ref = 0;

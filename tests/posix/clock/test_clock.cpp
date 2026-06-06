@@ -61,6 +61,12 @@ TEST_CASE("Testing clock sync", "[clock]") {
 
     REQUIRE(offset == 50);
 
+    // Protocol v2 rejects TIME_RESPONSE whose echoed orig_time doesn't
+    // match the most-recent outstanding request; seed the expected value
+    // so this unit test drives the offset path directly.
+    time_sync_reset_for_testing();
+    time_sync_seed_outstanding_for_testing(orig_time);
+
     beatled_message_time_response_t resp = {
         .orig_time = htonll(orig_time),
         .recv_time = htonll(orig_time + offset),

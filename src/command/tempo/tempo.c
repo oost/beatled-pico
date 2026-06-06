@@ -1,5 +1,6 @@
 #include <inttypes.h>
 #include "command/tempo.h"
+#include "command/time.h"
 #include "beatled/protocol.h"
 #include "config/constants.h"
 #include "clock/clock.h"
@@ -19,6 +20,9 @@ int prepare_tempo_request(void *buffer_payload, size_t buf_len) {
 
   beatled_message_tempo_request_t *msg = buffer_payload;
   msg->base.type = BEATLED_MESSAGE_TEMPO_REQUEST;
+  // Report our current OWD estimate so the server can compensate broadcast
+  // timestamps per-client. 0 = "no sample yet, don't compensate".
+  msg->owd_us_estimate = htonl(time_sync_owd_estimate_us());
   return 0;
 }
 

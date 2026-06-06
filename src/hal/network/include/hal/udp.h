@@ -7,8 +7,16 @@ extern "C" {
 // #include <lwip/pbuf.h>
 #include <stdlib.h>
 
+#include <stdint.h>
+
 typedef int (*prepare_payload_fn)(void *buffer_payload, size_t size);
-typedef int (*process_response_fn)(void *buffer_payload, size_t size);
+
+// rx_time_us is the local monotonic timestamp captured by the network port
+// at packet arrival (top of dgram_recv / equivalent). Callers should pass it
+// straight through to the event queue so downstream consumers — chiefly the
+// time-sync algorithm — see arrival-time, not dequeue-time.
+typedef int (*process_response_fn)(void *buffer_payload, size_t size,
+                                   uint64_t rx_time_us);
 
 // void resolve_server_address(const char *server_name);
 // void resolve_server_address_blocking(const char *server_name);

@@ -1,5 +1,6 @@
 add_executable(test_integration
     test_integration.cpp
+    test_sync_convergence.cpp
     integration_stubs.c
     # Real state machine
     ${CMAKE_SOURCE_DIR}/src/state_manager/state_manager.c

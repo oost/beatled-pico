@@ -2,6 +2,7 @@
 #include <lwip/pbuf.h>
 #include <lwip/tcpip.h>
 #include <pico/cyw43_arch.h>
+#include <pico/time.h>
 #include <pico/unique_id.h>
 
 #include "hal/network.h"
@@ -15,6 +16,9 @@ static uint32_t msg_id = 0;
 
 void dgram_recv(void *arg, struct udp_pcb *pcb, struct pbuf *p,
                 const ip_addr_t *addr, u16_t port) {
+  // Stamp arrival time before any work so the time-sync algorithm sees a
+  // dest_time as close to wire-arrival as possible.
+  uint64_t rx_time_us = time_us_64();
 
   size_t data_length = p->tot_len;
   void *server_msg = (void *)malloc(data_length);
@@ -31,7 +35,7 @@ void dgram_recv(void *arg, struct udp_pcb *pcb, struct pbuf *p,
   int server_msg_enqueue_error = 1;
 
   if (copied_length > 0 && copied_length == data_length) {
-    server_msg_enqueue_error = process_response_(server_msg, data_length);
+    server_msg_enqueue_error = process_response_(server_msg, data_length, rx_time_us);
     if (server_msg_enqueue_error) {
       puts("[ERR] Failed to queue UDP message on event loop");
     }

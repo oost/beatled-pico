@@ -9,6 +9,7 @@ extern "C" {
 #include "beatled/protocol.h"
 #include "clock/clock.h"
 #include "command/command.h"
+#include "command/time.h"
 #include "event/event_queue.h"
 #include "hal/network.h"
 #include "hal/queue.h"
@@ -73,6 +74,7 @@ static void reset_machine() {
   internal_state.current_state = STATE_UNKNOWN;
   internal_state.last_tempo_sync_time = 0;
   set_server_time_offset(0);
+  time_sync_reset_for_testing();
   stub_reset_counters();
 }
 
@@ -113,7 +115,10 @@ static void advance_to(state_manager_state_t target) {
   }
 
   if (state_manager_get_state() < STATE_TIME_SYNCED && target >= STATE_TIME_SYNCED) {
-    // Inject TIME_RESPONSE to trigger transition to TIME_SYNCED.
+    // Inject TIME_RESPONSE to trigger transition to TIME_SYNCED. v2
+    // requires us to pre-seed the expected orig_time so the response is
+    // accepted as the reply to a (notionally-)outstanding request.
+    time_sync_seed_outstanding_for_testing(DEFAULT_ORIG);
     beatled_message_time_response_t time_msg;
     memset(&time_msg, 0, sizeof(time_msg));
     time_msg.base.type = BEATLED_MESSAGE_TIME_RESPONSE;
@@ -185,6 +190,7 @@ TEST_CASE("Full lifecycle: UNKNOWN to TEMPO_SYNCED via server messages",
 
   // ── Inject TIME_RESPONSE → TIME_SYNCED ──
   uint64_t orig = 1000, recv_t = 3000, xmit = 4000, dest = 2000;
+  time_sync_seed_outstanding_for_testing(orig);
 
   beatled_message_time_response_t time_msg;
   memset(&time_msg, 0, sizeof(time_msg));
@@ -236,7 +242,8 @@ TEST_CASE("State entry handlers perform correct setup", "[integration]") {
     // Already called by init_system.  Verify the queues exist.
     REQUIRE(event_queue_ptr != nullptr);
     REQUIRE(intercore_command_queue != nullptr);
-    REQUIRE(hal_queue_capacity(intercore_command_queue) == 64);
+    // MAX_INTERCORE_QUEUE_COUNT bumped from 64 → 128 for backpressure headroom.
+    REQUIRE(hal_queue_capacity(intercore_command_queue) == 128);
   }
 
   SECTION("enter_initialized_state starts hello timer") {
@@ -294,6 +301,7 @@ TEST_CASE("Time sync calculates correct clock offset", "[integration]") {
   // With: orig=10000, recv=20000, xmit=20100, dest=10200
   // offset = (10000 - 5000) + (10050 - 5100) = 5000 + 4950 = 9950
   uint64_t orig = 10000, recv_t = 20000, xmit = 20100, dest = 10200;
+  time_sync_seed_outstanding_for_testing(orig);
 
   beatled_message_time_response_t time_msg;
   memset(&time_msg, 0, sizeof(time_msg));
@@ -358,23 +366,20 @@ TEST_CASE("Next beat updates registry with beat timing", "[integration]") {
   memset(&nb_msg, 0, sizeof(nb_msg));
   nb_msg.base.type = BEATLED_MESSAGE_NEXT_BEAT;
   nb_msg.next_beat_time_ref = htonll(9000000);
-  nb_msg.tempo_period_us = htonl(500000);
   nb_msg.beat_count = htonl(16);
-  nb_msg.program_id = htons(5);
+  nb_msg.seq = htons(1);
 
   event_t event = make_server_event(&nb_msg, sizeof(nb_msg));
   REQUIRE(handle_event(&event) == 0);
 
-  REQUIRE(registry.tempo_period_us == 500000);
+  // Protocol v2: NEXT_BEAT no longer carries tempo_period_us or program_id,
+  // so it only updates the time_ref / beat_count fields.
   REQUIRE(registry.beat_count == 16);
-  REQUIRE(registry.program_id == 5);
   REQUIRE(registry.next_beat_time_ref > 0);
   REQUIRE(registry.update_timestamp > 0);
 
   intercore_message_t ic = pop_intercore_msg();
   REQUIRE((ic.message_type & (0x01 << intercore_time_ref_update)) != 0);
-  REQUIRE((ic.message_type & (0x01 << intercore_tempo_update)) != 0);
-  REQUIRE((ic.message_type & (0x01 << intercore_program_update)) != 0);
 
   REQUIRE(state_manager_get_state() == STATE_TEMPO_SYNCED);
 }
@@ -403,9 +408,8 @@ TEST_CASE("Tempo and next_beat rejected before TIME_SYNCED",
     memset(&nb_msg, 0, sizeof(nb_msg));
     nb_msg.base.type = BEATLED_MESSAGE_NEXT_BEAT;
     nb_msg.next_beat_time_ref = htonll(9000000);
-    nb_msg.tempo_period_us = htonl(500000);
     nb_msg.beat_count = htonl(1);
-    nb_msg.program_id = htons(1);
+    nb_msg.seq = htons(1);
 
     event_t event = make_server_event(&nb_msg, sizeof(nb_msg));
     REQUIRE(handle_event(&event) == 0);
@@ -426,6 +430,7 @@ TEST_CASE("Program change updates registry and queues intercore message",
   memset(&prog_msg, 0, sizeof(prog_msg));
   prog_msg.base.type = BEATLED_MESSAGE_PROGRAM;
   prog_msg.program_id = htons(99);
+  prog_msg.seq = htons(1);
 
   event_t event = make_server_event(&prog_msg, sizeof(prog_msg));
   REQUIRE(handle_event(&event) == 0);
@@ -477,24 +482,22 @@ TEST_CASE("Multiple tempo re-syncs cycle correctly", "[integration]") {
   // No state re-entry when already in TEMPO_SYNCED, so no timers cancelled
   REQUIRE(stub_timer_cancel_count == cancel_before);
 
-  // Second re-sync: next_beat
+  // Second re-sync: next_beat. Protocol v2 NEXT_BEAT only carries
+  // next_beat_time_ref + beat_count + seq.
   drain_intercore_queue();
   {
     beatled_message_next_beat_t nb_msg;
     memset(&nb_msg, 0, sizeof(nb_msg));
     nb_msg.base.type = BEATLED_MESSAGE_NEXT_BEAT;
     nb_msg.next_beat_time_ref = htonll(3000000);
-    nb_msg.tempo_period_us = htonl(300000); // 200 BPM
     nb_msg.beat_count = htonl(32);
-    nb_msg.program_id = htons(20);
+    nb_msg.seq = htons(2);
 
     event_t event = make_server_event(&nb_msg, sizeof(nb_msg));
     REQUIRE(handle_event(&event) == 0);
   }
   REQUIRE(state_manager_get_state() == STATE_TEMPO_SYNCED);
-  REQUIRE(registry.tempo_period_us == 300000);
   REQUIRE(registry.beat_count == 32);
-  REQUIRE(registry.program_id == 20);
 
   intercore_message_t ic = pop_intercore_msg();
   REQUIRE((ic.message_type & (0x01 << intercore_time_ref_update)) != 0);

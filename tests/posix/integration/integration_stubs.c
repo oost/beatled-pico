@@ -90,7 +90,8 @@ void blink_once(int speed) { (void)speed; }
 
 /* ── Network stubs ───────────────────────────────────────────────── */
 typedef int (*prepare_payload_fn)(void *buffer_payload, size_t size);
-typedef int (*process_response_fn)(void *buffer_payload, size_t size);
+typedef int (*process_response_fn)(void *buffer_payload, size_t size,
+                                   uint64_t rx_time_us);
 
 int send_udp_request(size_t msg_length, prepare_payload_fn prepare_payload) {
   (void)msg_length;

@@ -61,7 +61,7 @@ TEST_CASE("Event queue operations", "[event_queue]") {
     void *data = malloc(8);
     REQUIRE(data != nullptr);
 
-    int result = add_payload_to_event_queue(data, 8);
+    int result = add_payload_to_event_queue(data, 8, /*rx_time_us=*/1234567);
     REQUIRE(result == 0);
 
     // Drain the event

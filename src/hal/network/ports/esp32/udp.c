@@ -14,6 +14,7 @@
 #include "config/constants.h"
 
 #include "dns.h"
+#include "hal/time.h"
 #include "hal/udp.h"
 
 #define MAXLINE 1024
@@ -123,6 +124,7 @@ static void udp_socket_listen(void *data) {
       continue;
     }
     if (recvlen > 0) {
+      uint64_t rx_time_us = time_us_64();
       buffer[recvlen] = 0;
       void *server_msg = (void *)pvPortMalloc(recvlen);
       if (!server_msg) {
@@ -130,7 +132,7 @@ static void udp_socket_listen(void *data) {
         continue;
       }
       memcpy(server_msg, buffer, recvlen);
-      if ((params->process_response)(server_msg, recvlen)) {
+      if ((params->process_response)(server_msg, recvlen, rx_time_us)) {
         BEATLED_FATAL("Failed to queue UDP message on event loop");
       }
     }

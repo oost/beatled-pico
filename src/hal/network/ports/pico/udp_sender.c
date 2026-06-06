@@ -45,17 +45,16 @@ int send_udp_request(size_t msg_length, prepare_payload_fn prepare_payload) {
       err = 1;
     }
 
-    if (udp_sendto(server_udp_pcb, buffer, &server_address, server_port) !=
-        ERR_OK) {
-      printf("[ERR] Failed to send UDP message to %s:%u\n",
-             ipaddr_ntoa(&server_address), server_port);
+    err_t send_err =
+        udp_sendto(server_udp_pcb, buffer, &server_address, server_port);
+    if (send_err != ERR_OK) {
+      printf("[ERR] udp_sendto -> %s:%u len=%zu err=%d\n",
+             ipaddr_ntoa(&server_address), server_port, msg_length, send_err);
       err = 1;
+    } else {
+      printf("[NET] udp_sendto -> %s:%u len=%zu OK\n",
+             ipaddr_ntoa(&server_address), server_port, msg_length);
     }
-
-#if BEATLED_VERBOSE_LOG
-    printf("[NET] Sent UDP request to %s:%u len=%u\n",
-           ipaddr_ntoa(&server_address), server_port, msg_length);
-#endif
     pbuf_free(buffer);
   }
   cyw43_arch_lwip_end();
