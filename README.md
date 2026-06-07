@@ -1,4 +1,23 @@
-# Beatled Pico
+# Beatled Pico — moved to [`oost/beatled/controller/`](https://github.com/oost/beatled/tree/master/controller)
+
+> **This repository is a read-only mirror.**
+>
+> Active firmware development has moved into the main
+> [`oost/beatled`](https://github.com/oost/beatled) monorepo, under the
+> [`controller/`](https://github.com/oost/beatled/tree/master/controller)
+> path. The wire protocol, server, React client, iOS/macOS app, build
+> scripts, and CI all live in one place now — keeping the firmware
+> in-tree eliminated the protocol-header drift that the prior split caused.
+>
+> The history here is preserved up to commit
+> [`2d36f04`](https://github.com/oost/beatled-pico/commit/2d36f04)
+> (protocol v2). Everything after that — including the actual git-subtree
+> import that moved the tree — lives in `oost/beatled`. Please open
+> issues and pull requests against that repo.
+
+---
+
+## Original README (preserved)
 
 Embedded C firmware for beat-synchronized LED control. Connects to a [Beatled server](https://github.com/oost/beatled) over WiFi and drives WS2812 LED strips in time with the music.
 
